@@ -8,7 +8,7 @@
 
 <div class="app">
 
-	<Sidebar.Provider>
+	<Sidebar.Provider >
 		<AppSidebar />
 		<main>
 			<Sidebar.Trigger />

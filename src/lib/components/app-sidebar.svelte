@@ -28,22 +28,74 @@
             url: "#",
             avatarUrl: "https://github.com/shadcn.png",
         },
+        {
+            name: "Serveur 6",
+            url: "#",
+            avatarUrl: "https://github.com/shadcn.png",
+        },
+        {
+            name: "Serveur 7",
+            url: "#",
+            avatarUrl: "https://github.com/shadcn.png",
+        },
+        {
+            name: "Serveur 8",
+            url: "#",
+            avatarUrl: "https://github.com/shadcn.png",
+        },
+        {
+            name: "Serveur 9",
+            url: "#",
+            avatarUrl: "https://github.com/shadcn.png",
+        },
+        {
+            name: "Serveur 10",
+            url: "#",
+            avatarUrl: "https://github.com/shadcn.png",
+        },
+        {
+            name: "Serveur 11",
+            url: "#",
+            avatarUrl: "https://github.com/shadcn.png",
+        },
+        {
+            name: "Serveur 12",
+            url: "#",
+            avatarUrl: "https://github.com/shadcn.png",
+        },
+        {
+            name: "Serveur 13",
+            url: "#",
+            avatarUrl: "https://github.com/shadcn.png",
+        },
+        {
+            name: "Serveur 14",
+            url: "#",
+            avatarUrl: "https://github.com/shadcn.png",
+        },
     ];
 </script>
 
-<Sidebar.Root>
-    <Sidebar.Content>
+<Sidebar.Root class="w-24">
+    <Sidebar.Content class="p-4">
         <Sidebar.Group>
-            <Sidebar.GroupLabel class="sidebar-group-label">SupChat</Sidebar.GroupLabel>
             <Sidebar.GroupContent>
-                <Sidebar.Menu>
+                <Sidebar.Menu class="flex flex-col items-center">
                     {#each items as item (item.name)}
-                        <Sidebar.MenuItem>
-                            <Sidebar.MenuButton>
-                                <a href={item.url} class="avatar-link">
-                                    <Avatar.Root>
-                                        <Avatar.Image src={item.avatarUrl} alt={item.name} />
-                                        <Avatar.Fallback>{item.name.slice(0, 2)}</Avatar.Fallback>
+                        <Sidebar.MenuItem class="mb-2 rounded w-full flex justify-center">
+                            <Sidebar.MenuButton
+                                    class="flex items-center justify-center p-2 rounded-full h-16 w-16 transition-all duration-300 hover:rounded-3xl"
+                            >
+                                <a href={item.url} class="avatar-link flex items-center justify-center w-full h-full">
+                                    <Avatar.Root class="h-12 w-12">
+                                        <Avatar.Image
+                                                src={item.avatarUrl}
+                                                alt={item.name}
+                                                class="h-full w-full rounded-full object-cover transition-all duration-300"
+                                        />
+                                        <Avatar.Fallback class="flex items-center justify-center rounded-full h-full w-full">
+                                            {item.name.slice(0, 2)}
+                                        </Avatar.Fallback>
                                     </Avatar.Root>
                                 </a>
                             </Sidebar.MenuButton>
