@@ -77,23 +77,23 @@
 </script>
 
 <Sidebar.Root class="w-24">
-    <Sidebar.Content class="p-4">
+    <Sidebar.Content>
         <Sidebar.Group>
             <Sidebar.GroupContent>
                 <Sidebar.Menu class="flex flex-col items-center">
                     {#each items as item (item.name)}
                         <Sidebar.MenuItem class="mb-2 rounded w-full flex justify-center">
                             <Sidebar.MenuButton
-                                    class="flex items-center justify-center p-2 rounded-full h-16 w-16 transition-all duration-300 hover:rounded-3xl"
+                                    class="flex items-center justify-center p-2 rounded-full h-16 w-16 transition-all duration-300"
                             >
                                 <a href={item.url} class="avatar-link flex items-center justify-center w-full h-full">
-                                    <Avatar.Root class="h-12 w-12">
+                                    <Avatar.Root class="h-12 w-12 ">
                                         <Avatar.Image
                                                 src={item.avatarUrl}
                                                 alt={item.name}
-                                                class="h-full w-full rounded-full object-cover transition-all duration-300"
+                                                class="h-full w-full rounded-full object-cover"
                                         />
-                                        <Avatar.Fallback class="flex items-center justify-center rounded-full h-full w-full">
+                                        <Avatar.Fallback class="flex items-center justify-center rounded-full h-full w-full ">
                                             {item.name.slice(0, 2)}
                                         </Avatar.Fallback>
                                     </Avatar.Root>

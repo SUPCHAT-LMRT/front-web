@@ -56,7 +56,7 @@
 {:else}
 	<div
 		bind:this={ref}
-		class="text-sidebar-foreground group peer hidden md:block"
+		class="text-sidebar-foreground peer hidden md:block"
 		data-state={sidebar.state}
 		data-collapsible={sidebar.state === "collapsed" ? collapsible : ""}
 		data-variant={variant}
@@ -65,7 +65,7 @@
 		<!-- This is what handles the sidebar gap on desktop -->
 		<div
 			class={cn(
-				"relative h-svh w-[--sidebar-width] bg-transparent transition-[width] duration-200 ease-linear",
+				"relative h-svh w-24 bg-transparent transition-[width] duration-200 ease-linear",
 				"group-data-[collapsible=offcanvas]:w-0",
 				"group-data-[side=right]:rotate-180",
 				variant === "floating" || variant === "inset"
