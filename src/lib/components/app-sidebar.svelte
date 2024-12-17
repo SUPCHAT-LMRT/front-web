@@ -1,36 +1,32 @@
 <script lang="ts">
-    import Calendar from "lucide-svelte/icons/calendar";
-    import House from "lucide-svelte/icons/house";
-    import Inbox from "lucide-svelte/icons/inbox";
-    import Search from "lucide-svelte/icons/search";
-    import Settings from "lucide-svelte/icons/settings";
+    import * as Avatar from "$lib/components/ui/avatar/index.js";
     import * as Sidebar from "$lib/components/ui/sidebar/index.js";
 
     const items = [
         {
-            title: "Home",
+            name: "Serveur 1",
             url: "#",
-            icon: House,
+            avatarUrl: "https://github.com/shadcn.png",
         },
         {
-            title: "Inbox",
+            name: "Serveur 2",
             url: "#",
-            icon: Inbox,
+            avatarUrl: "https://github.com/shadcn.png",
         },
         {
-            title: "Calendar",
+            name: "Serveur 3",
             url: "#",
-            icon: Calendar,
+            avatarUrl: "https://github.com/shadcn.png",
         },
         {
-            title: "Search",
+            name: "Serveur 4",
             url: "#",
-            icon: Search,
+            avatarUrl: "https://github.com/shadcn.png",
         },
         {
-            title: "Settings",
+            name: "Serveur 5",
             url: "#",
-            icon: Settings,
+            avatarUrl: "https://github.com/shadcn.png",
         },
     ];
 </script>
@@ -38,18 +34,18 @@
 <Sidebar.Root>
     <Sidebar.Content>
         <Sidebar.Group>
-            <Sidebar.GroupLabel>SupChat</Sidebar.GroupLabel>
+            <Sidebar.GroupLabel class="sidebar-group-label">SupChat</Sidebar.GroupLabel>
             <Sidebar.GroupContent>
                 <Sidebar.Menu>
-                    {#each items as item (item.title)}
+                    {#each items as item (item.name)}
                         <Sidebar.MenuItem>
                             <Sidebar.MenuButton>
-                                {#snippet child({ props })}
-                                    <a href={item.url} {...props}>
-                                        <item.icon />
-                                        <span>{item.title}</span>
-                                    </a>
-                                {/snippet}
+                                <a href={item.url} class="avatar-link">
+                                    <Avatar.Root>
+                                        <Avatar.Image src={item.avatarUrl} alt={item.name} />
+                                        <Avatar.Fallback>{item.name.slice(0, 2)}</Avatar.Fallback>
+                                    </Avatar.Root>
+                                </a>
                             </Sidebar.MenuButton>
                         </Sidebar.MenuItem>
                     {/each}
