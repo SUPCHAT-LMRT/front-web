@@ -3,11 +3,11 @@
     import * as Sidebar from "$lib/components/ui/sidebar/index.js";
     import * as Dialog from "$lib/components/ui/dialog/index.js";
     import { Input } from "$lib/components/ui/input/index.js";
-    import {BellIcon, CogIcon, SearchIcon, UserIcon, XIcon} from "lucide-svelte";
+    import {BellIcon, CogIcon, UserIcon, XIcon} from "lucide-svelte";
 
     const mainItems = [
         {
-            name: "Amis",
+            name: "Profil",
             url: "#",
             icon: UserIcon,
         },
@@ -41,22 +41,29 @@
     ];
 </script>
 
-<Sidebar.Root class="w-64 ml-24 border-l-2 border-r-2 border-gray-200">
-    <Sidebar.Content class="p-4">
+<Sidebar.Root class="w-64 ml-24 border-l-2 border-r-2 border-gray-200 ">
+    <Sidebar.Content class="p-4 containerTest">
         <Sidebar.Menu class="flex flex-col">
             <Dialog.Root>
                 <Dialog.Trigger class="flex w-full p-1 mb-2  rounded-md bg-gray-100 border border-gray-300 focus:outline-none focus:ring-2 hover:bg-gray-200 transition">
                     <span class="text-gray-700 text-sm">Rechercher...</span>
                 </Dialog.Trigger>
-                <Dialog.Content class="">
+                <Dialog.Content class="flex flex-col justify-center items-center">
                     <Dialog.Header>
                         <Dialog.Title>
                             <Input type="text" placeholder="Où désires-tu aller ?" class="max-w-xs" />
                         </Dialog.Title>
-                        <Dialog.Description>
-                            This action cannot be undone. This will permanently delete your account
-                            and remove your data from our servers.
+                        <Dialog.Description class="flex items-center space-x-1">
+                            <p class="text-[#1C9B4B] font-extrabold text-[11px] uppercase">Conseil de pro :</p>
+                            <p class="text-[11px]">
+                                Commencer les recherches avec
+                                <span class="p-1 bg-gray-200 font-bold rounded">@</span>
+                                et
+                                <span class="p-1 bg-gray-200 font-bold rounded">#</span>
+                                pour affiner les résultats.
+                            </p>
                         </Dialog.Description>
+
                     </Dialog.Header>
                 </Dialog.Content>
             </Dialog.Root>
@@ -73,6 +80,7 @@
             {/each}
 
             <div class="my-4 border-t border-gray-200"></div>
+            <p class="text-xs font-bold p-2 uppercase">Message privés</p>
 
             {#each users as user (user.name)}
                 <Sidebar.MenuItem class="mb-2 rounded w-full">

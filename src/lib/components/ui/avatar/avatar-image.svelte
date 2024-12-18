@@ -11,6 +11,6 @@
 
 <AvatarPrimitive.Image
 	bind:ref
-	class={cn("aspect-square h-full w-full", className)}
+	class={cn("h-full w-full ", className)}
 	{...restProps}
 />
