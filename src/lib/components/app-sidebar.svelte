@@ -77,7 +77,7 @@
 </script>
 
 <Sidebar.Root class="w-24">
-    <Sidebar.Content>
+    <Sidebar.Content class="!bg-[#E0E0E0]">
         <Sidebar.Group>
             <Sidebar.GroupContent>
                 <Sidebar.Menu class="flex flex-col items-center">
