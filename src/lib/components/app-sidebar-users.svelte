@@ -85,7 +85,7 @@
             {#each users as user (user.name)}
                 <Sidebar.MenuItem class="mb-2 rounded w-full">
                     <div class="relative group">
-                        <div class="flex items-center p-2 rounded transition-all duration-300 hover:bg-gray-100">
+                        <div class="flex items-center p-2 rounded transition-all duration-300 hover:bg-gray-200">
                             <a href={user.url} class="flex items-center w-full">
                                 <Avatar.Root class="h-9 w-9">
                                     <Avatar.Image src={user.avatarUrl} alt={user.name} class="h-full w-full rounded-full object-cover" />
