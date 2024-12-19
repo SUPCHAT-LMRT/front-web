@@ -42,7 +42,7 @@
 </script>
 
 <Sidebar.Root class="w-64 ml-24 border-l-2 border-r-2 border-gray-200 ">
-    <Sidebar.Content class="p-4 containerTest">
+    <Sidebar.Content class="p-4 containerTest z-0">
         <Sidebar.Menu class="flex flex-col">
             <Dialog.Root>
                 <Dialog.Trigger class="flex w-full p-1 mb-2  rounded-md bg-gray-100 border border-gray-300 focus:outline-none focus:ring-2 hover:bg-gray-200 transition">

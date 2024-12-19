@@ -1,19 +1,55 @@
+/**
+ * Most important configs:
+ *
+ * - isolatedModules (vite)
+ * - importsNotUsedAsValues (svelte)
+ * - preserveValueImports (svelte)
+ * - sourceMap (svelte)
+ *
+ * @see {@link https://www.npmjs.com/package/@tsconfig/svelte} re: svelte options
+ *
+ * @note svelte/types/runtime/dom.d.ts includes definitions for DOM APIs, making "lib": ["dom"] redundant here
+ */
 {
 	"extends": "./.svelte-kit/tsconfig.json",
+	"include": [
+		"src/**/*",
+		"src/node_modules",
+		".svelte-kit/ambient.d.ts"
+	],
+	"exclude": [
+		"node_modules/*",
+		"public/*"
+	],
 	"compilerOptions": {
+		"types": [
+			"svelte",
+			"vite/client"
+		],
+		"lib": [
+			"es2019",
+			"dom"
+		],
+		"moduleResolution": "node",
+		"target": "es6",
+		"isolatedModules": true,
+		"resolveJsonModule": true,
+		"sourceMap": true,
+		"esModuleInterop": true,
+		"skipLibCheck": true,
+		"forceConsistentCasingInFileNames": true,
+		"baseUrl": ".",
+		"paths": {
+			"$lib": [
+				"src/lib"
+			],
+			"$lib/*": [
+				"src/lib/*"
+			]
+		},
 		"allowJs": true,
 		"checkJs": true,
-		"esModuleInterop": true,
-		"forceConsistentCasingInFileNames": true,
-		"resolveJsonModule": true,
-		"skipLibCheck": true,
-		"sourceMap": true,
-		"strict": true,
-		"moduleResolution": "bundler"
+		"useDefineForClassFields": true,
+		"module": "ESNext"
 	}
-	// Path aliases are handled by https://svelte.dev/docs/kit/configuration#alias
-	// except $lib which is handled by https://svelte.dev/docs/kit/configuration#files
-	//
-	// If you want to overwrite includes/excludes, make sure to copy over the relevant includes/excludes
-	// from the referenced tsconfig.json - TypeScript does not merge them in
 }
