@@ -1,12 +1,13 @@
 <script lang="ts">
 	import * as Sidebar from "$lib/components/ui/sidebar";
 	import AppSidebar from "$lib/components/app-sidebar.svelte";
+	import { ModeWatcher } from "mode-watcher";
 
 	let { children } = $props();
 </script>
 
 <div class="app">
-
+	<ModeWatcher />
 	<Sidebar.Provider >
 		<AppSidebar />
 		<main>

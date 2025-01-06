@@ -2,14 +2,21 @@
     import * as Avatar from "$lib/components/ui/avatar/index.js";
     import * as Sidebar from "$lib/components/ui/sidebar/index.js";
     import * as Tooltip from "$lib/components/ui/tooltip/index.js";
+    import * as Dialog from "$lib/components/ui/dialog/index.js";
     import workspacesStore from "$lib/stores/workspacesStore";
     import { onMount } from "svelte";
+    import { Globe, Plus } from "lucide-svelte";
 
     const workspaces = $state(workspacesStore.get());
+    let showInput = $state(false);
 
     onMount(() => {
         workspacesStore.fetch();
     });
+
+    function handleCreateMineClick() {
+        showInput = true;
+    }
 </script>
 
 <Sidebar.Root class="w-24">
@@ -38,6 +45,60 @@
                             </Tooltip.Content>
                         </Tooltip.Root>
                     {/each}
+
+                    <Sidebar.MenuItem class="mt-4 w-full flex justify-center">
+                        <Dialog.Root>
+                            <Dialog.Trigger>
+                                <div class="flex items-center justify-center p-2 h-12 w-12 rounded-full transition-transform duration-500 hover:rounded-2xl bg-gray-200 hover:bg-gray-300">
+                                    <Plus class="h-4 w-4" />
+                                </div>
+                            </Dialog.Trigger>
+                            <Dialog.Content class="sm:max-w-[425px]">
+                                <Dialog.Header class="flex flex-col items-center justify-center text-center relative h-full">
+                                    <div class="text-center">
+                                        <Dialog.Title class="text-2xl font-bold">
+                                            Crée ton serveur
+                                        </Dialog.Title>
+                                        <p class="text-sm mt-2 text-gray-700">
+                                            Ton serveur est l&apos;endroit où tu retrouves tes amis. Crée le tien et lance une discussion.
+                                        </p>
+                                    </div>
+                                </Dialog.Header>
+
+                                <div class="space-y-4 mt-4">
+                                    {#if !showInput}
+                                        <Sidebar.MenuButton
+                                                class="w-full justify-between h-16 border hover:bg-gray-200"
+                                                on:click={handleCreateMineClick}
+                                        >
+                                            <div class="flex items-center gap-3">
+                                                <div class="p-2 rounded-full">
+                                                    <Globe class="h-6 w-6" />
+                                                </div>
+                                                <span class="font-medium">Créer le mien</span>
+                                            </div>
+                                            <div class="text-gray-400">→</div>
+                                        </Sidebar.MenuButton>
+                                    {:else}
+                                        <div class="w-full">
+                                            <input
+                                                    type="text"
+                                                    placeholder="Nom du serveur"
+                                                    class="w-full p-2 border rounded-md"
+                                            />
+                                        </div>
+                                    {/if}
+
+                                    <div class="pt-4 text-center">
+                                        <p class="text-sm text-gray-500 mb-2">Tu as déjà une invitation ?</p>
+                                        <Sidebar.MenuButton class="w-full justify-center h-10 bg-gray-200">
+                                            Rejoindre un serveur
+                                        </Sidebar.MenuButton>
+                                    </div>
+                                </div>
+                            </Dialog.Content>
+                        </Dialog.Root>
+                    </Sidebar.MenuItem>
                 </Sidebar.Menu>
             </Sidebar.GroupContent>
         </Sidebar.Group>

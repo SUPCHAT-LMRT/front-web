@@ -1,5 +1,5 @@
 import { Store, StoreResultState, type StoreResult } from "./store.svelte"
-import { getWorkspaces, type Workspace } from "../api/workspace"
+import { getWorkspaces,createWorkspace, type Workspace } from "../api/workspace"
 
 
 export type WorkspaceStoreResult = {
@@ -35,21 +35,21 @@ class WorkspacesStore extends Store<WorkspaceStoreResult> {
         })
     }
 
-//     public createWorkspace(workspaceName: string): Promise<Workspace> {
-//         // eslint-disable-next-line no-async-promise-executor
-//         return new Promise<Workspace>(async (resolve, reject) => {
-//             try {
-//                 const workspace = await createWorkspace(workspaceName);
-//                 this.changeData({
-//                     ...this.getData(),
-//                     workspaces: [...this.getData().workspaces, workspace]
-//                 });
-//                 resolve(workspace);
-//             } catch (e) {
-//                 reject(e);
-//             }
-//         });
-//     }
+    public createWorkspace(workspaceName: string): Promise<Workspace> {
+        // eslint-disable-next-line no-async-promise-executor
+        return new Promise<Workspace>(async (resolve, reject) => {
+            try {
+                const workspace = await createWorkspace(workspaceName, "PUBLIC", []);
+                this.changeData({
+                    ...this.getData(),
+                    workspaces: [...this.getData().workspaces, workspace]
+                });
+                resolve(workspace);
+            } catch (e) {
+                reject(e);
+            }
+        });
+    }
 //
 //     public deleteWorkspace(workspaceId: string): Promise<void> {
 //         // eslint-disable-next-line no-async-promise-executor
