@@ -1,22 +1,53 @@
 <script lang="ts">
-    import * as Avatar from "$lib/components/ui/avatar/index.js";
-    import * as Sidebar from "$lib/components/ui/sidebar/index.js";
-    import * as Tooltip from "$lib/components/ui/tooltip/index.js";
-    import * as Dialog from "$lib/components/ui/dialog/index.js";
+    import type {LayoutData} from './$types';
+    import * as Avatar from "$lib/components/ui/avatar";
+    import * as Sidebar from "$lib/components/ui/sidebar";
+    import * as Tooltip from "$lib/components/ui/tooltip";
+    import * as Dialog from "$lib/components/ui/dialog";
     import workspacesStore from "$lib/stores/workspacesStore";
     import { onMount } from "svelte";
     import { Globe, Plus } from "lucide-svelte";
     import {Input} from "$lib/components/ui/input";
+    import * as Form from "$lib/components/ui/form";
+    import * as RadioGroup from "$lib/components/ui/radio-group";
+    import { Label } from "$lib/components/ui/label";
+    import {type Infer, superForm, type SuperValidated} from "sveltekit-superforms";
+    import {type CreateWorkspaceForm, createWorkspaceFormSchema} from "$lib/components/app-sidebar/schema";
+    import {zodClient} from "sveltekit-superforms/adapters";
 
     const workspaces = $state(workspacesStore.get());
     let showInput = $state(false);
+    let workspaceName = $state("");
+    let visibility = $state("PUBLIC");
 
     onMount(() => {
         workspacesStore.fetch();
     });
 
+    let {data}: {data: LayoutData} = $props();
+
+    const pageData = data as {
+        createWorkspace: SuperValidated<Infer<CreateWorkspaceForm>>
+    };
+
+    const createWorkspaceForm = superForm(pageData.createWorkspace, {
+        validators: zodClient(createWorkspaceFormSchema)
+    });
+
+    const {form: formData, enhance} = createWorkspaceForm;
+
     function handleCreateMineClick() {
         showInput = true;
+    }
+
+    async function createNewWorkspace() {
+        try {
+            const newWorkspace = await workspacesStore.createWorkspace(workspaceName);
+            console.log("Workspace créé : ", newWorkspace);
+            showInput = false;
+        } catch (error) {
+            console.error("Erreur lors de la création du workspace :", error);
+        }
     }
 </script>
 
@@ -80,21 +111,49 @@
                                             </div>
                                             <div class="text-gray-400">→</div>
                                         </Sidebar.MenuButton>
+                                        <div class="pt-4 text-center">
+                                            <p class="text-sm text-gray-500 mb-2">Tu as déjà une invitation ?</p>
+                                            <Sidebar.MenuButton class="w-full justify-center h-10 bg-gray-200">
+                                                Rejoindre un serveur
+                                            </Sidebar.MenuButton>
+                                        </div>
                                     {:else}
-                                        <div class="w-full">
-                                            <Input type="text" placeholder="Nom du serveur" class="w-full p-2 border rounded-md"/>
-                                            <div class="grid w-full max-w-sm items-center gap-1.5">
+                                        <form class="w-full" onsubmit={createNewWorkspace} use:enhance>
+                                            <Form.Field form={createWorkspaceForm} name="name">
+                                                <Form.Control let:attrs>
+                                                    <Input {...attrs} bind:value={$formData.name} type="text" placeholder="Nom du serveur" class="w-full p-2 border rounded-md"/>
+                                                </Form.Control>
+                                                <Form.FieldErrors class="dark:text-red-400" />
+                                            </Form.Field>
+                                                <div class="grid w-full max-w-sm items-center gap-1.5 mt-2">
                                                 <Input id="picture" type="file" />
                                             </div>
-                                        </div>
+                                            <RadioGroup.Root bind:value={visibility} class="pt-2">
+                                                <div class="flex items-center space-x-2">
+                                                    <RadioGroup.Item value="PRIVATE" id="r1" />
+                                                    <Label for="r1">Privé</Label>
+                                                </div>
+                                                <div class="flex items-center space-x-2">
+                                                    <RadioGroup.Item value="PUBLIC" id="r2" />
+                                                    <Label for="r2">Public</Label>
+                                                </div>
+                                            </RadioGroup.Root>
+                                            <div class="pt-4 text-center">
+                                                <Sidebar.MenuButton class="w-full justify-center h-10 bg-gray-200">
+                                                    Créer le serveur
+                                                </Sidebar.MenuButton>
+                                            </div>
+                                        </form>
                                     {/if}
+                                </div>
 
-                                    <div class="pt-4 text-center">
-                                        <p class="text-sm text-gray-500 mb-2">Tu as déjà une invitation ?</p>
-                                        <Sidebar.MenuButton class="w-full justify-center h-10 bg-gray-200">
-                                            Rejoindre un serveur
+                                <div class="flex justify-end pt-4">
+                                    {#if showInput}
+                                        <Sidebar.MenuButton class="w-24 h-10 bg-gray-200 hover:bg-gray-300 rounded-md justify-center" onclick={() => showInput = false}>
+                                            <div class="text-gray-400">&larr;</div>
+                                            Retour
                                         </Sidebar.MenuButton>
-                                    </div>
+                                    {/if}
                                 </div>
                             </Dialog.Content>
                         </Dialog.Root>

@@ -39,7 +39,7 @@ class WorkspacesStore extends Store<WorkspaceStoreResult> {
         // eslint-disable-next-line no-async-promise-executor
         return new Promise<Workspace>(async (resolve, reject) => {
             try {
-                const workspace = await createWorkspace(workspaceName, "PUBLIC", []);
+                const workspace = await createWorkspace(workspaceName, "PUBLIC");
                 this.changeData({
                     ...this.getData(),
                     workspaces: [...this.getData().workspaces, workspace]
