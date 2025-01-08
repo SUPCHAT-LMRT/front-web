@@ -6,6 +6,7 @@
     import workspacesStore from "$lib/stores/workspacesStore";
     import { onMount } from "svelte";
     import { Globe, Plus } from "lucide-svelte";
+    import {Input} from "$lib/components/ui/input";
 
     const workspaces = $state(workspacesStore.get());
     let showInput = $state(false);
@@ -69,7 +70,7 @@
                                     {#if !showInput}
                                         <Sidebar.MenuButton
                                                 class="w-full justify-between h-16 border hover:bg-gray-200"
-                                                on:click={handleCreateMineClick}
+                                                onclick={handleCreateMineClick}
                                         >
                                             <div class="flex items-center gap-3">
                                                 <div class="p-2 rounded-full">
@@ -81,11 +82,10 @@
                                         </Sidebar.MenuButton>
                                     {:else}
                                         <div class="w-full">
-                                            <input
-                                                    type="text"
-                                                    placeholder="Nom du serveur"
-                                                    class="w-full p-2 border rounded-md"
-                                            />
+                                            <Input type="text" placeholder="Nom du serveur" class="w-full p-2 border rounded-md"/>
+                                            <div class="grid w-full max-w-sm items-center gap-1.5">
+                                                <Input id="picture" type="file" />
+                                            </div>
                                         </div>
                                     {/if}
 

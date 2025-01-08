@@ -9,7 +9,7 @@ export type Workspace = {
 
 export const getWorkspaces = async (): Promise<Workspace[]> => {
     try {
-        const { data } = await baseClient.get("/workspaces");
+        const { data } = await baseClient.get("/api/workspaces");
         return data;
     } catch (e) {
         console.error(e);
