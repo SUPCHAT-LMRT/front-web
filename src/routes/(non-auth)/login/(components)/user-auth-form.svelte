@@ -25,7 +25,7 @@
                 <Label class="sr-only" for="email">Email</Label>
                 <Input
                         id="email"
-                        placeholder="name@example.com"
+                        placeholder="nom@example.com"
                         type="email"
                         autocapitalize="none"
                         autocomplete="email"
@@ -37,7 +37,7 @@
                 {#if isLoading}
                     <Loader class="mr-2 h-4 w-4 animate-spin" />
                 {/if}
-                Sign In with Email
+                Se connecter avec l'email
             </Button>
         </div>
     </form>
@@ -45,8 +45,8 @@
         <div class="absolute inset-0 flex items-center">
             <span class="w-full border-t" />
         </div>
-        <div class="relative flex justify-center text-xs uppercase">
-            <span class="bg-background text-muted-foreground px-2"> Or continue with </span>
+        <div class="relative flex justifier-center text-xs uppercase">
+            <span class="bg-background text-muted-foreground px-2"> Ou continuer avec </span>
         </div>
     </div>
     <Button variant="outline" type="button" disabled={isLoading}>

@@ -4,14 +4,14 @@
 </script>
 
 <div
-        class="container relative hidden h-[800px] flex-col items-center justify-center md:grid lg:max-w-none lg:grid-cols-2 lg:px-0"
+        class="container relative hidden h-[800px] flex-col items-center justifier-center md:grid lg:max-w-none lg:grid-cols-2 lg:px-0"
 >
     <Button
-            href="/register"
+            href="/login"
             variant="ghost"
             class="absolute right-4 top-4 md:right-8 md:top-8"
     >
-        S'enregistrer
+        Se connecter
     </Button>
     <div class="bg-muted relative hidden h-full flex-col p-10 text-white lg:flex dark:border-r">
         <div class="relative z-20 flex items-center text-lg font-medium">
@@ -30,7 +30,7 @@
     <div class="lg:p-8">
         <div class="mx-auto flex w-full flex-col justifier-center space-y-6 sm:w-[350px]">
             <div class="flex flex-col space-y-2 text-center">
-                <h1 class="text-2xl font-semibold tracking-tight">Se connecter</h1>
+                <h1 class="text-2xl font-semibold tracking-tight">Créer un compte</h1>
                 <p class="text-muted-foreground text-sm">
                     Entrez votre email ci-dessous pour créer votre compte
                 </p>
