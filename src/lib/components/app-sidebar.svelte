@@ -10,6 +10,7 @@
 
     const workspaces = $state(workspacesStore.get());
     let showInput = $state(false);
+    let workspaceName = $state("");
 
     onMount(() => {
         workspacesStore.fetch();
@@ -17,6 +18,16 @@
 
     function handleCreateMineClick() {
         showInput = true;
+    }
+
+    async function createNewWorkspace() {
+        try {
+            const newWorkspace = await workspacesStore.createWorkspace(workspaceName);
+            console.log("Workspace créé : ", newWorkspace);
+            showInput = false;
+        } catch (error) {
+            console.error("Erreur lors de la création du workspace :", error);
+        }
     }
 </script>
 
@@ -68,10 +79,7 @@
 
                                 <div class="space-y-4 mt-4">
                                     {#if !showInput}
-                                        <Sidebar.MenuButton
-                                                class="w-full justify-between h-16 border hover:bg-gray-200"
-                                                onclick={handleCreateMineClick}
-                                        >
+                                        <Sidebar.MenuButton class="w-full justify-between h-16 border hover:bg-gray-200" onclick={handleCreateMineClick}>
                                             <div class="flex items-center gap-3">
                                                 <div class="p-2 rounded-full">
                                                     <Globe class="h-6 w-6" />
@@ -90,10 +98,24 @@
                                     {/if}
 
                                     <div class="pt-4 text-center">
+                                        {#if !showInput}
                                         <p class="text-sm text-gray-500 mb-2">Tu as déjà une invitation ?</p>
                                         <Sidebar.MenuButton class="w-full justify-center h-10 bg-gray-200">
                                             Rejoindre un serveur
                                         </Sidebar.MenuButton>
+                                        {:else}
+                                            <Sidebar.MenuButton onsubmit={createNewWorkspace} class="w-full justify-center h-10 bg-gray-200">
+                                                Créer un serveur
+                                            </Sidebar.MenuButton>
+                                        {/if}
+                                    </div>
+                                    <div class="flex justify-end pt-4">
+                                        {#if showInput}
+                                            <Sidebar.MenuButton class="w-24 h-10 bg-gray-200 hover:bg-gray-300 rounded-md justify-center" onclick={() => showInput = false}>
+                                                <div class="text-gray-400">&larr;</div>
+                                                Retour
+                                            </Sidebar.MenuButton>
+                                        {/if}
                                     </div>
                                 </div>
                             </Dialog.Content>
