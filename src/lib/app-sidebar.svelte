@@ -9,16 +9,25 @@
     import {Input} from "$lib/components/ui/input";
     import { Label } from "$lib/components/ui/label";
     import * as RadioGroup from "$lib/components/ui/radio-group";
+    import { Skeleton } from "$lib/components/ui/skeleton/index.js";
+
 
 
     const workspaces = $state(workspacesStore.get());
     let showInput = $state(false);
     let workspaceName = $state("");
     let type = $state("");
+    let isLoading = $state(true);
 
     onMount(() => {
-        workspacesStore.fetch();
+        try {
+            workspacesStore.fetch();
+            isLoading = false;
+        } catch (error) {
+            console.error("Erreur lors de la récupération des workspaces :", error);
+        }
     });
+
 
     function handleCreateMineClick() {
         showInput = true;
@@ -38,9 +47,14 @@
 
 <Sidebar.Root class="w-24">
     <Sidebar.Content class="!bg-[#E0E0E0] containerTest">
-        <Sidebar.Group class="z-0">
+        <Sidebar.Group>
             <Sidebar.GroupContent>
                 <Sidebar.Menu class="flex flex-col items-center">
+                    {#if isLoading}
+                        <Skeleton class="h-12 w-12 mb-4 mt-2 rounded-full" />
+                        <Skeleton class="h-12 w-12 mb-4 rounded-full" />
+                        <Skeleton class="h-12 w-12 rounded-full" />
+                    {:else}
                     {#each workspaces.data.workspaces as workspace (workspace.id)}
                         <Tooltip.Root>
                             <Tooltip.Trigger>
@@ -49,9 +63,6 @@
                                         <a href="https://github.com/shadcn.png" class="avatar-link flex items-center justify-center w-full h-full">
                                             <Avatar.Root class="h-12 w-12 rounded-full transition-transform duration-500 hover:rounded-2xl">
                                                 <Avatar.Image src="https://github.com/shadcn.png" alt={workspace.name} class="h-full w-full object-cover" />
-                                                <Avatar.Fallback class="flex items-center justify-center h-full w-full">
-                                                    {workspace.name.slice(0, 2)}
-                                                </Avatar.Fallback>
                                             </Avatar.Root>
                                         </a>
                                     </Sidebar.MenuButton>
@@ -62,6 +73,7 @@
                             </Tooltip.Content>
                         </Tooltip.Root>
                     {/each}
+                    {/if}
 
                     <Sidebar.MenuItem class="mt-4 w-full flex justify-center">
                         <Dialog.Root>

@@ -21,7 +21,7 @@ export const createWorkspace = async (
     type: string,
 ): Promise<Workspace> => {
     try {
-        const { data } = await baseClient.post("/api/workspaces", { name, type });
+        const { data } = await baseClient.post("/api/workspaces", { name, type, userId: "678fb1dc90530577bfa9256f" });
         return data;
     } catch (e) {
         console.error(e);

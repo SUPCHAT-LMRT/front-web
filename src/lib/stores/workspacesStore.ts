@@ -35,7 +35,7 @@ class WorkspacesStore extends Store<WorkspaceStoreResult> {
         })
     }
 
-    public createWorkspace(workspaceName: string, type: string): Promise<Workspace> {
+    public createWorkspace(workspaceName: string, type: string ): Promise<Workspace> {
         // eslint-disable-next-line no-async-promise-executor
         return new Promise<Workspace>(async (resolve, reject) => {
             try {
