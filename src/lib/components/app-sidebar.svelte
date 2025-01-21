@@ -7,10 +7,14 @@
     import { onMount } from "svelte";
     import { Globe, Plus } from "lucide-svelte";
     import {Input} from "$lib/components/ui/input";
+    import { Label } from "$lib/components/ui/label";
+    import * as RadioGroup from "$lib/components/ui/radio-group/index.js";
+
 
     const workspaces = $state(workspacesStore.get());
     let showInput = $state(false);
     let workspaceName = $state("");
+    let type = $state("");
 
     onMount(() => {
         workspacesStore.fetch();
@@ -22,12 +26,13 @@
 
     async function createNewWorkspace() {
         try {
-            const newWorkspace = await workspacesStore.createWorkspace(workspaceName);
+            const newWorkspace = await workspacesStore.createWorkspace(workspaceName, type);
             console.log("Workspace créé : ", newWorkspace);
             showInput = false;
         } catch (error) {
             console.error("Erreur lors de la création du workspace :", error);
         }
+        console.log("workspaceName : ", workspaceName);
     }
 </script>
 
@@ -90,10 +95,20 @@
                                         </Sidebar.MenuButton>
                                     {:else}
                                         <div class="w-full">
-                                            <Input type="text" placeholder="Nom du serveur" class="w-full p-2 border rounded-md"/>
+                                            <Input bind:value={workspaceName} type="text" placeholder="Nom du serveur" class="w-full p-2 border rounded-md mb-4"/>
                                             <div class="grid w-full max-w-sm items-center gap-1.5">
                                                 <Input id="picture" type="file" />
                                             </div>
+                                            <RadioGroup.Root bind:value={type} class="pt-4">
+                                                <div class="flex items-center space-x-2">
+                                                    <RadioGroup.Item value="PRIVATE" id="r1" />
+                                                    <Label for="r1">Privé</Label>
+                                                </div>
+                                                <div class="flex items-center space-x-2">
+                                                    <RadioGroup.Item value="PUBLIC" id="r2" />
+                                                    <Label for="r2">Public</Label>
+                                                </div>
+                                            </RadioGroup.Root>
                                         </div>
                                     {/if}
 
@@ -104,7 +119,7 @@
                                             Rejoindre un serveur
                                         </Sidebar.MenuButton>
                                         {:else}
-                                            <Sidebar.MenuButton onsubmit={createNewWorkspace} class="w-full justify-center h-10 bg-gray-200">
+                                            <Sidebar.MenuButton onclick={createNewWorkspace} class="w-full justify-center h-10 bg-gray-200">
                                                 Créer un serveur
                                             </Sidebar.MenuButton>
                                         {/if}
