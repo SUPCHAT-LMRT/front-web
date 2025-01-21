@@ -1,14 +1,14 @@
 <script lang="ts">
-    import * as Avatar from "$lib/components/ui/avatar/index.js";
-    import * as Sidebar from "$lib/components/ui/sidebar/index.js";
-    import * as Tooltip from "$lib/components/ui/tooltip/index.js";
-    import * as Dialog from "$lib/components/ui/dialog/index.js";
+    import * as Avatar from "$lib/components/ui/avatar";
+    import * as Sidebar from "$lib/components/ui/sidebar";
+    import * as Tooltip from "$lib/components/ui/tooltip";
+    import * as Dialog from "$lib/components/ui/dialog";
     import workspacesStore from "$lib/stores/workspacesStore";
     import { onMount } from "svelte";
     import { Globe, Plus } from "lucide-svelte";
     import {Input} from "$lib/components/ui/input";
     import { Label } from "$lib/components/ui/label";
-    import * as RadioGroup from "$lib/components/ui/radio-group/index.js";
+    import * as RadioGroup from "$lib/components/ui/radio-group";
 
 
     const workspaces = $state(workspacesStore.get());

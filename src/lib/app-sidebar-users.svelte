@@ -1,8 +1,8 @@
 <script lang="ts">
-    import * as Avatar from "$lib/components/ui/avatar/index.js";
-    import * as Sidebar from "$lib/components/ui/sidebar/index.js";
-    import * as Dialog from "$lib/components/ui/dialog/index.js";
-    import { Input } from "$lib/components/ui/input/index.js";
+    import * as Avatar from "$lib/components/ui/avatar";
+    import * as Sidebar from "$lib/components/ui/sidebar";
+    import * as Dialog from "$lib/components/ui/dialog";
+    import { Input } from "$lib/components/ui/input";
     import {BellIcon, CogIcon, UserIcon, XIcon} from "lucide-svelte";
 
     const mainItems = [
