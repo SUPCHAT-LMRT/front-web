@@ -16,7 +16,7 @@
         <div class="flex flex-col px-4 py-2">
             <section>
                 <div class="flex items-end mb-4">
-                    <h1 class="text-3xl font-bold text-gray-700">Paramètre</h1>
+                    <h1 class="text-3xl font-bold text-gray-700">Paramètres</h1>
                     <span class="mx-2 mb-1">-</span>
                     <span class="text-gray-700 text-lg font-semibold">{activeTab}</span>
                 </div>
