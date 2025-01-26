@@ -35,3 +35,14 @@ export const registerUser = async (
         throw e;
     }
 };
+
+export const loginUser = async (email: string, password: string, rememberMe: boolean): Promise<AuthResponse> => {
+    try {
+        const { data } = await baseClient.post("/api/users/login", { email, password, rememberMe });
+        return data;
+    }
+    catch (e) {
+        console.error(e);
+        throw e;
+    }
+}
