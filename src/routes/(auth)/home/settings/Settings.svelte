@@ -3,6 +3,7 @@
     import Language from "$lib/components/app/settings/Language.svelte";
     import Account from "$lib/components/app/settings/Account.svelte";
     import Connection from "$lib/components/app/settings/Connection.svelte";
+    import Voice from "$lib/components/app/settings/Voice.svelte";
 
     let activeTab = "Mon compte";
 
@@ -50,7 +51,7 @@
             {:else if activeTab === "Connexion"}
                 <Connection />
             {:else if activeTab === "Voix & Vidéo"}
-                <p>Contenu pour Voix & Vidéo</p>
+                <Voice />
             {/if}
         </div>
     </Tabs.Root>
