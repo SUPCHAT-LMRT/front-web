@@ -15,6 +15,7 @@
 	"devDependencies": {
 		"@eslint/compat": "^1.2.3",
 		"@fontsource/fira-mono": "^5.0.0",
+		"@internationalized/date": "^3.7.0",
 		"@neoconfetti/svelte": "^2.0.0",
 		"@sveltejs/adapter-auto": "^3.0.0",
 		"@sveltejs/kit": "^2.9.0",
