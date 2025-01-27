@@ -1,12 +1,9 @@
 <script>
-import {Button} from "$lib/components/ui/button";
-import {Lock} from "lucide-svelte";
-import CardPdp from "$lib/components/app/settings/CardPdp.svelte";
+    import {Button} from "$lib/components/ui/button";
+    import {Lock} from "lucide-svelte";
 </script>
 
-<CardPdp />
-
-<section class="px-4 py-2 ml-2 pt-8">
+<section class="px-4 py-2 ml-2 pt-8 w-full">
     <h1 class="text-gray-700 text-lg font-semibold">Mot de passe et authentification</h1>
     <div class="flex items-center mt-7">
         <Lock class="text-green-500" />

@@ -45,8 +45,8 @@
     }
 </script>
 
-<Sidebar.Root class="w-24">
-    <Sidebar.Content class="!bg-[#E0E0E0] containerTest">
+<Sidebar.Root class="w-64 ml-24 border-l-2 border-r-2 border-gray-200 ">
+    <Sidebar.Content>
         <Sidebar.Group>
             <Sidebar.GroupContent>
                 <Sidebar.Menu class="flex flex-col items-center">

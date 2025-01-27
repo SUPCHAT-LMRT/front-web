@@ -1,6 +1,6 @@
 <script lang="ts">
     import * as Select from "$lib/components/ui/select/index.js";
-    import { Slider } from "$lib/components/ui/slider/index.ts";
+    import { Slider } from "$lib/components/ui/slider";
     import { onMount } from "svelte";
 
     let value = $state(50);
@@ -44,7 +44,7 @@
     });
 </script>
 
-<section class="px-4 py-2 ml-2 pt-8">
+<section class="px-4 py-2 ml-2 pt-8 w-full">
     <h1 class="text-gray-700 text-lg font-semibold mb-3">Paramètres vocaux</h1>
     <div class="flex item-center mb-5">
         <div class="flex flex-col mr-4 w-72">

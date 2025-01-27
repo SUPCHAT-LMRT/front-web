@@ -1,16 +1,16 @@
 <script lang="ts">
-import {Button} from "$lib/components/ui/button";
+    import {Button} from "$lib/components/ui/button";
 </script>
 
-<section class="px-4 py-2 ml-2 pt-8">
+<section class="px-4 py-2 ml-2 pt-8 w-full">
     <h2 class="text-gray-700 text-xs font-bold uppercase mb-3">Connexion au profil</h2>
     <div class="space-y-4">
         <div class="flex flex-col bg-blue-100 border rounded-md p-4">
             <h2 class="text-gray-700 text-xs font-bold  uppercase">Ajoute des comptes au profil</h2>
             <p class="text-gray-700 text-sm mt-3">Cette information ne sera pas partagé en dehors de Sup-chat sans ta permission et sera utilisée en accord  <br> avec la
                 <Button variant="link" class="text-blue-500 p-0 h-auto">
-                Politique de confidentialité
-            </Button> de Sup-chat.
+                    Politique de confidentialité
+                </Button> de Sup-chat.
             </p>
             <div class="flex items-center gap-2 mt-2">
                 <svg xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="30" height="30" viewBox="0 0 48 48">

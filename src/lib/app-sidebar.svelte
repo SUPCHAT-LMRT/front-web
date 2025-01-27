@@ -3,14 +3,20 @@
     import {
         MessageSquareMore,
         Briefcase,
-        User,
+        ShoppingCart,
         Compass,
         Settings
     } from "lucide-svelte";
+    import {goto} from "$lib/utils/goto";
 
-    let selected = 'business';
+    let selected = 'messages';
 
     function select(id: string) {
+        if (id == "messages") goto("/chat");
+        if (id == "workspaces") goto("/workspaces");
+        if (id == "store") goto("/store");
+        if (id == "settings") goto("/settings");
+        if (id == "discover") goto("/discover");
         selected = id;
     }
 </script>
@@ -22,8 +28,8 @@
                 <Sidebar.Menu class="flex flex-col items-center">
                     <Sidebar.MenuItem class="mb-4 flex flex-col items-center">
                         <Sidebar.MenuButton
-                                class={`hover:bg-[#96C9DC] flex items-center justify-center h-14 w-14 transition-all duration-300 ${
-                                selected === 'messages' ? 'bg-[#61A0AF] shadow-md' : 'bg-gray-200'
+                                class={`hover:bg-[#96C9DC] flex items-center justify-center h-12 w-12 transition-all duration-300 ${
+                                selected === 'messages' ? 'bg-[#61A0AF] shadow-[' : 'bg-gray-200'
                             }`}
                                 onclick={() => select('messages')}
                         >
@@ -31,40 +37,26 @@
                                 <MessageSquareMore class={`${selected === 'messages' ? 'text-white' : 'text-gray-600'}`} />
                             </div>
                         </Sidebar.MenuButton>
-                        <span class="mt-1 text-xs text-center">Chat</span>
+                        <span class="mt-2 text-xs text-center">Chat</span>
                     </Sidebar.MenuItem>
 
                     <Sidebar.MenuItem class="mb-4 flex flex-col items-center">
                         <Sidebar.MenuButton
-                                class={`hover:bg-[#96C9DC] flex items-center justify-center h-14 w-14 transition-all duration-300 ${
-                                selected === 'business' ? 'bg-[#61A0AF] shadow-md' : 'bg-gray-200'
+                                class={`hover:bg-[#96C9DC] flex items-center justify-center h-12 w-12 transition-all duration-300 ${
+                                selected === 'workspaces' ? 'bg-[#61A0AF] shadow-md' : 'bg-gray-200'
                             }`}
-                                onclick={() => select('business')}
+                                onclick={() => select('workspaces')}
                         >
                             <div class="h-12 w-12 flex justify-center items-center">
-                                <Briefcase class={`${selected === 'business' ? 'text-white' : 'text-gray-600'}`} />
+                                <Briefcase class={`${selected === 'workspaces' ? 'text-white' : 'text-gray-600'}`} />
                             </div>
                         </Sidebar.MenuButton>
-                        <span class="mt-1 text-xs text-center">Server</span>
+                        <span class="mt-2 text-xs text-center">Server</span>
                     </Sidebar.MenuItem>
 
                     <Sidebar.MenuItem class="mb-4 flex flex-col items-center">
                         <Sidebar.MenuButton
-                                class={`hover:bg-[#96C9DC] flex items-center justify-center h-14 w-14 transition-all duration-300 ${
-                                selected === 'user' ? 'bg-[#61A0AF] shadow-md' : 'bg-gray-200'
-                            }`}
-                                onclick={() => select('user')}
-                        >
-                            <div class="h-12 w-12 flex justify-center items-center">
-                                <User class={`${selected === 'user' ? 'text-white' : 'text-gray-600'}`} />
-                            </div>
-                        </Sidebar.MenuButton>
-                        <span class="mt-1 text-xs text-center">User</span>
-                    </Sidebar.MenuItem>
-
-                    <Sidebar.MenuItem class="mb-4 flex flex-col items-center">
-                        <Sidebar.MenuButton
-                                class={`hover:bg-[#96C9DC] flex items-center justify-center h-14 w-14 transition-all duration-300 ${
+                                class={`hover:bg-[#96C9DC] flex items-center justify-center h-12 w-12 transition-all duration-300 ${
                                 selected === 'settings' ? 'bg-[#61A0AF] shadow-md' : 'bg-gray-200'
                             }`}
                                 onclick={() => select('settings')}
@@ -73,21 +65,35 @@
                                 <Settings class={`${selected === 'settings' ? 'text-white' : 'text-gray-600'}`} />
                             </div>
                         </Sidebar.MenuButton>
-                        <span class="mt-1 text-xs text-center">Settings</span>
+                        <span class="mt-2 text-xs text-center">Settings</span>
                     </Sidebar.MenuItem>
 
                     <Sidebar.MenuItem class="mb-4 flex flex-col items-center">
                         <Sidebar.MenuButton
-                                class={` hover:bg-[#96C9DC] flex items-center justify-center h-14 w-14 transition-all duration-300 ${
-                                selected === 'compass' ? 'bg-[#61A0AF] shadow-md' : 'bg-gray-200'
+                                class={` hover:bg-[#96C9DC] flex items-center justify-center h-12 w-12 transition-all duration-300 ${
+                                selected === 'discover' ? 'bg-[#61A0AF] shadow-md' : 'bg-gray-200'
                             }`}
-                                onclick={() => select('compass')}
+                                onclick={() => select('discover')}
                         >
                             <div class="h-12 w-12 flex justify-center items-center">
-                                <Compass class={`${selected === 'compass' ? 'text-white' : 'text-gray-600'}`}/>
+                                <Compass class={`${selected === 'discover' ? 'text-white' : 'text-gray-600'}`}/>
                             </div>
                         </Sidebar.MenuButton>
-                        <span class="mt-1 text-xs text-center">Discover</span>
+                        <span class="mt-2 text-xs text-center">Discover</span>
+                    </Sidebar.MenuItem>
+
+                    <Sidebar.MenuItem class="mb-4 flex flex-col items-center">
+                        <Sidebar.MenuButton
+                                class={`hover:bg-[#96C9DC] flex items-center justify-center h-12 w-12 transition-all duration-300 ${
+                                selected === 'store' ? 'bg-[#61A0AF] shadow-md' : 'bg-gray-200'
+                            }`}
+                                onclick={() => select('store')}
+                        >
+                            <div class="h-12 w-12 flex justify-center items-center">
+                                <ShoppingCart class={`${selected === 'store' ? 'text-white' : 'text-gray-600'}`} />
+                            </div>
+                        </Sidebar.MenuButton>
+                        <span class="mt-2 text-xs text-center">Boutique</span>
                     </Sidebar.MenuItem>
                 </Sidebar.Menu>
             </Sidebar.GroupContent>
