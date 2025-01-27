@@ -1,38 +1,35 @@
 <script lang="ts">
     import { Button } from "$lib/components/ui/button/index.js";
     import { Input } from "$lib/components/ui/input/index.js";
-    import { Label } from "$lib/components/ui/label/index.js";
     import { cn } from "$lib/utils.js";
     import { Github, Loader } from "lucide-svelte";
     import { loginUser } from "$lib/api/user";
+    import { Checkbox } from "$lib/components/ui/checkbox/index.js";
+    import { Label } from "$lib/components/ui/label/index.js";
 
     let className: string | undefined | null = undefined;
     export { className as class };
 
-    let isLoading = false;
+    let isSubmitting = false;
     let email = "";
     let password = "";
     let rememberMe = false;
 
     async function onSubmit() {
-        isLoading = true;
+        isSubmitting = true;
         try {
             console.log(email, password, rememberMe);
-            const response = await loginUser(
-                email,
-                password,
-                rememberMe,
-            );
+            const response = await loginUser(email, password, rememberMe);
             console.log("User logged in successfully:", response);
         } catch (error) {
             console.error("Error logging in user:", error);
         } finally {
-            isLoading = false;
+            isSubmitting = false;
         }
     }
 </script>
 
-<div class={cn("grid gap-6", className)} {...$$restProps}>
+<div class={cn("grid gap-6", className)}>
     <form on:submit|preventDefault={onSubmit}>
         <div class="grid gap-2">
             <div class="grid gap-1">
@@ -45,7 +42,7 @@
                         autocomplete="email"
                         autocorrect="off"
                         bind:value={email}
-                        disabled={isLoading}
+                        disabled={isSubmitting}
                 />
                 <Label class="sr-only" for="password">Password</Label>
                 <Input
@@ -53,21 +50,21 @@
                         placeholder="Password"
                         type="password"
                         bind:value={password}
-                        disabled={isLoading}
+                        disabled={isSubmitting}
                 />
             </div>
             <div class="flex items-center space-x-2">
-                <input
-                        id="remember-me"
-                        type="checkbox"
-                        bind:checked={rememberMe}
-                        class="rounded border-muted focus:ring-primary"
-                        disabled={isLoading}
-                />
-                <Label for="remember-me">Rester connecté</Label>
+                <Checkbox id="terms" bind:checked={rememberMe} aria-labelledby="terms-label" />
+                <Label
+                        id="terms-label"
+                        for="terms"
+                        class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                >
+                    Se souvenir de moi
+                </Label>
             </div>
-            <Button type="submit" disabled={isLoading}>
-                {#if isLoading}
+            <Button type="submit" disabled={isSubmitting}>
+                {#if isSubmitting}
                     <Loader class="mr-2 h-4 w-4 animate-spin" />
                 {/if}
                 Se connecter avec l'email
@@ -82,12 +79,11 @@
             <span class="bg-background text-muted-foreground px-2"> Ou continuer avec </span>
         </div>
     </div>
-    <Button variant="outline" type="button" disabled={isLoading}>
-        {#if isLoading}
+    <Button variant="outline" type="button" disabled={isSubmitting}>
+        {#if isSubmitting}
             <Loader class="mr-2 h-4 w-4 animate-spin" />
-        {:else}
-            <Github class="mr-2" />
         {/if}
+        <Github class="mr-2" />
         Github
     </Button>
 </div>
