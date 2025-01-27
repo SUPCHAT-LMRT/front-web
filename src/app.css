@@ -73,39 +73,5 @@
     @apply bg-background text-foreground;
   }
 
-
-  .containerTest {
-    overflow-y: auto;
-    scrollbar-width: none;
-    -ms-overflow-style: none;
-  }
-
-  .containerTest::-webkit-scrollbar {
-    width: 0;
-  }
-
-  .containerTest:hover::-webkit-scrollbar,
-  .containerTest.scrolling::-webkit-scrollbar {
-    width: 10px;
-  }
-
-  .containerTest:hover::-webkit-scrollbar-track,
-  .containerTest.scrolling::-webkit-scrollbar-track {
-    background: #888;
-    border-radius: 5px;
-  }
-
-  .containerTest:hover::-webkit-scrollbar-thumb,
-  .containerTest.scrolling::-webkit-scrollbar-thumb {
-    background: #000;
-    border-radius: 5px;
-  }
-
-  .containerTest:hover::-webkit-scrollbar-thumb:hover,
-  .containerTest.scrolling::-webkit-scrollbar-thumb:hover {
-    background: #555;
-  }
-
-
 }
 

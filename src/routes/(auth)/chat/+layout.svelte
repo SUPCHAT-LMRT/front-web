@@ -1,8 +1,8 @@
 <script lang="ts">
-    import * as Avatar from "$lib/components/ui/avatar/index.js";
-    import * as Sidebar from "$lib/components/ui/sidebar/index.js";
-    import * as Dialog from "$lib/components/ui/dialog/index.js";
-    import { Input } from "$lib/components/ui/input/index.js";
+    import * as Avatar from "$lib/components/ui/avatar";
+    import * as Sidebar from "$lib/components/ui/sidebar";
+    import * as Dialog from "$lib/components/ui/dialog";
+    import { Input } from "$lib/components/ui/input";
     import {BellIcon, CogIcon, UserIcon, XIcon} from "lucide-svelte";
 
     const mainItems = [
@@ -48,7 +48,7 @@
                 <Dialog.Trigger class="flex w-full p-1 mb-2  rounded-md bg-gray-100 border border-gray-300 focus:outline-none focus:ring-2 hover:bg-gray-200 transition">
                     <span class="text-gray-700 text-sm">Rechercher...</span>
                 </Dialog.Trigger>
-                <Dialog.Content class="flex flex-col justify-center items-center">
+                <Dialog.Content class="flex flex-col justify-center items-center max-w-[25rem]">
                     <Dialog.Header>
                         <Dialog.Title>
                             <Input type="text" placeholder="Où désires-tu aller ?" class="max-w-xs" />
@@ -56,7 +56,7 @@
                         <Dialog.Description class="flex items-center space-x-1">
                             <p class="text-[#1C9B4B] font-extrabold text-[11px] uppercase">Conseil de pro :</p>
                             <p class="text-[11px]">
-                                Commencer les recherches avec
+                                Utiliser
                                 <span class="p-1 bg-gray-200 font-bold rounded">@</span>
                                 et
                                 <span class="p-1 bg-gray-200 font-bold rounded">#</span>
