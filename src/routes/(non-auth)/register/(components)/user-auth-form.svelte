@@ -52,6 +52,13 @@
 </script>
 
 <div class={cn("grid gap-6", className)}>
+    <Button
+            href="/login"
+            variant="ghost"
+            class="absolute right-2 top-2"
+    >
+        Se connecter
+    </Button>
     <form on:submit|preventDefault={onSubmit}>
         <div class="grid gap-2">
             <div class="grid gap-1">
@@ -83,21 +90,23 @@
                         disabled={isLoading}
                 />
                 <Label class="sr-only" for="firstName">First Name</Label>
-                <Input
-                        id="firstName"
-                        placeholder="First Name"
-                        type="text"
-                        bind:value={firstName}
-                        disabled={isLoading}
-                />
-                <Label class="sr-only" for="lastName">Last Name</Label>
-                <Input
-                        id="lastName"
-                        placeholder="Last Name"
-                        type="text"
-                        bind:value={lastName}
-                        disabled={isLoading}
-                />
+                <div class="flex gap-1">
+                    <Input
+                            id="firstName"
+                            placeholder="First Name"
+                            type="text"
+                            bind:value={firstName}
+                            disabled={isLoading}
+                    />
+                    <Label class="sr-only" for="lastName">Last Name</Label>
+                    <Input
+                            id="lastName"
+                            placeholder="Last Name"
+                            type="text"
+                            bind:value={lastName}
+                            disabled={isLoading}
+                    />
+                </div>
                 <Label class="sr-only" for="pseudo">Pseudo</Label>
                 <Input
                         id="pseudo"
@@ -125,7 +134,7 @@
                     </Popover.Content>
                 </Popover.Root>
             </div>
-            <Button type="submit" disabled={isLoading}>
+            <Button class="bg-[#61A0AF]" type="submit" disabled={isLoading}>
                 {#if isLoading}
                     <Loader class="mr-2 h-4 w-4 animate-spin"/>
                 {/if}
