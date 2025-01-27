@@ -9,9 +9,9 @@
         getLocalTimeZone
     } from "@internationalized/date";
     import { cn } from "$lib/utils.js";
-    import { Calendar } from "$lib/components/ui/calendar/index.js";
     import * as Popover from "$lib/components/ui/popover";
     import {registerUser} from "$lib/api/user";
+    import CalendarNew from "./CalendarNew.svelte";
 
     const df = new DateFormatter("en-US", {
         dateStyle: "long"
@@ -20,16 +20,16 @@
     let value = $state<DateValue | undefined>();
     let contentRef = $state<HTMLElement | null>(null);
 
-    let className: string | undefined | null = undefined;
+    let className: string | undefined | null =  $state("undefined");
     export {className as class};
 
-    let isLoading = false;
-    let email = "";
-    let password = "";
-    let passwordConfirmation = "";
-    let firstName = "";
-    let lastName = "";
-    let pseudo = "";
+    let isLoading = $state(false);
+    let email = $state("");
+    let password = $state("");
+    let passwordConfirmation = $state("");
+    let firstName = $state("");
+    let lastName = $state("");
+    let pseudo = $state("");
 
     function formatToISODate(value: DateValue, timeZone: string): string {
         const date = value.toDate(timeZone);
@@ -52,7 +52,7 @@
 </script>
 
 <div class={cn("grid gap-6", className)}>
-    <form on:submit|preventDefault={onSubmit}>
+    <form onsubmit={onSubmit}>
         <div class="grid gap-2">
             <div class="grid gap-1">
                 <Label class="sr-only" for="email">Email</Label>
@@ -121,7 +121,7 @@
                         {value ? df.format(value.toDate(getLocalTimeZone())) : "Pick a date"}
                     </Popover.Trigger>
                     <Popover.Content bind:ref={contentRef} class="w-auto p-0">
-                        <Calendar type="single" bind:value id="birthDate" disabled={isLoading}/>
+                        <CalendarNew bind:value id="birthDate" disabled={isLoading} type="single"/>
                     </Popover.Content>
                 </Popover.Root>
             </div>
