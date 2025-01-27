@@ -21,7 +21,7 @@
             radial-gradient(circle at 100% 70%, #96C9DC 5%, #b3d8e6 10%, transparent 20%, transparent 100%);
             background-size: cover;
             background-position: center;
-            filter: blur(40px);
+            filter: blur(50px);
         }
     }
 </style>
