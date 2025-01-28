@@ -1,5 +1,5 @@
 import { Store, StoreResultState, type StoreResult } from "./store.svelte"
-import { getWorkspaces,createWorkspace, type Workspace } from "../api/workspace"
+import {getWorkspaces, createWorkspace, type Workspace, type WorkspaceType} from "../api/workspace"
 
 
 export type WorkspaceStoreResult = {
@@ -35,7 +35,7 @@ class WorkspacesStore extends Store<WorkspaceStoreResult> {
         })
     }
 
-    public createWorkspace(workspaceName: string, type: string ): Promise<Workspace> {
+    public createWorkspace(workspaceName: string, type: WorkspaceType ): Promise<Workspace> {
         // eslint-disable-next-line no-async-promise-executor
         return new Promise<Workspace>(async (resolve, reject) => {
             try {

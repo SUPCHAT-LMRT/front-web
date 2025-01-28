@@ -1,9 +1,11 @@
 import { baseClient } from "$lib/api/client";
 
+export type WorkspaceType = "PRIVATE" | "PUBLIC";
+
 export type Workspace = {
     id: string;
     name: string;
-    type: string;
+    type: WorkspaceType;
 };
 
 export const getWorkspaces = async (): Promise<Workspace[]> => {
@@ -18,7 +20,7 @@ export const getWorkspaces = async (): Promise<Workspace[]> => {
 
 export const createWorkspace = async (
         name: string,
-        type: string,
+        type: WorkspaceType,
 ): Promise<Workspace> => {
     try {
         const { data } = await baseClient.post("/api/workspaces", { name, type, userId: "6797f984eaeb71f709074293" });
