@@ -44,9 +44,9 @@
     });
 </script>
 
-<section class="px-4 py-2 ml-2 pt-8 w-full">
-    <h1 class="text-gray-700 text-lg font-semibold mb-3">Paramètres vocaux</h1>
-    <div class="flex item-center mb-5">
+<section class="px-4 py-2 ml-2 pt-8 w-[500px]">
+    <h1 class="text-gray-700 text-lg font-semibold mb-5">Paramètres vocaux</h1>
+    <div class="flex flex-col item-center mb-5">
         <div class="flex flex-col mr-4 w-72">
             <h2 class="text-gray-700 text-xs font-bold uppercase mb-2">Périphérique d'entrée</h2>
             <Select.Root type="single" name="audioInput" bind:value={selectedInput}>
@@ -68,7 +68,9 @@
                     </Select.Group>
                 </Select.Content>
             </Select.Root>
+            <Slider type="single" bind:value max={100} step={1} class="w-72 mt-4 mb-10" />
         </div>
+
         <div class="flex flex-col w-72">
             <h2 class="text-gray-700 text-xs font-bold uppercase mb-2">Périphérique de sortie</h2>
             <Select.Root type="single" name="audioOutput" bind:value={selectedOutput}>
@@ -90,16 +92,7 @@
                     </Select.Group>
                 </Select.Content>
             </Select.Root>
-        </div>
-    </div>
-    <div class="flex item-center">
-        <div class="flex flex-col mr-4 w-72">
-            <h2 class="text-gray-700 text-xs font-bold uppercase mb-3">Périphérique d'entrée</h2>
-            <Slider type="single" bind:value max={100} step={1} class="w-72" />
-        </div>
-        <div class="flex flex-col mr-4 w-72">
-            <h2 class="text-gray-700 text-xs font-bold uppercase mb-3">Périphérique d'entrée</h2>
-            <Slider type="single" bind:value max={100} step={1} class="w-72" />
+            <Slider type="single" bind:value max={100} step={1} class="w-72 mt-4" />
         </div>
     </div>
 </section>
