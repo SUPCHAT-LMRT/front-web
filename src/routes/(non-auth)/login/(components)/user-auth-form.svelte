@@ -60,15 +60,24 @@
                         disabled={isSubmitting}
                 />
             </div>
-            <div class="flex items-center space-x-2">
-                <Checkbox id="terms" bind:checked={rememberMe} aria-labelledby="terms-label" />
-                <Label
-                        id="terms-label"
-                        for="terms"
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-2">
+                    <Checkbox id="terms" bind:checked={rememberMe} aria-labelledby="terms-label" />
+                    <Label
+                            id="terms-label"
+                            for="terms"
+                            class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                    >
+                        Se souvenir de moi
+                    </Label>
+                </div>
+                <Button
+                        href="/password-forget"
+                        variant="ghost"
                         class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
                 >
-                    Se souvenir de moi
-                </Label>
+                    Mot de passe oublié ?
+                </Button>
             </div>
             <Button class="bg-[#61A0AF]" type="submit" disabled={isSubmitting}>
                 {#if isSubmitting}
