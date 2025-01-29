@@ -63,7 +63,6 @@
                                 pour affiner les résultats.
                             </p>
                         </Dialog.Description>
-
                     </Dialog.Header>
                 </Dialog.Content>
             </Dialog.Root>
