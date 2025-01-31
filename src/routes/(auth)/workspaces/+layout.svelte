@@ -139,7 +139,7 @@
                                                     <Input onchange={({currentTarget}) => {
                                                         workspaceIconImage = currentTarget.files?.[0];
                                                     }} id="picture" type="file"
-                                                           accept="image/png, image/jpeg"/>
+                                                           accept="image/png, image/jpeg, image/webp" />
                                                 </div>
                                                 <RadioGroup.Root bind:value={type} class="pt-4">
                                                     <div class="flex items-center space-x-2">
