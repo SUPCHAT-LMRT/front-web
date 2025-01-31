@@ -28,13 +28,14 @@
                 <Sidebar.Menu class="flex flex-col items-center">
                     <Sidebar.MenuItem class="mb-4 flex flex-col items-center">
                         <Sidebar.MenuButton
-                                class={`hover:bg-[#96C9DC] flex items-center justify-center h-12 w-12 transition-all duration-300 ${
-                                selected === 'messages' ? 'bg-[#61A0AF] shadow-[' : 'bg-gray-200'
+                                class={`hover:bg-primary/70 flex items-center justify-center h-12 w-12 transition-all duration-300 ${
+                                selected === 'messages' ? 'bg-primary shadow-[' : 'bg-gray-200'
                             }`}
                                 onclick={() => select('messages')}
                         >
                             <div class="h-12 w-12 flex justify-center items-center">
-                                <MessageSquareMore class={`${selected === 'messages' ? 'text-white' : 'text-gray-600'}`} />
+                                <MessageSquareMore
+                                        class={`${selected === 'messages' ? 'text-white' : 'text-gray-600'}`}/>
                             </div>
                         </Sidebar.MenuButton>
                         <span class="mt-2 text-xs text-center">Chat</span>
@@ -42,13 +43,13 @@
 
                     <Sidebar.MenuItem class="mb-4 flex flex-col items-center">
                         <Sidebar.MenuButton
-                                class={`hover:bg-[#96C9DC] flex items-center justify-center h-12 w-12 transition-all duration-300 ${
-                                selected === 'workspaces' ? 'bg-[#61A0AF] shadow-md' : 'bg-gray-200'
+                                class={`hover:bg-primary/70 flex items-center justify-center h-12 w-12 transition-all duration-300 ${
+                                selected === 'workspaces' ? 'bg-primary shadow-md' : 'bg-gray-200'
                             }`}
                                 onclick={() => select('workspaces')}
                         >
                             <div class="h-12 w-12 flex justify-center items-center">
-                                <Briefcase class={`${selected === 'workspaces' ? 'text-white' : 'text-gray-600'}`} />
+                                <Briefcase class={`${selected === 'workspaces' ? 'text-white' : 'text-gray-600'}`}/>
                             </div>
                         </Sidebar.MenuButton>
                         <span class="mt-2 text-xs text-center">Server</span>
@@ -56,13 +57,13 @@
 
                     <Sidebar.MenuItem class="mb-4 flex flex-col items-center">
                         <Sidebar.MenuButton
-                                class={`hover:bg-[#96C9DC] flex items-center justify-center h-12 w-12 transition-all duration-300 ${
-                                selected === 'settings' ? 'bg-[#61A0AF] shadow-md' : 'bg-gray-200'
+                                class={`hover:bg-primary/70 flex items-center justify-center h-12 w-12 transition-all duration-300 ${
+                                selected === 'settings' ? 'bg-primary shadow-md' : 'bg-gray-200'
                             }`}
                                 onclick={() => select('settings')}
                         >
                             <div class="h-12 w-12 flex justify-center items-center">
-                                <Settings class={`${selected === 'settings' ? 'text-white' : 'text-gray-600'}`} />
+                                <Settings class={`${selected === 'settings' ? 'text-white' : 'text-gray-600'}`}/>
                             </div>
                         </Sidebar.MenuButton>
                         <span class="mt-2 text-xs text-center">Settings</span>
@@ -70,8 +71,8 @@
 
                     <Sidebar.MenuItem class="mb-4 flex flex-col items-center">
                         <Sidebar.MenuButton
-                                class={` hover:bg-[#96C9DC] flex items-center justify-center h-12 w-12 transition-all duration-300 ${
-                                selected === 'discover' ? 'bg-[#61A0AF] shadow-md' : 'bg-gray-200'
+                                class={` hover:bg-primary/70 flex items-center justify-center h-12 w-12 transition-all duration-300 ${
+                                selected === 'discover' ? 'bg-primary shadow-md' : 'bg-gray-200'
                             }`}
                                 onclick={() => select('discover')}
                         >
@@ -84,13 +85,13 @@
 
                     <Sidebar.MenuItem class="mb-4 flex flex-col items-center">
                         <Sidebar.MenuButton
-                                class={`hover:bg-[#96C9DC] flex items-center justify-center h-12 w-12 transition-all duration-300 ${
-                                selected === 'store' ? 'bg-[#61A0AF] shadow-md' : 'bg-gray-200'
+                                class={`hover:bg-primary/70 flex items-center justify-center h-12 w-12 transition-all duration-300 ${
+                                selected === 'store' ? 'bg-primary shadow-md' : 'bg-gray-200'
                             }`}
                                 onclick={() => select('store')}
                         >
                             <div class="h-12 w-12 flex justify-center items-center">
-                                <ShoppingCart class={`${selected === 'store' ? 'text-white' : 'text-gray-600'}`} />
+                                <ShoppingCart class={`${selected === 'store' ? 'text-white' : 'text-gray-600'}`}/>
                             </div>
                         </Sidebar.MenuButton>
                         <span class="mt-2 text-xs text-center">Boutique</span>

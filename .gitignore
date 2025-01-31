@@ -5,3 +5,4 @@ pnpm-lock.json
 .svelte-kit
 .env
 !.env.example
+/pnpm-lock.yaml
