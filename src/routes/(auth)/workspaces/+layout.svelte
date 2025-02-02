@@ -13,6 +13,9 @@
     import {getS3ObjectUrl, S3Bucket} from "$lib/api/s3";
     import {WorkspaceType} from "$lib/api/workspace";
     import {Button} from "$lib/components/ui/button";
+    import {page} from "$app/state";
+
+    const currentWorkspaceId = $derived(page.url.pathname.split("/").pop());
 
     const workspaces = $state(workspacesStore.get());
     let showInput = $state(false);
@@ -55,44 +58,50 @@
 <div class="flex w-full h-full">
     <Sidebar.Root class="border-l-2 border-r-2 border-gray-200">
         <Sidebar.Content>
-            <Sidebar.Group>
+            <Sidebar.Group class="p-0">
                 <Sidebar.GroupContent>
-                    <Sidebar.Menu class="flex mx-auto px-4 flex-col items-center">
+                    <Sidebar.Menu class="flex mx-auto flex-col items-center">
                         {#if isLoading}
                             <Skeleton class="h-12 w-12 mb-4 mt-2 rounded-full"/>
                             <Skeleton class="h-12 w-12 mb-4 rounded-full"/>
                             <Skeleton class="h-12 w-12 rounded-full"/>
                         {:else}
                             {#each workspaces.data.workspaces as workspace (workspace.id)}
-                                <Tooltip.Root>
-                                    <Tooltip.Trigger>
-                                        <Sidebar.MenuItem class="mb-[2px] w-full flex justify-center">
-                                            <Sidebar.MenuButton
-                                                    class="flex items-center justify-center p-2 h-16 w-16 transition-all duration-300">
-                                                <a href="/workspaces/{workspace.id}"
-                                                   class="avatar-link flex items-center justify-center w-full h-full">
-                                                    <Avatar.Root
-                                                            class="h-12 w-12 rounded-3xl transition-all hover:rounded-2xl hover:scale-105">
-                                                        {#key workspace.id}
-                                                            <Avatar.Image
-                                                                    src={getS3ObjectUrl(S3Bucket.WORKSPACES_ICONS, workspace.id)}
-                                                                    alt={workspace.name}
-                                                                    class="h-full w-full object-cover"
-                                                            />
-                                                        {/key}
+                                <div class="relative flex items-center group/icon">
+                                    {#if currentWorkspaceId === workspace.id}
+                                        <div class="absolute h-2/4 border-l-4 border-primary rounded-r-full group-hover/icon:h-3/4 transition-height duration-50"></div>
+                                    {/if}
 
-                                                        <Avatar.Fallback class="rounded-3xl transition-all hover:rounded-2xl hover:scale-105">
-                                                            {workspace.name[0].toUpperCase()}
-                                                        </Avatar.Fallback>
-                                                    </Avatar.Root>
-                                                </a>
-                                            </Sidebar.MenuButton>
-                                        </Sidebar.MenuItem>
-                                    </Tooltip.Trigger>
-                                    <Tooltip.Content>
-                                        <p>{workspace.name}</p>
-                                    </Tooltip.Content>
-                                </Tooltip.Root>
+                                    <Tooltip.Root>
+                                        <Tooltip.Trigger class="h-full">
+                                            <Sidebar.MenuItem class="mb-[2px] w-full flex justify-center px-4">
+                                                <Sidebar.MenuButton
+                                                        class="flex items-center justify-center p-2 h-16 w-16 transition-all duration-300">
+                                                    <a href="/workspaces/{workspace.id}"
+                                                       class="avatar-link flex items-center justify-center w-full h-full">
+                                                        <Avatar.Root
+                                                                class="h-12 w-12 rounded-3xl transition-all hover:rounded-2xl hover:scale-105">
+                                                            {#key workspace.id}
+                                                                <Avatar.Image
+                                                                        src={getS3ObjectUrl(S3Bucket.WORKSPACES_ICONS, workspace.id)}
+                                                                        alt={workspace.name}
+                                                                        class="h-full w-full object-cover"
+                                                                />
+                                                            {/key}
+
+                                                            <Avatar.Fallback class="rounded-3xl transition-all hover:rounded-2xl hover:scale-105">
+                                                                {workspace.name[0].toUpperCase()}
+                                                            </Avatar.Fallback>
+                                                        </Avatar.Root>
+                                                    </a>
+                                                </Sidebar.MenuButton>
+                                            </Sidebar.MenuItem>
+                                        </Tooltip.Trigger>
+                                        <Tooltip.Content>
+                                            <p>{workspace.name}</p>
+                                        </Tooltip.Content>
+                                    </Tooltip.Root>
+                                </div>
                             {/each}
                         {/if}
 

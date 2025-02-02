@@ -1,35 +1,24 @@
 <script lang="ts">
     import {page} from "$app/state";
-    import {asyncJoinRoom, getConnectedUsers, sendMessage, subscribe} from "$lib/api/ws.svelte";
+    import {asyncJoinRoom, sendMessage, subscribe} from "$lib/api/ws.svelte.js";
     import {Input} from "$lib/components/ui/input";
-    import {AvatarFallback, AvatarImage} from "$lib/components/ui/avatar/index.js";
+    import {AvatarFallback, AvatarImage} from "$lib/components/ui/avatar";
     import {getS3ObjectUrl, S3Bucket} from "$lib/api/s3";
     import {RoomKind} from "$lib/api/room";
     import * as Avatar from "$lib/components/ui/avatar";
 
-    let currentWorkspaceId = $state("");
+    let currentChatId = $state("");
+    let currentChatKind: RoomKind = $state(RoomKind.UNKNOWN);
     let currentMessage = $state("");
     let currentRoom = $state(null);
-    let allUsersConnected = $state(getConnectedUsers());
 
     $effect(() => {
-        currentWorkspaceId = page.params.workspaceId;
+        currentChatId = page.params.chatId;
+        currentChatKind = RoomKind[page.params.chatKind as keyof typeof RoomKind];
         let unsubscribeSendMessage = null;
-        let unsubscribeUserConnect = null;
-        let unsubscribeUserDisconnect = null;
-
-        // user-connect can happen before the room is joined
-        unsubscribeUserConnect = subscribe("user-connect", msg => {
-            allUsersConnected = [...allUsersConnected, msg.sender];
-        })
-
-        // user-disconnect can happen before the room is joined
-        unsubscribeUserDisconnect = subscribe("user-disconnect", msg => {
-            allUsersConnected = allUsersConnected.filter(user => user.userId !== msg.sender.userId);
-        })
 
         setTimeout(async () => {
-            currentRoom = await asyncJoinRoom(currentWorkspaceId, RoomKind.CHANNEL);
+            currentRoom = await asyncJoinRoom(currentChatId, currentChatKind)
 
             unsubscribeSendMessage = subscribe("send-message", msg => {
                 currentRoom.messages = [...currentRoom.messages, msg];
@@ -38,8 +27,6 @@
 
         return () => {
             unsubscribeSendMessage?.();
-            unsubscribeUserConnect?.();
-            unsubscribeUserDisconnect?.();
         }
     })
 
@@ -50,13 +37,6 @@
 </script>
 
 <div class="w-full">
-    <div>
-        Tous les utilisateurs connectés:
-        {#each allUsersConnected as user (user.id)}
-            {user.userId}
-        {/each}
-    </div>
-
     <div>
         Room:
         {#if currentRoom}
@@ -73,9 +53,9 @@
                             <Avatar.Root>
                                 <AvatarImage
                                         src={getS3ObjectUrl(S3Bucket.USERS_AVATARS, message.messageSender.userId)}/>
-                                <AvatarFallback>{message.messageSender.workspacePseudo[0]}</AvatarFallback>
+                                <AvatarFallback>{message.messageSender.pseudo[0]}</AvatarFallback>
                             </Avatar.Root>
-                            <span>{message.messageSender.workspacePseudo}</span>
+                            <span>{message.messageSender.pseudo}</span>
                         {/if}
                         <span>{message.message}</span>
                     </div>

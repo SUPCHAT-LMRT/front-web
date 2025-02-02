@@ -1,4 +1,5 @@
 import {getCurrentOpenedRoom, setCurrentOpenedRoom} from "./currentOpenedRoom.svelte";
+import {RoomKind} from "./room";
 
 let ws: WebSocket = $state(null);
 let rooms = $state([]);
@@ -89,18 +90,34 @@ export const findRoom = (roomId) => {
     }
 }
 
-export const joinRoom = (roomId: string) => {
+export const joinRoom = (roomId: string, roomKind: RoomKind) => {
     const currentOpenedRoom = getCurrentOpenedRoom();
     if (currentOpenedRoom !== "") {
         leaveRoom(findRoom(currentOpenedRoom));
     }
 
-    ws.send(JSON.stringify({action: 'join-room', message: roomId}));
+    let action: string;
+    switch (roomKind) {
+        case RoomKind.DIRECT:
+            action = "join-direct-room";
+            break;
+        case RoomKind.GROUP:
+            action = "join-group-room";
+            break;
+        case RoomKind.CHANNEL:
+            action = "join-channel-room";
+            break;
+        default:
+            throw new Error("Invalid room kind");
+    }
+
+    ws.send(JSON.stringify({action: action, message: roomId}));
 }
 
-export const asyncJoinRoom = async (roomId: string) => {
+export const asyncJoinRoom = async (roomId: string, roomKind: RoomKind) => {
     return new Promise((resolve) => {
-        joinRoom(roomId);
+        joinRoom(roomId, roomKind);
+
         const unsubscribe = subscribe("room-joined", (msg) => {
             resolve(msg.target);
             unsubscribe();
