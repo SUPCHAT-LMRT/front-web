@@ -1,5 +1,6 @@
 import {getCurrentOpenedRoom, setCurrentOpenedRoom} from "./currentOpenedRoom.js";
 import {RoomKind} from "./room";
+import { env } from '$env/dynamic/public';
 
 class Ws {
     private subscribers = [];
@@ -11,7 +12,7 @@ class Ws {
     }
 
     private initWebSocket = () => {
-        this.ws = new WebSocket("ws://localhost:3000/api/ws");
+        this.ws = new WebSocket(env.PUBLIC_API_WS_ORIGIN);
 
         this.ws.onopen = () => {
             console.log("WebSocket connected");

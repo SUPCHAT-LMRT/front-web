@@ -1,7 +1,7 @@
 import axios from "axios";
-import {PUBLIC_API_ORIGIN} from "$env/static/public";
+import { env } from '$env/dynamic/public';
 
 export const baseClient = axios.create({
-    baseURL: PUBLIC_API_ORIGIN,
+    baseURL: env.PUBLIC_API_ORIGIN,
     withCredentials: true
 })

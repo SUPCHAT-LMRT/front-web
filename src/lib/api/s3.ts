@@ -1,4 +1,4 @@
-import { PUBLIC_S3_ORIGIN } from "$env/static/public";
+import { env } from '$env/dynamic/public';
 
 export enum S3Bucket {
     MESSAGES_FILES = "messages-files",
@@ -7,5 +7,5 @@ export enum S3Bucket {
 }
 
 export const getS3ObjectUrl = (bucket: S3Bucket, key: string): string => {
-    return `${PUBLIC_S3_ORIGIN}/${bucket}/${key}`;
+    return `${env.PUBLIC_S3_ORIGIN}/${bucket}/${key}`;
 }
