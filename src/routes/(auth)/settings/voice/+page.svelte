@@ -2,8 +2,10 @@
     import * as Select from "$lib/components/ui/select/index.js";
     import { Slider } from "$lib/components/ui/slider";
     import { onMount } from "svelte";
+    import TestAudio from "./TestAudio.svelte";
 
-    let value = $state(50);
+    let inputVolume = $state(50);
+    let outputVolume = $state(50);
 
     let audioInputs = $state([]);
     let audioOutputs = $state([]);
@@ -44,11 +46,12 @@
     });
 </script>
 
+
 <section class="px-4 py-2 ml-2 pt-8 w-[500px]">
     <h1 class="text-gray-700 text-lg font-semibold mb-5">Paramètres vocaux</h1>
     <div class="flex flex-col item-center mb-5">
         <div class="flex flex-col mr-4 w-72">
-            <h2 class="text-gray-700 text-xs font-bold uppercase mb-2">Périphérique d'entrée</h2>
+            <h2 class="text-gray-700 text-xs font-bold uppercase mb-3">Périphérique d'entrée</h2>
             <Select.Root type="single" name="audioInput" bind:value={selectedInput}>
                 <Select.Trigger>
                     {#if selectedInput}
@@ -68,11 +71,11 @@
                     </Select.Group>
                 </Select.Content>
             </Select.Root>
-            <Slider type="single" bind:value max={100} step={1} class="w-72 mt-4 mb-10" />
+            <Slider type="single" bind:value={inputVolume} max={100} step={1} class="w-72 mt-4 mb-10" />
         </div>
 
         <div class="flex flex-col w-72">
-            <h2 class="text-gray-700 text-xs font-bold uppercase mb-2">Périphérique de sortie</h2>
+            <h2 class="text-gray-700 text-xs font-bold uppercase mb-3">Périphérique de sortie</h2>
             <Select.Root type="single" name="audioOutput" bind:value={selectedOutput}>
                 <Select.Trigger>
                     {#if selectedOutput}
@@ -92,7 +95,11 @@
                     </Select.Group>
                 </Select.Content>
             </Select.Root>
-            <Slider type="single" bind:value max={100} step={1} class="w-72 mt-4" />
+            <Slider type="single" bind:value={outputVolume} max={100} step={1} class="w-72 mt-4" />
         </div>
+
+        <TestAudio />
+
     </div>
 </section>
+

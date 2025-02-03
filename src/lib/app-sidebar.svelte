@@ -1,5 +1,7 @@
 <script lang="ts">
     import * as Sidebar from "$lib/components/ui/sidebar";
+    import { toast } from "svelte-sonner";
+    import { Button } from "$lib/components/ui/button/index.js";
     import {
         MessageSquareMore,
         Briefcase,
@@ -7,19 +9,18 @@
         Compass,
         Settings
     } from "lucide-svelte";
-    import {goto} from "$lib/utils/goto";
-    import {page} from "$app/state";
+    import { goto } from "$lib/utils/goto";
+    import Error from "$lib/components/app/icon/Error.svelte";
 
-    const currentTab = page.url.pathname.split("/")[1];
+    let selected = 'messages';
 
-    let selected = currentTab;
 
     function select(id: string) {
-        if (id == "chat") goto("/chat");
-        if (id == "workspaces") goto("/workspaces");
-        if (id == "store") goto("/store");
-        if (id == "settings") goto("/settings");
-        if (id == "discover") goto("/discover");
+        if (id === "messages") goto("/chat");
+        if (id === "workspaces") goto("/workspaces");
+        if (id === "store") goto("/store");
+        if (id === "settings") goto("/settings");
+        if (id === "discover") goto("/discover");
         selected = id;
     }
 </script>
@@ -32,13 +33,13 @@
                     <Sidebar.MenuItem class="mb-4 flex flex-col items-center">
                         <Sidebar.MenuButton
                                 class={`hover:bg-primary/70 flex items-center justify-center h-12 w-12 transition-all duration-300 ${
-                                selected === 'chat' ? 'bg-primary shadow-[' : 'bg-gray-200'
+                                selected === 'messages' ? 'bg-primary shadow-[' : 'bg-gray-200'
                             }`}
-                                onclick={() => select('chat')}
+                                onclick={() => select('messages')}
                         >
                             <div class="h-12 w-12 flex justify-center items-center">
                                 <MessageSquareMore
-                                        class={`${selected === 'chat' ? 'text-white' : 'text-gray-600'}`}/>
+                                        class={`${selected === 'messages' ? 'text-white' : 'text-gray-600'}`}/>
                             </div>
                         </Sidebar.MenuButton>
                         <span class="mt-2 text-xs text-center">Chat</span>
