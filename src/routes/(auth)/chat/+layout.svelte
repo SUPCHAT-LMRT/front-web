@@ -45,7 +45,7 @@
 <div class="flex w-full h-full">
     <Sidebar.Root class="border-l-2 border-r-2 border-gray-200">
         <Sidebar.Content class="p-4 containerTest z-0">
-            <Sidebar.Menu class="flex w-52 flex-col">
+            <Sidebar.Menu class="flex flex-col">
                 <Dialog.Root>
                     <Dialog.Trigger
                             class="flex w-full p-1 mb-2  rounded-md bg-gray-100 border border-gray-300 focus:outline-none focus:ring-2 hover:bg-gray-200 transition">
@@ -85,35 +85,37 @@
                 <div class="my-4 border-t border-gray-200"></div>
                 <p class="text-xs font-bold p-2 uppercase">Message privés</p>
 
-            {#if recentChats.state === StoreResultState.LOADING}
-                <!-- Todo skeleton page chats récent -->
-                <span class="text-3xl text-red-600 underline"> ⚠️ SKELETON A FAIRE</span>
-            {:else}
-                {#each recentChats.data.recentChats as chat (chat.id)}
-                    <Sidebar.MenuItem class="mb-2 rounded w-full {currentChatId === chat.id ? 'bg-gray-200' : ''}">
-                        <div class="relative group">
-                            <div class="flex items-center p-2 rounded transition-all duration-300 hover:bg-gray-200">
-                                <a href="/chat/{chat.kind}/{chat.id}" class="flex items-center w-full">
-                                    <Avatar.Root class="h-9 w-9">
-                                        <Avatar.Image src={chat.avatarUrl} alt={chat.id}
-                                                      class="h-full w-full rounded-full object-cover"/>
-                                        <Avatar.Fallback
-                                                class="flex items-center justify-center rounded-full h-full w-full">
-                                            {chat.name.slice(0, 2)}
-                                        </Avatar.Fallback>
-                                    </Avatar.Root>
-                                    <span class="ml-4 text-gray-700">{chat.name}</span>
-                                </a>
+                {#if recentChats.state === StoreResultState.LOADING}
+                    <!-- Todo skeleton page chats récent -->
+                    <span class="text-3xl text-red-600 underline">⚠️ SKELETON A FAIRE</span>
+                {:else}
+                    {#each recentChats.data.recentChats as chat (chat.id)}
+                        <Sidebar.MenuItem class="mb-2 rounded w-full {currentChatId === chat.id ? 'bg-gray-200' : ''}">
+                            <div class="relative group">
+                                <div class="flex items-center p-2 rounded transition-all duration-300 hover:bg-gray-200">
+                                    <a href="/chat/{chat.kind}/{chat.id}" class="flex items-center w-full">
+                                        <Avatar.Root class="h-7 w-7">
+                                            <Avatar.Image src={chat.avatarUrl} alt={chat.id}
+                                                          class="h-full w-full rounded-full object-cover"/>
+                                            <Avatar.Fallback
+                                                    class="flex items-center justify-center rounded-full h-full w-full">
+                                                {chat.name.slice(0, 2)}
+                                            </Avatar.Fallback>
+                                        </Avatar.Root>
+                                        <span class="ml-4 text-sm text-gray-700">{chat.name}</span>
+                                    </a>
+                                </div>
+                                <button
+                                        class="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                                >
+                                    <XIcon class="h-4 w-4"/>
+                                </button>
                             </div>
-                            <button
-                                    class="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-                            >
-                                <XIcon class="h-4 w-4"/>
-                            </button>
-                        </div>
-                    </Sidebar.MenuItem>
-                {/each}
-            {/if}
+                        </Sidebar.MenuItem>
+                    {:else}
+                        <span class="text-gray-500 text-md">Aucun chat récent</span>
+                    {/each}
+                {/if}
 
             </Sidebar.Menu>
         </Sidebar.Content>
