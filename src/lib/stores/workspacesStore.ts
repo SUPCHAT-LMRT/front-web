@@ -1,5 +1,5 @@
 import {Store, StoreResultState, type StoreResult} from "./store.svelte"
-import {getWorkspaces, createWorkspace, type Workspace, type WorkspaceType, updateWorkspaceIcon} from "../api/workspace"
+import {getWorkspaces, createWorkspace, type Workspace, type WorkspaceType, updateWorkspaceIcon} from "../api/workspaces/workspace"
 
 
 export type WorkspaceStoreResult = {

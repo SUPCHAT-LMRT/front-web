@@ -14,7 +14,7 @@ export type RecentChat = {
 
 export const getRecentChats = async (): Promise<RecentChat[]> => {
     try {
-        let {data} = await baseClient.get("/api/chat/recent");
+        let {data} = await baseClient.get("/api/chats/recents");
         data = data.map((chat: any) => {
             if (chat.kind === 0) {
                 chat.kind = RecentChatKind.GROUP;

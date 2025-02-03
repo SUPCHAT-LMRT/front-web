@@ -1,4 +1,4 @@
-import {baseClient} from "$lib/api/client";
+import {baseClient} from "../client";
 
 export enum WorkspaceType {
     PUBLIC = "PUBLIC",

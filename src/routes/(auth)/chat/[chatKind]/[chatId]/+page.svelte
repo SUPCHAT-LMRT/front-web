@@ -1,37 +1,39 @@
 <script lang="ts">
     import {page} from "$app/state";
-    import {asyncJoinRoom, sendMessage, subscribe} from "$lib/api/ws.svelte.js";
+    import ws from "$lib/api/ws";
     import {Input} from "$lib/components/ui/input";
     import {AvatarFallback, AvatarImage} from "$lib/components/ui/avatar";
     import {getS3ObjectUrl, S3Bucket} from "$lib/api/s3";
     import {RoomKind} from "$lib/api/room";
     import * as Avatar from "$lib/components/ui/avatar";
 
-    let currentChatId = $state("");
-    let currentChatKind: RoomKind = $state(RoomKind.UNKNOWN);
+    let currentChatId = $derived(page.params.chatId);
+    let currentChatKind: RoomKind = $derived(RoomKind[page.params.chatKind as keyof typeof RoomKind]);
     let currentMessage = $state("");
-    let currentRoom = $state(null);
+    let currentRoom = $state({id: null, messages: []});
+    let unsubscribeSendMessage = null;
 
     $effect(() => {
-        currentChatId = page.params.chatId;
-        currentChatKind = RoomKind[page.params.chatKind as keyof typeof RoomKind];
-        let unsubscribeSendMessage = null;
-
-        setTimeout(async () => {
-            currentRoom = await asyncJoinRoom(currentChatId, currentChatKind)
-
-            unsubscribeSendMessage = subscribe("send-message", msg => {
-                currentRoom.messages = [...currentRoom.messages, msg];
-            })
-        }, 300)
+        joinRoomAndListenMessages(currentChatId, currentChatKind);
 
         return () => {
             unsubscribeSendMessage?.();
+            ws.leaveRoom(currentRoom.id);
+            currentRoom.id = null;
+            currentRoom.messages = [];
         }
     })
 
+    const joinRoomAndListenMessages = async (roomId: string, chatKind: RoomKind) => {
+        currentRoom.id = await ws.asyncJoinRoom(roomId, chatKind)
+
+        unsubscribeSendMessage = ws.subscribe("send-message", msg => {
+            currentRoom.messages = [...currentRoom.messages, msg];
+        })
+    }
+
     const sendMessageToWs = () => {
-        sendMessage(currentRoom, currentMessage)
+        ws.sendMessage(currentRoom.id, currentMessage)
         currentMessage = "";
     }
 </script>
@@ -39,7 +41,7 @@
 <div class="w-full">
     <div>
         Room:
-        {#if currentRoom}
+        {#if currentRoom.id !== null}
             <span>{currentRoom.id}</span>
 
             <Input placeholder="Enter your message" bind:value={currentMessage}

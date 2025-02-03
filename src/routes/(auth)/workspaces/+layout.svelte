@@ -11,7 +11,7 @@
     import * as RadioGroup from "$lib/components/ui/radio-group";
     import {Skeleton} from "$lib/components/ui/skeleton/index.js";
     import {getS3ObjectUrl, S3Bucket} from "$lib/api/s3";
-    import {WorkspaceType} from "$lib/api/workspace";
+    import {WorkspaceType} from "$lib/api/workspaces/workspace";
     import {Button} from "$lib/components/ui/button";
     import {page} from "$app/state";
 

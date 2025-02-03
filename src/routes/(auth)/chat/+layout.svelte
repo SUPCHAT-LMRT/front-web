@@ -6,10 +6,9 @@
     import {BellIcon, CogIcon, UserIcon, XIcon} from "lucide-svelte";
     import recentChatsStore from "$lib/stores/recentChatsStore";
     import {onMount} from "svelte";
-    import workspacesStore from "$lib/stores/workspacesStore";
     import {page} from "$app/state";
 
-    const currentChatId = page.url.pathname.split("/").pop();
+    const currentChatId = $derived(page.url.pathname.split("/").pop());
 
     const mainItems = [
         {

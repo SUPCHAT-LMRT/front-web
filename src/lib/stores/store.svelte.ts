@@ -60,7 +60,7 @@ export abstract class Store<T> {
     }
 
     public clearData() {
-        this.changeData(null as T);
+        this.changeData(this.getDefaultState().data);
         this.changeState(StoreResultState.IDLE)
     }
 
