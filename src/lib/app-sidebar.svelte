@@ -7,16 +7,17 @@
         Compass,
         Settings
     } from "lucide-svelte";
-    import {goto} from "$lib/utils/goto";
+    import { goto } from "$lib/utils/goto";
 
     let selected = 'messages';
 
+
     function select(id: string) {
-        if (id == "messages") goto("/chat");
-        if (id == "workspaces") goto("/workspaces");
-        if (id == "store") goto("/store");
-        if (id == "settings") goto("/settings");
-        if (id == "discover") goto("/discover");
+        if (id === "messages") goto("/chat");
+        if (id === "workspaces") goto("/workspaces");
+        if (id === "store") goto("/store");
+        if (id === "settings") goto("/settings");
+        if (id === "discover") goto("/discover");
         selected = id;
     }
 </script>
