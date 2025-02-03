@@ -31,7 +31,7 @@
     <div class="pl-32">
         <div class="mx-auto flex w-full flex-col justifier-center space-y-6 sm:w-[350px]">
             <div class="flex flex-col space-y-2 text-center">
-                <h1 class="text-2xl font-semibold tracking-tight">Se connecter</h1>
+                <h1 class="text-2xl font-semibold tracking-tight">Mot de passe oublié</h1>
             </div>
             <div class={cn("grid gap-6", className)}>
                 <Button
@@ -47,7 +47,7 @@
                             <Label class="sr-only" for="email">Nouveau mot de passe</Label>
                             <Input
                                     id="password"
-                                    placeholder="Confirmer le mot de passe"
+                                    placeholder="Nouveau mot de passe"
                                     type="password"
                                     bind:value={newPassword}
                             />
