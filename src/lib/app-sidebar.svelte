@@ -105,15 +105,3 @@
         </Sidebar.Group>
     </Sidebar.Content>
 </Sidebar.Root>
-
-<Button
-        variant="outline"
-        onclick={() =>
-    toast('Event has been created', {
-	description: 'Monday, January 3rd at 6:00pm',
-	icon: Error
-})
-}
->
-    Show Toast
-</Button>
