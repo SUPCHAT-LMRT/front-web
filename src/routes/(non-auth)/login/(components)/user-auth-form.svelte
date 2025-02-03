@@ -73,7 +73,8 @@
                     Se souvenir de moi
                 </Label>
             </div>
-            <Button class="bg-[#61A0AF]" type="submit" disabled={isSubmitting}>
+            <Button class="bg-[#61A0AF]" type="submit" disabled={isSubmitting}
+            >
                 {#if isSubmitting}
                     <Loader class="mr-2 h-4 w-4 animate-spin" />
                 {/if}

@@ -1,13 +1,16 @@
 <script lang="ts">
     import * as Sidebar from "$lib/components/ui/sidebar";
+    import { toast } from "svelte-sonner";
+    import { Button } from "$lib/components/ui/button/index.js";
     import {
         MessageSquareMore,
         Briefcase,
         ShoppingCart,
         Compass,
-        Settings
+        Settings,
     } from "lucide-svelte";
     import { goto } from "$lib/utils/goto";
+    import Error from "$lib/components/app/icon/Error.svelte";
 
     let selected = 'messages';
 
@@ -102,3 +105,15 @@
         </Sidebar.Group>
     </Sidebar.Content>
 </Sidebar.Root>
+
+<Button
+        variant="outline"
+        onclick={() =>
+    toast('Event has been created', {
+	description: 'Monday, January 3rd at 6:00pm',
+	icon: Error
+})
+}
+>
+    Show Toast
+</Button>
