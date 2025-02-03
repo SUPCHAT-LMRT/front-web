@@ -2,7 +2,7 @@
     import { Button } from "$lib/components/ui/button/index.js";
     import { Input } from "$lib/components/ui/input/index.js";
     import { cn } from "$lib/utils.js";
-    import { Github, Loader } from "lucide-svelte";
+    import { Loader } from "lucide-svelte";
     import { loginUser } from "$lib/api/user";
     import { Checkbox } from "$lib/components/ui/checkbox/index.js";
     import { Label } from "$lib/components/ui/label/index.js";

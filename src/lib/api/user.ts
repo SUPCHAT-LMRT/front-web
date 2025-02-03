@@ -28,7 +28,7 @@ export const registerUser = async (
     birthDate: string
 ): Promise<AuthResponse> => {
     try {
-        const { data } = await baseClient.post("/api/users/register", { email, password, passwordConfirmation, firstName, lastName, pseudo, birthDate });
+        const { data } = await baseClient.post("/api/account/auth/register", { email, password, passwordConfirmation, firstName, lastName, pseudo, birthDate });
         return data;
     } catch (e) {
         console.error(e);
@@ -38,7 +38,7 @@ export const registerUser = async (
 
 export const loginUser = async (email: string, password: string, rememberMe: boolean): Promise<AuthResponse> => {
     try {
-        const { data } = await baseClient.post("/api/users/login", { email, password, rememberMe });
+        const { data } = await baseClient.post("/api/account/auth/login", { email, password, rememberMe });
         return data;
     }
     catch (e) {

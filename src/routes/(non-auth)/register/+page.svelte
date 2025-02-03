@@ -1,9 +1,8 @@
 <script lang="ts">
     import UserAuthForm from "./(components)/user-auth-form.svelte";
-    import { Button } from "$lib/components/ui/button/index.js";
 </script>
 
-<div class="container flex min-h-screen items-center justify-center">
+<div class="container flex min-h-screen items-center justify-center bg-white z-10">
     <div class="pl-32">
         <div class="mx-auto flex w-full flex-col justifier-center space-y-6 sm:w-[350px]">
             <div class="flex flex-col space-y-2 text-center">

@@ -33,8 +33,8 @@
     let selectedLanguage = 'fr';
 </script>
 
-<section class="px-4 py-2 ml-2 pt-8 w-full">
-    <h2 class="text-gray-700 text-xs font-bold uppercase mb-3">Sélectionne une langue</h2>
+<section class="px-4 py-2 ml-2 pt-8 w-[500px]">
+    <h2 class="text-gray-700 text-lg font-semibold mb-3">Sélectionne une langue</h2>
     <ul role="list" class="space-y-2">
         <RadioGroup.Root bind:value={selectedLanguage}>
             {#each languages as { id, label, flag }}
