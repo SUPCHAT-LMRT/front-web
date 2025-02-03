@@ -12,6 +12,10 @@
     import * as Popover from "$lib/components/ui/popover";
     import {registerUser} from "$lib/api/user";
     import CalendarNew from "./CalendarNew.svelte";
+    import Validate from "$lib/components/app/icon/Validate.svelte";
+    import Error from "$lib/components/app/icon/Error.svelte";
+    import {toast} from "svelte-sonner";
+    import {goto} from "$lib/utils/goto";
 
     const df = new DateFormatter("en-US", {
         dateStyle: "long"
@@ -43,8 +47,17 @@
             const formattedBirthDate = value ? formatToISODate(value, getLocalTimeZone()) : "";
             const response = await registerUser(email, password, passwordConfirmation, firstName, lastName, pseudo, formattedBirthDate);
             console.log("User registered successfully:", response);
+            goto("/login");
+            toast("Inscription réussie !", {
+                description: "Votre compte a bien été créé.",
+                icon: Validate
+            });
         } catch (error) {
             console.error("Error registering user:", error);
+            toast("Erreur lors de l'inscription", {
+                description: error.response.data.error,
+                icon: Error
+            });
         } finally {
             isLoading = false;
         }

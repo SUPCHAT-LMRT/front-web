@@ -7,6 +7,9 @@
     import { Checkbox } from "$lib/components/ui/checkbox/index.js";
     import { Label } from "$lib/components/ui/label/index.js";
     import {goto} from "$lib/utils/goto";
+    import {toast} from "svelte-sonner";
+    import Validate from "$lib/components/app/icon/Validate.svelte";
+    import Error from "$lib/components/app/icon/Error.svelte";
 
 
     let className: string | undefined | null = undefined;
@@ -111,3 +114,28 @@
         </Button>
     </div>
 </div>
+
+
+
+<Button
+        variant="outline"
+        onclick={() =>
+    toast('Event has been created', {
+	description: 'Monday, January 3rd at 6:00pm',
+	icon: Validate
+})}
+>
+    Show Toast
+</Button>
+
+
+<Button
+        variant="outline"
+        onclick={() =>
+    toast('Event has been created', {
+	description: 'Monday, January 3rd at 6:00pm',
+	icon: Error
+})}
+>
+    Show Toast
+</Button>
