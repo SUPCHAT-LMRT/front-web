@@ -6,6 +6,8 @@
     import { loginUser } from "$lib/api/user";
     import { Checkbox } from "$lib/components/ui/checkbox/index.js";
     import { Label } from "$lib/components/ui/label/index.js";
+    import {goto} from "$lib/utils/goto";
+
 
     let className: string | undefined | null = undefined;
     export { className as class };
@@ -21,6 +23,7 @@
             console.log(email, password, rememberMe);
             const response = await loginUser(email, password, rememberMe);
             console.log("User logged in successfully:", response);
+            goto("/");
         } catch (error) {
             console.error("Error logging in user:", error);
         } finally {
@@ -79,7 +82,8 @@
                     Mot de passe oublié ?
                 </Button>
             </div>
-            <Button class="bg-[#61A0AF]" type="submit" disabled={isSubmitting}>
+            <Button class="bg-[#61A0AF]" type="submit" disabled={isSubmitting}
+            >
                 {#if isSubmitting}
                     <Loader class="mr-2 h-4 w-4 animate-spin" />
                 {/if}

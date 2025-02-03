@@ -73,3 +73,13 @@ export const resetPassword = async (token: string, newPassword: string, newPassw
         throw e;
     }
 }
+
+export const getLoginUser = async (): Promise<User> => {
+    try {
+        const { data } = await baseClient.get("/api/account/me");
+        return data;
+    } catch (e) {
+        console.error(e);
+        throw e;
+    }
+}
