@@ -121,6 +121,7 @@
         </Sidebar.Content>
     </Sidebar.Root>
 
-
-    {@render children()}
+    <div class="h-screen w-full">
+        {@render children()}
+    </div>
 </div>
