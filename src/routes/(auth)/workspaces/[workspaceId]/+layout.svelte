@@ -10,7 +10,7 @@
     import type {Channel} from "$lib/api/workspaces/channels";
     import ws from "$lib/api/ws";
 
-    let currentWorkspaceId = $state(null);
+    let currentWorkspaceId = $derived(page.params.workspaceId);
     let channels = $state(workspaceChannelsStore.get());
     let createChannelData = $state({
         dialogOpen: false,
@@ -20,8 +20,6 @@
 
     // $effect to allow the store to fetch the data when changing workspace
     $effect(() => {
-        currentWorkspaceId = page.params.workspaceId;
-
         workspaceChannelsStore.clearData();
         workspaceChannelsStore.fetch(currentWorkspaceId);
     })
@@ -53,7 +51,9 @@
 </script>
 
 <div class="flex w-full justify-between">
-    {@render children()}
+    <div class="h-screen w-full">
+        {@render children()}
+    </div>
 
     <Sidebar.Root class="h-full border-l-2 border-r-2 border-gray-200">
         <ContextMenu.Root>

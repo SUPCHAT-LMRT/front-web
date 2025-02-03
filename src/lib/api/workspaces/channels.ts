@@ -27,3 +27,31 @@ export const createWorkspaceChannel = async (workspaceId: string, name: string, 
         throw e;
     }
 }
+
+export type ChannelMessage = {
+    id: string;
+    content: string;
+    author: ChannelMessageAuthor;
+    createdAt: Date;
+}
+
+type ChannelMessageAuthor = {
+    userId: string;
+    pseudo: string;
+    workspaceMemberId: string;
+    workspacePseudo: string;
+}
+
+export const getWorkspaceChannelMessages = async (workspaceId: string, channelId: string): Promise<ChannelMessage[]> => {
+    try {
+        let {data} = await baseClient.get(`/api/workspaces/${workspaceId}/channels/${channelId}/messages`);
+        data = data.map((message: any) => ({
+            ...message,
+            createdAt: new Date(message.createdAt)
+        }));
+        return data;
+    } catch (e) {
+        console.error(e);
+        throw e;
+    }
+}

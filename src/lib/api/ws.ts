@@ -107,8 +107,8 @@ class Ws {
         this.send(JSON.stringify({action: action, message: roomId}));
     }
 
-    public asyncJoinRoom = async (roomId: string, roomKind: RoomKind) => {
-        return new Promise((resolve) => {
+    public asyncJoinRoom = async (roomId: string, roomKind: RoomKind): Promise<string> => {
+        return new Promise<string>((resolve) => {
             this.joinRoom(roomId, roomKind);
 
             const unsubscribe = this.subscribe("room-joined", (msg) => {
