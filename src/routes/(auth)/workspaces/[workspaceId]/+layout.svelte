@@ -61,17 +61,18 @@
                 <Sidebar.Content class="h-full flex justify-between">
 
                     <Sidebar.Group class="p-0">
+                        <Sidebar.GroupLabel>Canaux</Sidebar.GroupLabel>
                         <Sidebar.GroupContent>
                             <Sidebar.Menu class="flex mx-auto flex-col items-center min-w-64">
 
                                 {#each channels.data.channels as channel (channel.id)}
-                                    <Sidebar.MenuItem class="mb-[2px] w-full flex justify-center px-4">
-                                        <Sidebar.MenuButton>
-                                            <a href="/workspaces/{currentWorkspaceId}/channels/{channel.id}">
+                                    <a href="/workspaces/{currentWorkspaceId}/channels/{channel.id}"  class="mb-[2px] w-full flex justify-center px-4">
+                                        <Sidebar.MenuItem>
+                                            <Sidebar.MenuButton>
                                                 {channel.name}
-                                            </a>
-                                        </Sidebar.MenuButton>
-                                    </Sidebar.MenuItem>
+                                            </Sidebar.MenuButton>
+                                        </Sidebar.MenuItem>
+                                    </a>
                                 {/each}
 
                             </Sidebar.Menu>
