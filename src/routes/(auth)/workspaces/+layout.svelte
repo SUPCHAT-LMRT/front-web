@@ -15,7 +15,7 @@
     import {Button} from "$lib/components/ui/button";
     import {page} from "$app/state";
 
-    const currentWorkspaceId = $derived(page.url.pathname.split("/").pop());
+    const currentWorkspaceId = $derived(page.url.pathname.split("/")?.[2]);
 
     const workspaces = $state(workspacesStore.get());
     let showInput = $state(false);
