@@ -7,7 +7,7 @@
     import { Checkbox } from "$lib/components/ui/checkbox/index.js";
     import { Label } from "$lib/components/ui/label/index.js";
     import {goto} from "$lib/utils/goto";
-
+    import preventDefault from "$lib/utils/preventDefault";
 
     let className: string | undefined | null = undefined;
     export { className as class };
@@ -20,7 +20,6 @@
     async function onSubmit() {
         isSubmitting = true;
         try {
-            console.log(email, password, rememberMe);
             const response = await loginUser(email, password, rememberMe);
             console.log("User logged in successfully:", response);
             goto("/");
@@ -40,7 +39,7 @@
     >
         S'enregistrer
     </Button>
-    <form on:submit|preventDefault={onSubmit}>
+    <form onsubmit={preventDefault(onSubmit)}>
         <div class="grid gap-2">
             <div class="grid gap-1">
                 <Label class="sr-only" for="email">Email</Label>
