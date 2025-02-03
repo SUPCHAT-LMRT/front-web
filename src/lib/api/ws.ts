@@ -1,11 +1,12 @@
 import {getCurrentOpenedRoom, setCurrentOpenedRoom} from "./currentOpenedRoom.js";
 import {RoomKind} from "./room";
-import { env } from '$env/dynamic/public';
+import {env} from '$env/dynamic/public';
 
 class Ws {
     private subscribers = [];
     private ws: WebSocket;
     private messageQueue = [];
+    private connectionCrashed = false;
 
     constructor() {
         this.initWebSocket();
@@ -16,6 +17,16 @@ class Ws {
 
         this.ws.onopen = () => {
             console.log("WebSocket connected");
+
+            if (this.connectionCrashed) {
+                console.log("WebSocket connection restored, rejoining room...");
+                const currentOpenedRoom = getCurrentOpenedRoom();
+                if (currentOpenedRoom?.id !== "") {
+                    this.joinRoom(currentOpenedRoom.id, currentOpenedRoom.kind);
+                }
+                this.connectionCrashed = false;
+            }
+
             // Send any queued messages
             while (this.messageQueue.length > 0) {
                 this.ws.send(this.messageQueue.shift());
@@ -23,6 +34,7 @@ class Ws {
         };
 
         this.ws.onclose = (event) => {
+            this.connectionCrashed = true;
             console.log("WebSocket closed, retrying...", event);
             setTimeout(() => this.initWebSocket(), 1000); // Retry after 1s
         };
@@ -42,7 +54,6 @@ class Ws {
         } else if (this.ws.readyState === WebSocket.CONNECTING) {
             console.log("WebSocket still connecting, queuing message...");
             this.messageQueue.push(message);
-            setTimeout(() => this.send(message), 500); // Fixed: Call this.send instead of sendMessage
         } else {
             console.log("WebSocket not connected, discarding message.");
         }
@@ -70,7 +81,7 @@ class Ws {
 
     private handleRoomJoined = (msg) => {
         const room = msg.target;
-        setCurrentOpenedRoom(room.id);
+        setCurrentOpenedRoom(room.id, this.mapRoomKind(room.kind));
     }
 
     public sendMessage = (roomId, message) => {
@@ -85,8 +96,8 @@ class Ws {
 
     public joinRoom = (roomId: string, roomKind: RoomKind) => {
         const currentOpenedRoom = getCurrentOpenedRoom();
-        if (currentOpenedRoom !== "") {
-            this.leaveRoom(currentOpenedRoom);
+        if (currentOpenedRoom.id !== "") {
+            this.leaveRoom(currentOpenedRoom.id);
         }
 
         let action: string;
@@ -101,7 +112,7 @@ class Ws {
                 action = "join-channel-room";
                 break;
             default:
-                throw new Error("Invalid room kind");
+                throw new Error("Invalid room kind " + roomKind);
         }
 
         this.send(JSON.stringify({action: action, message: roomId}));
@@ -116,6 +127,11 @@ class Ws {
                 unsubscribe();
             });
         })
+    }
+
+    public leaveRoom = (roomId) => {
+        setCurrentOpenedRoom("", RoomKind.UNKNOWN);
+        this.send(JSON.stringify({action: 'leave-room', message: roomId}));
     }
 
     public subscribe = (action: string, callback: (msg) => void): () => void => {
@@ -141,9 +157,17 @@ class Ws {
         }
     }
 
-    public leaveRoom = (roomId) => {
-        setCurrentOpenedRoom("");
-        this.send(JSON.stringify({action: 'leave-room', message: roomId}));
+    private mapRoomKind = (roomKind: string): RoomKind => {
+        switch (roomKind) {
+            case "direct":
+                return RoomKind.DIRECT;
+            case "group":
+                return RoomKind.GROUP;
+            case "channel":
+                return RoomKind.CHANNEL;
+            default:
+                return RoomKind.UNKNOWN;
+        }
     }
 }
 
