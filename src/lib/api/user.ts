@@ -47,6 +47,10 @@ export const loginUser = async (email: string, password: string, rememberMe: boo
     }
 }
 
+export const refreshAccessToken = () => {
+    return baseClient.post("/api/account/auth/token/access/renew");
+}
+
 export const validateAccount = async (token: string): Promise<void> => {
     try {
         await baseClient.post(`/account/validation/validate`, {validationToken: token});

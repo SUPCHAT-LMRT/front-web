@@ -1,22 +1,23 @@
-import { getLoginUser } from "$lib/api/user";
-import { goto } from "$lib/utils/goto";
-import type { LayoutLoad } from "./$types";
+import {getLoginUser} from "$lib/api/user";
+import {goto} from "$lib/utils/goto";
+import type {LayoutLoad} from "./$types";
 
 export const load = (async () => {
-    let isAuthenticated = false;
+    import("$lib/api/ws"); // Connect to the WebSocket server
+
+    let authenticatedUser = null;
 
     try {
-        const user = await getLoginUser();
-        isAuthenticated = !!user;
+        authenticatedUser = await getLoginUser();
     } catch (error) {
         console.error("Erreur lors de la vérification de l'utilisateur :", error);
     }
 
-    if (!isAuthenticated) {
+    if (!authenticatedUser) {
         goto("/login");
     }
 
     return {
-        isAuthenticated
+        authenticatedUser
     };
 }) as LayoutLoad;

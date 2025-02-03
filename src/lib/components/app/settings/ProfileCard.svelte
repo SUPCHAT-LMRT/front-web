@@ -1,8 +1,13 @@
 <script>
-import {Button} from "$lib/components/ui/button";
-import {Hash, Settings, Shield} from "lucide-svelte";
-import {Badge} from "$lib/components/ui/badge";
-import {Card} from "$lib/components/ui/card";
+    import {Button} from "$lib/components/ui/button";
+    import {Hash, Settings, Shield} from "lucide-svelte";
+    import {Badge} from "$lib/components/ui/badge";
+    import {Card} from "$lib/components/ui/card";
+    import {getS3ObjectUrl, S3Bucket} from "$lib/api/s3";
+    import {page} from "$app/state";
+    import * as Avatar from "$lib/components/ui/avatar";
+
+    const {authenticatedUser} = page.data;
 </script>
 
 <section class="px-4 py-2 pt-8 ml-2">
@@ -12,7 +17,14 @@ import {Card} from "$lib/components/ui/card";
 
             <div class="absolute bottom-0 left-6 transform translate-y-1/2 flex items-end">
                 <div class="relative">
-                    <img src="https://github.com/shadcn.png" alt="Avatar" class="w-24 h-24 rounded-full border-4 border-gray-200">
+                    <Avatar.Root class="w-24 h-24 rounded-full border-4 border-gray-200">
+                        <Avatar.Image src={getS3ObjectUrl(S3Bucket.USERS_AVATARS, authenticatedUser.id)}/>
+                        <Avatar.Fallback>
+                            <div class="flex items-center justify-center w-full h-full bg-gray-200 text-gray-500 text-2xl font-bold rounded-full">
+                                {authenticatedUser.pseudo[0]}
+                            </div>
+                        </Avatar.Fallback>
+                    </Avatar.Root>
                     <div class="absolute bottom-1 right-1 w-4 h-4 bg-emerald-500 rounded-full border-2 border-gray-200"></div>
                 </div>
             </div>
@@ -25,13 +37,13 @@ import {Card} from "$lib/components/ui/card";
         <Card class="mt-16 bg-white border border-gray-200 text-gray-800 p-6 shadow-sm max-w-3xl mx-auto">
             <div class="flex gap-2 mb-6 ml-2">
                 <Badge variant="secondary" class="bg-purple-200 text-purple-700 hover:bg-purple-300">
-                    <Shield class="w-4 h-4 mx-1" />
+                    <Shield class="w-4 h-4 mx-1"/>
                 </Badge>
                 <Badge variant="secondary" class="bg-emerald-200 text-emerald-700 hover:bg-emerald-300">
-                    <Hash class="w-4 h-4 mx-1" />
+                    <Hash class="w-4 h-4 mx-1"/>
                 </Badge>
                 <Badge variant="secondary" class="bg-emerald-200 text-emerald-700 hover:bg-emerald-300">
-                    <Settings class="w-4 h-4 mx-1" />
+                    <Settings class="w-4 h-4 mx-1"/>
                 </Badge>
             </div>
 

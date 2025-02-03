@@ -12,7 +12,7 @@ class Ws {
     }
 
     private initWebSocket = () => {
-        this.ws = new WebSocket(env.PUBLIC_API_WS_ORIGIN);
+        this.ws = new WebSocket(env.PUBLIC_API_WS);
 
         this.ws.onopen = () => {
             console.log("WebSocket connected");
