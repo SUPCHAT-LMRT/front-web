@@ -6,13 +6,12 @@
     import {getS3ObjectUrl, S3Bucket} from "$lib/api/s3";
     import {RoomKind} from "$lib/api/room";
     import * as Avatar from "$lib/components/ui/avatar";
-    import {getGroupMessages, GroupMessage} from "$lib/api/group/message";
-    import {getWorkspaceChannelMessages} from "$lib/api/workspaces/channels";
+    import {getGroupMessages, type GroupMessage} from "$lib/api/group/message";
 
     let currentChatId = $derived(page.params.chatId);
     let currentChatKind: RoomKind = $derived(RoomKind[page.params.chatKind as keyof typeof RoomKind]);
     let currentMessage = $state("");
-    let currentRoom: {id: string | null, messages: GroupMessage[]} = $state({id: null, messages: []});
+    let currentRoom: { id: string | null, messages: GroupMessage[] } = $state({id: null, messages: []});
     let unsubscribeSendMessage = null;
 
     $effect(() => {
