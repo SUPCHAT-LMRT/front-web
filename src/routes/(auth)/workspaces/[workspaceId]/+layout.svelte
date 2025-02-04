@@ -25,6 +25,7 @@
         workspaceChannelsStore.fetch(currentWorkspaceId);
     })
 
+    // $effect to send the selectWorkspace message to the server when the workspace changes
     $effect(() => {
         ws.selectWorkspace(currentWorkspaceId);
     })

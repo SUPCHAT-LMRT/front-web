@@ -7,15 +7,6 @@
     import {page} from "$app/state";
     import recentChatsStore from "$lib/stores/recentChatsStore";
     import {StoreResultState} from "$lib/stores/store.svelte";
-    import {onMount} from "svelte";
-
-    onMount(async () => {
-        try {
-            await recentChatsStore.fetch();
-        } catch (error) {
-            console.error("Erreur lors de la récupération des chats récents :", error);
-        }
-    })
 
     const currentChatId = $derived(page.url.pathname.split("/").pop());
 
