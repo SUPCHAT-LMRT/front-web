@@ -1,5 +1,8 @@
 <script lang="ts">
     import { page } from '$app/state';
+    import {Toaster} from "$lib/components/ui/sonner";
+    import Error from "$lib/components/app/icon/Error.svelte";
+    import Validate from "$lib/components/app/icon/Validate.svelte";
 
     let { children } = $props();
 
@@ -50,3 +53,10 @@
         transform: rotate(180deg);
     }
 </style>
+
+
+
+<Toaster>
+    <Validate slot="success-icon" />
+    <Error slot="error-icon" />
+</Toaster>

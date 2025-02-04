@@ -32,6 +32,7 @@ export const registerUser = async (
         return data;
     } catch (e) {
         console.error(e);
+        console.log(e);
         throw e;
     }
 };

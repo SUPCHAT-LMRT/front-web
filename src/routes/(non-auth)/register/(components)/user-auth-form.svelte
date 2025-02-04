@@ -1,17 +1,20 @@
 <script lang="ts">
-    import {Button, buttonVariants} from "$lib/components/ui/button/index.js";
-    import {Input} from "$lib/components/ui/input/index.js";
-    import {Label} from "$lib/components/ui/label/index.js";
-    import {Loader} from "lucide-svelte";
-    import {Calendar1} from "lucide-svelte";     import {
+    import { Button, buttonVariants } from "$lib/components/ui/button/index.js";
+    import { Input } from "$lib/components/ui/input/index.js";
+    import { Label } from "$lib/components/ui/label/index.js";
+    import { Loader } from "lucide-svelte";
+    import { Calendar1 } from "lucide-svelte";
+    import {
         DateFormatter,
         type DateValue,
         getLocalTimeZone
     } from "@internationalized/date";
     import { cn } from "$lib/utils.js";
     import * as Popover from "$lib/components/ui/popover";
-    import {registerUser} from "$lib/api/user";
+    import { registerUser } from "$lib/api/user";
     import CalendarNew from "./CalendarNew.svelte";
+    import { goto } from "$lib/utils/goto";
+    import { success, notifyByLevel } from "$lib/toast/toast";
 
     const df = new DateFormatter("en-US", {
         dateStyle: "long"
@@ -20,8 +23,8 @@
     let value = $state<DateValue | undefined>();
     let contentRef = $state<HTMLElement | null>(null);
 
-    let className: string | undefined | null =  $state("undefined");
-    export {className as class};
+    let className: string | undefined | null = $state("undefined");
+    export { className as class };
 
     let isLoading = $state(false);
     let email = $state("");
@@ -41,15 +44,31 @@
         isLoading = true;
         try {
             const formattedBirthDate = value ? formatToISODate(value, getLocalTimeZone()) : "";
-            const response = await registerUser(email, password, passwordConfirmation, firstName, lastName, pseudo, formattedBirthDate);
+            const response = await registerUser(
+                email,
+                password,
+                passwordConfirmation,
+                firstName,
+                lastName,
+                pseudo,
+                formattedBirthDate
+            );
             console.log("User registered successfully:", response);
+            goto("/login");
+            success("Inscription réussie !", "Votre compte a bien été créé.");
         } catch (error) {
             console.error("Error registering user:", error);
+            const errorData = error.response?.data || {};
+            const title = "Erreur lors de l'inscription";
+            const level: 'warning' | 'error' = errorData.level || 'error';
+            const message = errorData.messageDisplay || "Une erreur est survenue";
+            notifyByLevel({ title, level, message });
         } finally {
             isLoading = false;
         }
     }
 </script>
+
 
 <div class={cn("grid gap-6", className)}>
     <Button

@@ -7,6 +7,7 @@
     import { Checkbox } from "$lib/components/ui/checkbox/index.js";
     import { Label } from "$lib/components/ui/label/index.js";
     import {goto} from "$lib/utils/goto";
+    import {notifyByLevel, success} from "$lib/toast/toast";
     import preventDefault from "$lib/utils/preventDefault";
 
     let className: string | undefined | null = undefined;
@@ -22,9 +23,15 @@
         try {
             const response = await loginUser(email, password, rememberMe);
             console.log("User logged in successfully:", response);
+            success("Connexion réussie !", "Vous êtes maintenant connecté.");
             goto("/");
         } catch (error) {
             console.error("Error logging in user:", error);
+            const errorData = error.response?.data || {};
+            const title = "Erreur lors de la connexion";
+            const level: 'warning' | 'error' = errorData.level || 'error';
+            const message = errorData.messageDisplay || "Une erreur est survenue";
+            notifyByLevel({ title, level, message });
         } finally {
             isSubmitting = false;
         }
