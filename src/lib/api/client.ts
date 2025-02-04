@@ -7,7 +7,7 @@ export const baseClient = axios.create({
     withCredentials: true
 })
 
-const maxRetry = 1;
+const maxRetry = 3;
 let retry = 0;
 
 baseClient.interceptors.response.use(response => response, async error => {
