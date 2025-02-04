@@ -2,6 +2,7 @@
     import * as Avatar from "$lib/components/ui/avatar";
     import * as Sidebar from "$lib/components/ui/sidebar";
     import * as Dialog from "$lib/components/ui/dialog";
+    import { Skeleton } from "$lib/components/ui/skeleton/index.js";
     import {Input} from "$lib/components/ui/input";
     import {BellIcon, CogIcon, UserIcon, XIcon} from "lucide-svelte";
     import {page} from "$app/state";
@@ -86,10 +87,11 @@
                 <p class="text-xs font-bold p-2 uppercase">Message privés</p>
 
                 {#if recentChats.state === StoreResultState.LOADING}
-                    <!-- Todo skeleton page chats récent -->
-                    <span class="text-3xl text-red-600 underline">⚠️ SKELETON A FAIRE</span>
+                    {#each Array(13) as _}
+                        <Skeleton class="h-8 w-full mb-4" />
+                    {/each}
                 {:else}
-                    {#each recentChats.data.recentChats as chat (chat.id)}
+                {#each recentChats.data.recentChats as chat (chat.id)}
                         <Sidebar.MenuItem class="mb-2 rounded w-full {currentChatId === chat.id ? 'bg-gray-200' : ''}">
                             <div class="relative group">
                                 <div class="flex items-center p-2 rounded transition-all duration-300 hover:bg-gray-200">
