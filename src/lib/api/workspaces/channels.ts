@@ -4,6 +4,7 @@ export type Channel = {
     id: string;
     name: string;
     topic: string;
+    workspaceId: string;
 }
 
 export const getWorkspaceChannels = async (workspaceId: string): Promise<Channel[]> => {

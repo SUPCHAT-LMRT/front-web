@@ -9,6 +9,7 @@
     import {Button} from "$lib/components/ui/button";
     import type {Channel} from "$lib/api/workspaces/channels";
     import ws from "$lib/api/ws";
+    import {onDestroy, onMount} from "svelte";
 
     let currentWorkspaceId = $derived(page.params.workspaceId);
     let channels = $state(workspaceChannelsStore.get());
@@ -25,8 +26,14 @@
     })
 
     $effect(() => {
+        ws.selectWorkspace(currentWorkspaceId);
+    })
+
+    $effect(() => {
         const unsubscribeChannelCreated = ws.subscribe("channel-created", msg => {
-            workspaceChannelsStore.put(msg.payload as Channel);
+            const channelCreated = msg.payload as Channel;
+            if (channelCreated.workspaceId !== currentWorkspaceId) return; // This is not supposed to happen but just in case (because it's handled by the server)
+            workspaceChannelsStore.put(channelCreated);
         })
 
         return () => {
