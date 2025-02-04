@@ -7,10 +7,7 @@
     import { Checkbox } from "$lib/components/ui/checkbox/index.js";
     import { Label } from "$lib/components/ui/label/index.js";
     import {goto} from "$lib/utils/goto";
-    import {toast} from "svelte-sonner";
-    import Validate from "$lib/components/app/icon/Validate.svelte";
-    import Error from "$lib/components/app/icon/Error.svelte";
-
+    import {notifyByLevel, success} from "$lib/toast/toast";
 
     let className: string | undefined | null = undefined;
     export { className as class };
@@ -26,9 +23,15 @@
             console.log(email, password, rememberMe);
             const response = await loginUser(email, password, rememberMe);
             console.log("User logged in successfully:", response);
+            success("Connexion réussie !", "Vous êtes maintenant connecté.");
             goto("/");
         } catch (error) {
             console.error("Error logging in user:", error);
+            const errorData = error.response?.data || {};
+            const title = "Erreur lors de la connexion";
+            const level: 'warning' | 'error' = errorData.level || 'error';
+            const message = errorData.messageDisplay || "Une erreur est survenue";
+            notifyByLevel({ title, level, message });
         } finally {
             isSubmitting = false;
         }
@@ -114,28 +117,3 @@
         </Button>
     </div>
 </div>
-
-
-
-<Button
-        variant="outline"
-        onclick={() =>
-    toast('Event has been created', {
-	description: 'Monday, January 3rd at 6:00pm',
-	icon: Validate
-})}
->
-    Show Toast
-</Button>
-
-
-<Button
-        variant="outline"
-        onclick={() =>
-    toast('Event has been created', {
-	description: 'Monday, January 3rd at 6:00pm',
-	icon: Error
-})}
->
-    Show Toast
-</Button>
