@@ -1,7 +1,17 @@
 <script lang="ts">
     import {page} from "$app/state";
+    import CreateChannelDialog from "./(components)/CreateChannelDialog.svelte";
+    import workspaceChannelsStore from "$lib/stores/workspaceChannelsStore";
+    import InviteMemberDialog from "./(components)/InviteMemberDialog.svelte";
+    import EditWorkspaceDialog from "./(components)/EditWorkspaceDialog.svelte";
 
     let currentWorkspaceId = $derived(page.params.workspaceId);
+
+    let createChannelData = $state({
+        dialogOpen: false,
+        name: "",
+        topic: ""
+    });
 
     let stats = [
         { label: "Membres", value: 42 },
@@ -22,6 +32,20 @@
         { user: "Bob", action: "a rejoint le workspace" },
         { user: "Charlie", action: "a modifié les permissions" }
     ];
+
+    const createChannel = async () => {
+        try {
+            await workspaceChannelsStore.create(currentWorkspaceId, createChannelData.name, createChannelData.topic);
+            createChannelData = {
+                dialogOpen: false,
+                name: "",
+                topic: ""
+            }
+        } catch (e) {
+            console.error(e);
+        }
+    }
+
 </script>
 
 <div class="container mx-auto p-6">
@@ -29,13 +53,13 @@
 
     <div class="flex gap-4 mb-6">
         <button class="bg-[#61A0AF] text-white px-4 py-2 rounded-lg shadow-md hover:bg-[#4B7986]">
-            Inviter un membre
+            <InviteMemberDialog />
         </button>
         <button class="bg-[#61A0AF] text-white px-4 py-2 rounded-lg shadow-md hover:bg-[#4B7986]">
-            Créer un canal
+            <CreateChannelDialog {createChannelData} {createChannel} />
         </button>
         <button class="bg-[#61A0AF] text-white px-4 py-2 rounded-lg shadow-md hover:bg-[#4B7986]">
-            Modifier Workspace
+            <EditWorkspaceDialog />
         </button>
     </div>
 

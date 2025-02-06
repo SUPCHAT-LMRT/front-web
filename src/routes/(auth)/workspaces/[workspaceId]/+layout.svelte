@@ -2,14 +2,10 @@
     import workspaceChannelsStore from "$lib/stores/workspaceChannelsStore";
     import {page} from "$app/state";
     import * as Sidebar from "$lib/components/ui/sidebar";
-    import * as Dialog from "$lib/components/ui/dialog";
     import * as ContextMenu from "$lib/components/ui/context-menu";
-    import {Textarea} from "$lib/components/ui/textarea";
-    import {Input} from "$lib/components/ui/input";
-    import {Button} from "$lib/components/ui/button";
     import type {Channel} from "$lib/api/workspaces/channels";
     import ws from "$lib/api/ws";
-    import {onDestroy, onMount} from "svelte";
+    import CreateChannelDialog from "./(components)/CreateChannelDialog.svelte";
 
     let currentWorkspaceId = $derived(page.params.workspaceId);
     let channels = $state(workspaceChannelsStore.get());
@@ -93,42 +89,7 @@
 
                                 <Sidebar.MenuItem class="mb-[2px] w-full flex justify-center px-4">
                                     <Sidebar.MenuButton>
-                                        <Dialog.Root bind:open={createChannelData.dialogOpen}>
-                                            <Dialog.Trigger class="mx-auto text-xl underline">
-                                                Créer un canal
-                                            </Dialog.Trigger>
-                                            <Dialog.Content class="sm:max-w-[425px]">
-                                                <Dialog.Header
-                                                        class="flex flex-col items-center justify-center text-center relative h-full">
-                                                    <div class="text-center">
-                                                        <Dialog.Title class="text-2xl font-bold">
-                                                            Crée ton serveur
-                                                        </Dialog.Title>
-                                                        <p class="text-sm mt-2 text-gray-700">
-                                                            Ton serveur est l&apos;endroit où tu retrouves tes amis.
-                                                            Crée le tien et
-                                                            lance une discussion.
-                                                        </p>
-                                                    </div>
-                                                </Dialog.Header>
-
-                                                <div class="w-full">
-                                                    <Input bind:value={createChannelData.name} type="text"
-                                                           placeholder="Nom du canal"
-                                                           class="w-full p-2 border rounded-md mb-4"/>
-                                                    <Textarea bind:value={createChannelData.topic}
-                                                              placeholder="Topic du canal"
-                                                              class="w-full p-2 border rounded-md mb-4"/>
-                                                </div>
-
-                                                <div class="float-end">
-                                                    <Button onclick={createChannel}
-                                                            class="justify-center w-full h-10 px-6 bg-primary text-white">
-                                                        Créer un canal
-                                                    </Button>
-                                                </div>
-                                            </Dialog.Content>
-                                        </Dialog.Root>
+                                        <CreateChannelDialog {createChannelData} {createChannel} />
                                     </Sidebar.MenuButton>
                                 </Sidebar.MenuItem>
 
