@@ -5,7 +5,7 @@
     import * as ContextMenu from "$lib/components/ui/context-menu";
     import type {Channel} from "$lib/api/workspaces/channels";
     import ws from "$lib/api/ws";
-    import CreateChannelDialog from "./(components)/CreateChannelDialog.svelte";
+    import CreateChannelDialog from "$lib/components/app/workspaces/CreateChannelDialog.svelte";
 
     let currentWorkspaceId = $derived(page.params.workspaceId);
     let channels = $state(workspaceChannelsStore.get());

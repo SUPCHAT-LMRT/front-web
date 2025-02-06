@@ -1,9 +1,11 @@
 <script lang="ts">
     import {page} from "$app/state";
-    import CreateChannelDialog from "./(components)/CreateChannelDialog.svelte";
+    import * as Sidebar from "$lib/components/ui/sidebar";
+    import CreateChannelDialog from "$lib/components/app/workspaces/CreateChannelDialog.svelte";
     import workspaceChannelsStore from "$lib/stores/workspaceChannelsStore";
-    import InviteMemberDialog from "./(components)/InviteMemberDialog.svelte";
-    import EditWorkspaceDialog from "./(components)/EditWorkspaceDialog.svelte";
+    import InviteMemberDialog from "$lib/components/app/workspaces/InviteMemberDialog.svelte";
+    import EditWorkspaceDialog from "$lib/components/app/workspaces/EditWorkspaceDialog.svelte";
+    import {getWorkspaceMembers, type WorksapceMember} from "$lib/api/workspaces/workspace";
 
     let currentWorkspaceId = $derived(page.params.workspaceId);
 
@@ -19,13 +21,16 @@
         { label: "Messages", value: 1245 }
     ];
 
-    let members = [
-        { name: "Alice", role: "Admin", avatar: "https://i.pravatar.cc/40?img=1" },
-        { name: "Bob", role: "Membre", avatar: "https://i.pravatar.cc/40?img=2" },
-        { name: "Charlie", role: "Modérateur", avatar: "https://i.pravatar.cc/40?img=3" }
-    ];
+    let members:WorksapceMember[] = $state([]);
+    let channels = $state(workspaceChannelsStore.get());
 
-    let channels = ["Général", "Développement", "Design", "Support"];
+    $effect(() => {
+        defineMembers(currentWorkspaceId);
+    });
+
+    const defineMembers = async (workspaceid) => {
+        members = await getWorkspaceMembers(workspaceid);
+    }
 
     let recentActivities = [
         { user: "Alice", action: "a ajouté un nouveau canal #design" },
@@ -77,13 +82,7 @@
             <h2 class="text-lg font-semibold mb-3">👥 Membres</h2>
             <ul>
                 {#each members as member}
-                    <li class="flex items-center gap-3 p-2 border-b">
-                        <img src={member.avatar} alt="Avatar" class="w-8 h-8 rounded-full" />
-                        <div>
-                            <p class="font-medium">{member.name}</p>
-                            <p class="text-sm text-gray-500">{member.role}</p>
-                        </div>
-                    </li>
+                    <li class="p-2 border-b">{member.pseudo}</li>
                 {/each}
             </ul>
         </div>
@@ -91,8 +90,8 @@
         <div class="bg-white p-4 rounded-lg shadow-md">
             <h2 class="text-lg font-semibold mb-3">📢 Canaux</h2>
             <ul>
-                {#each channels as channel}
-                    <li class="p-2 border-b"># {channel}</li>
+                {#each channels.data.channels as channel}
+                    <li class="p-2 border-b"># {channel.name}</li>
                 {/each}
             </ul>
         </div>

@@ -46,7 +46,7 @@
             <Button onclick={() => editWorkspaceData.update(data => ({ ...data, dialogOpen: false }))} class="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-700">
                 Annuler
             </Button>
-            <Button onclick={saveWorkspaceChanges} class="px-4 py-2 bg-primary text-white rounded-md hover:bg-blue-800">
+            <Button onclick={saveWorkspaceChanges} class="px-4 py-2 bg-primary text-white rounded-md hover:hover:bg-[#4B7986]">
                 Enregistrer
             </Button>
         </div>
