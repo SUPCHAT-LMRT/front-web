@@ -1,6 +1,7 @@
 import {getCurrentOpenedRoom, setCurrentOpenedRoom} from "./currentOpenedRoom.js";
 import {RoomKind} from "./room";
 import {env} from '$env/dynamic/public';
+import {getCurrentSelectedWorkspace, setCurrentSelectedWorkspace} from "$lib/api/currentSelectedWorkspace";
 
 class Ws {
     private subscribers = [];
@@ -23,6 +24,10 @@ class Ws {
                 const currentOpenedRoom = getCurrentOpenedRoom();
                 if (currentOpenedRoom?.id !== "") {
                     this.joinRoom(currentOpenedRoom.id, currentOpenedRoom.kind);
+                }
+                const currentSelectedWorkspace = getCurrentSelectedWorkspace();
+                if (currentSelectedWorkspace !== "") {
+                    this.selectWorkspace(currentSelectedWorkspace);
                 }
                 this.connectionCrashed = false;
             }
@@ -127,6 +132,20 @@ class Ws {
                 unsubscribe();
             });
         })
+    }
+
+    public selectWorkspace = (workspaceId) => {
+        const currentSelectedWorkspace = getCurrentSelectedWorkspace();
+        if (currentSelectedWorkspace) {
+            this.unselectWorkspace();
+        }
+        setCurrentSelectedWorkspace(workspaceId);
+        this.send(JSON.stringify({action: 'select-workspace', message: workspaceId}));
+    }
+
+    public unselectWorkspace = () => {
+        setCurrentSelectedWorkspace("");
+        this.send(JSON.stringify({action: 'unselect-workspace'}));
     }
 
     public leaveRoom = (roomId) => {
