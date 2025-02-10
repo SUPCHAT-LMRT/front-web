@@ -54,7 +54,7 @@ export const refreshAccessToken = () => {
 
 export const validateAccount = async (token: string): Promise<void> => {
     try {
-        await baseClient.post(`/account/validation/validate`, {validationToken: token});
+        await baseClient.post(`/api/account/validation/validate`, {validationToken: token});
     } catch (e) {
         console.error(e);
         throw e;
@@ -63,7 +63,7 @@ export const validateAccount = async (token: string): Promise<void> => {
 
 export const forgotPassword = async (token: string, newPassword: string, newPasswordConfirmation: string): Promise<void> => {
     try {
-        await baseClient.post(`/account/forgot-password`, {validationToken: token, newPassword, newPasswordConfirmation});
+        await baseClient.post(`/api/account/forgot-password`, {validationToken: token, newPassword, newPasswordConfirmation});
     } catch (e) {
         console.error(e);
         throw e;
@@ -72,7 +72,7 @@ export const forgotPassword = async (token: string, newPassword: string, newPass
 
 export const resetPassword = async (token: string, newPassword: string, newPasswordConfirmation: string): Promise<void> => {
     try {
-        await baseClient.post(`/account/reset-password`, {validationToken: token, newPassword, newPasswordConfirmation});
+        await baseClient.post(`/api/account/reset-password`, {validationToken: token, newPassword, newPasswordConfirmation});
     } catch (e) {
         console.error(e);
         throw e;
