@@ -11,6 +11,12 @@ export type Workspace = {
     type: WorkspaceType;
 };
 
+export type WorksapceMember = {
+    id: string;
+    userId: string;
+    pseudo: string;
+}
+
 export const getWorkspaces = async (): Promise<Workspace[]> => {
     try {
         const {data} = await baseClient.get("/api/workspaces");
@@ -52,3 +58,15 @@ export const updateWorkspaceIcon = async (
         throw e;
     }
 };
+
+export const getWorkspaceMembers = async (
+    workspaceId: string,
+): Promise<WorksapceMember[]> => {
+    try {
+        const { data } = await baseClient.get(`/api/workspaces/${workspaceId}/members`);
+        return data;
+    } catch (e) {
+        console.error(e);
+        throw e;
+    }
+}
