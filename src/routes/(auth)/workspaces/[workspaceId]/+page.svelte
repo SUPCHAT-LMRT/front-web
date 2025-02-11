@@ -1,11 +1,12 @@
 <script lang="ts">
     import {page} from "$app/state";
-    import * as Sidebar from "$lib/components/ui/sidebar";
     import CreateChannelDialog from "$lib/components/app/workspaces/CreateChannelDialog.svelte";
     import workspaceChannelsStore from "$lib/stores/workspaceChannelsStore";
     import InviteMemberDialog from "$lib/components/app/workspaces/InviteMemberDialog.svelte";
     import EditWorkspaceDialog from "$lib/components/app/workspaces/EditWorkspaceDialog.svelte";
     import {getWorkspaceMembers, type WorksapceMember} from "$lib/api/workspaces/workspace";
+    import {getS3ObjectUrl, S3Bucket} from "$lib/api/s3";
+    import * as Avatar from "$lib/components/ui/avatar";
 
     let currentWorkspaceId = $derived(page.params.workspaceId);
 
@@ -50,20 +51,39 @@
             console.error(e);
         }
     }
-
 </script>
+
+
+
+<div class="relative">
+    <img
+            src={getS3ObjectUrl(S3Bucket.WORKSPACES_BANNERS, currentWorkspaceId)}
+            alt={`Workspace banner ${currentWorkspaceId}`}
+            class="w-full h-40 mb-6 object-cover"
+    />
+
+    <Avatar.Root class="absolute bottom-0 left-6 transform translate-y-1/2">
+        <Avatar.Image
+                src={getS3ObjectUrl(S3Bucket.WORKSPACES_ICONS, currentWorkspaceId)}
+                alt={`Workspace ${currentWorkspaceId}`}
+                class="w-16 h-16 rounded-full border-4 border-white shadow-lg"
+        />
+    </Avatar.Root>
+</div>
+
+
 
 <div class="container mx-auto p-6">
     <h1 class="text-2xl font-bold text-gray-800 mb-4">Workspace {currentWorkspaceId}</h1>
 
     <div class="flex gap-4 mb-6">
-        <button class="bg-[#61A0AF] text-white px-4 py-2 rounded-lg shadow-md hover:bg-[#4B7986]">
+        <button class="bg-primary text-white px-4 py-2 rounded-lg shadow-md hover:bg-[#4B7986] duration-300">
             <InviteMemberDialog />
         </button>
-        <button class="bg-[#61A0AF] text-white px-4 py-2 rounded-lg shadow-md hover:bg-[#4B7986]">
+        <button class="bg-primary text-white px-4 py-2 rounded-lg shadow-md hover:bg-[#4B7986] duration-300">
             <CreateChannelDialog {createChannelData} {createChannel} />
         </button>
-        <button class="bg-[#61A0AF] text-white px-4 py-2 rounded-lg shadow-md hover:bg-[#4B7986]">
+        <button class="bg-primary text-white px-4 py-2 rounded-lg shadow-md hover:bg-[#4B7986] duration-300">
             <EditWorkspaceDialog />
         </button>
     </div>
