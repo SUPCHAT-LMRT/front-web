@@ -4,13 +4,19 @@
     import workspaceChannelsStore from "$lib/stores/workspaceChannelsStore";
     import InviteMemberDialog from "$lib/components/app/workspaces/InviteMemberDialog.svelte";
     import EditWorkspaceDialog from "$lib/components/app/workspaces/EditWorkspaceDialog.svelte";
-    import {getWorkspaceMembers, type WorksapceMember} from "$lib/api/workspaces/workspace";
+    import {getWorkspaceMembers, getWorkspaceTimeSeries, type WorksapceMember} from "$lib/api/workspaces/workspace";
     import {getS3ObjectUrl, S3Bucket} from "$lib/api/s3";
+    import {chart} from "$lib/actions/chart";
     import * as Avatar from "$lib/components/ui/avatar";
-    import { chart } from "$lib/actions/chart";
-    import type { ApexOptions } from "apexcharts";
 
-    const chartOptions: ApexOptions = {
+    let currentWorkspaceId = $derived(page.params.workspaceId);
+    let createChannelData = $state({
+        dialogOpen: false,
+        name: "",
+        topic: ""
+    });
+
+    const defaultChartOptions = {
         chart: {
             type: "area",
             height: 100,
@@ -18,22 +24,22 @@
                 show: false
             },
             animations: {
-                enabled: false,
+                enabled: true,
                 dynamicAnimation: {
-                    speed: 0
+                    speed: 500
                 }
             }
         },
-        series: [
-            {
-                data: [10, 41, 5, 100, 22],
-            }
-        ],
+        noData: {
+            text: "No data available",
+        },
+        series: [{data:[]}],
         dataLabels: {
             enabled: false
         },
         stroke: {
-            curve: 'smooth'
+            curve: 'smooth',
+            width: 2
         },
         markers: {
             size: 0,
@@ -67,35 +73,29 @@
                 right: -10,
             },
         }
-    };
+    }
 
-
-
-    let currentWorkspaceId = $derived(page.params.workspaceId);
-
-    let createChannelData = $state({
-        dialogOpen: false,
-        name: "",
-        topic: ""
-    });
-
-    let stats = [
-        { label: "Messages", value: 1245 },
-        { label: "Visites", value: 125 },
+    let stats = $state([
+        { label: "Messages", value: 1245, chartOptions: defaultChartOptions },
+        { label: "Visites", value: 125, chartOptions: defaultChartOptions },
         { label: "Membres", value: 42 },
         { label: "Canaux", value: 8 }
-    ];
+    ]);
 
-    let members:WorksapceMember[] = $state([]);
+    let members: WorksapceMember[] = $state([]);
     let channels = $state(workspaceChannelsStore.get());
 
     $effect(() => {
-        defineMembers(currentWorkspaceId);
-    });
+        getWorkspaceMembers(currentWorkspaceId).then(result => members = result);
 
-    const defineMembers = async (workspaceid) => {
-        members = await getWorkspaceMembers(workspaceid);
-    }
+        getWorkspaceTimeSeries(currentWorkspaceId).getMinutelyMessageSents()
+            .then((data) => {
+                // response.data is as follow: [{"sentAt":"2025-02-11T18:14:00Z","count":1},{"sentAt":"2025-02-11T18:15:00Z","count":3}]
+                // We need to transform it to the following format: [1, 3]
+                // stats[0] is the "Messages" stat
+                stats[0].chartOptions.series[0].data = data.map((item) => item.count);
+            })
+    });
 
     let recentActivities = [
         { user: "Alice", action: "a ajouté un nouveau canal #design" },
@@ -136,9 +136,6 @@
 </div>
 
 
-
-
-
 <div class="container mx-auto p-6">
     <h1 class="text-2xl font-bold text-gray-800 mb-4">Workspace {currentWorkspaceId}</h1>
 
@@ -154,13 +151,13 @@
         </button>
     </div>
 
-    <div class="grid grid-cols-4 gap-4 mb-6">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         {#each stats as stat}
             <div class="bg-gray-100 rounded-lg shadow-md text-left h-36">
                 <p class="font-semibold pl-4 pt-4">{stat.label}</p>
                 <p class="text-xl pl-4 pt-4">{stat.value}</p>
-                {#if stat.label === "Messages" || stat.label === "Visites"}
-                    <div use:chart={chartOptions} class="w-full translate-y-[-1.55rem]"></div>
+                {#if stat.chartOptions}
+                    <div use:chart={stat.chartOptions} class="w-full translate-y-[-1.55rem]"></div>
                 {/if}
             </div>
         {/each}
