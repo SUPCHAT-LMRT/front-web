@@ -48,13 +48,31 @@ export const loginUser = async (email: string, password: string, rememberMe: boo
     }
 }
 
+export const logout = async (): Promise<void> => {
+    try {
+        await baseClient.post("/api/account/auth/logout");
+    } catch (e) {
+        console.error(e);
+        throw e;
+    }
+}
+
 export const refreshAccessToken = () => {
     return baseClient.post("/api/account/auth/token/access/renew");
 }
 
 export const validateAccount = async (token: string): Promise<void> => {
     try {
-        await baseClient.post(`/account/validation/validate`, {validationToken: token});
+        await baseClient.post(`/api/account/validation/validate`, {validationToken: token});
+    } catch (e) {
+        console.error(e);
+        throw e;
+    }
+}
+
+export const requestForgotPassword = async (email: string): Promise<void> => {
+    try {
+        await baseClient.post("/api/account/forgot-password/request", {email});
     } catch (e) {
         console.error(e);
         throw e;
@@ -63,7 +81,16 @@ export const validateAccount = async (token: string): Promise<void> => {
 
 export const forgotPassword = async (token: string, newPassword: string, newPasswordConfirmation: string): Promise<void> => {
     try {
-        await baseClient.post(`/account/forgot-password`, {validationToken: token, newPassword, newPasswordConfirmation});
+        await baseClient.post(`/api/account/forgot-password/validate`, {token, newPassword, newPasswordConfirmation});
+    } catch (e) {
+        console.error(e);
+        throw e;
+    }
+}
+
+export const requestResetPassword = async (): Promise<void> => {
+    try {
+        await baseClient.post("/api/account/reset-password/request");
     } catch (e) {
         console.error(e);
         throw e;
@@ -72,7 +99,7 @@ export const forgotPassword = async (token: string, newPassword: string, newPass
 
 export const resetPassword = async (token: string, newPassword: string, newPasswordConfirmation: string): Promise<void> => {
     try {
-        await baseClient.post(`/account/reset-password`, {validationToken: token, newPassword, newPasswordConfirmation});
+        await baseClient.post(`/api/account/reset-password/validate`, {token, newPassword, newPasswordConfirmation});
     } catch (e) {
         console.error(e);
         throw e;

@@ -5,6 +5,8 @@
     import {Label} from "$lib/components/ui/label";
     import {forgotPassword} from "$lib/api/user";
     import {page} from "$app/state";
+    import {error, success} from "$lib/toast/toast";
+    import {goto} from "$lib/utils/goto";
 
     let className = "";
     let newPassword = "";
@@ -21,8 +23,11 @@
         try {
             const response = await forgotPassword(token, newPassword, confirmPassword);
             console.log("Mot de passe réinitialisé avec succès:", response);
-        } catch (error) {
-            console.error("Erreur lors de la réinitialisation du mot de passe:", error);
+            success("Réinitialisation du mot de passe réussie.", "Vous pouvez maintenant vous connecter.");
+            goto("/login");
+        } catch (e) {
+            console.error("Erreur lors de la réinitialisation du mot de passe:", e);
+            error("Erreur lors de la réinitialisation du mot de passe.", "Veuillez réessayer.");
         }
     }
 </script>
