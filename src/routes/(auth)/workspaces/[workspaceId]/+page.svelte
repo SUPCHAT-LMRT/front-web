@@ -7,6 +7,69 @@
     import {getWorkspaceMembers, type WorksapceMember} from "$lib/api/workspaces/workspace";
     import {getS3ObjectUrl, S3Bucket} from "$lib/api/s3";
     import * as Avatar from "$lib/components/ui/avatar";
+    import { chart } from "$lib/actions/chart";
+    import type { ApexOptions } from "apexcharts";
+
+    const chartOptions: ApexOptions = {
+        chart: {
+            type: "area",
+            height: 100,
+            toolbar: {
+                show: false
+            },
+            animations: {
+                enabled: false,
+                dynamicAnimation: {
+                    speed: 0
+                }
+            }
+        },
+        series: [
+            {
+                data: [10, 41, 5, 100, 22],
+            }
+        ],
+        dataLabels: {
+            enabled: false
+        },
+        stroke: {
+            curve: 'smooth'
+        },
+        markers: {
+            size: 0,
+            hover: {
+                size: 0
+            }
+        },
+        tooltip: {
+            enabled: false
+        },
+        xaxis: {
+            labels: {
+                show: false,
+            },
+            axisBorder: {
+                show: false
+            },
+            axisTicks: {
+                show: false
+            },
+        },
+        yaxis: {
+            labels: {
+                show: false
+            }
+        },
+        grid: {
+            show: false,
+            padding: {
+                left: -10,
+                right: -10,
+            },
+        }
+    };
+
+
 
     let currentWorkspaceId = $derived(page.params.workspaceId);
 
@@ -17,9 +80,10 @@
     });
 
     let stats = [
+        { label: "Messages", value: 1245 },
+        { label: "Visites", value: 125 },
         { label: "Membres", value: 42 },
-        { label: "Canaux", value: 8 },
-        { label: "Messages", value: 1245 }
+        { label: "Canaux", value: 8 }
     ];
 
     let members:WorksapceMember[] = $state([]);
@@ -62,14 +126,16 @@
             class="w-full h-40 mb-6 object-cover"
     />
 
-    <Avatar.Root class="absolute bottom-0 left-6 transform translate-y-1/2">
+    <Avatar.Root class="absolute bottom-0 left-6 transform translate-y-1/2 w-20 h-20 rounded-full border-4 border-white shadow-lg overflow-hidden">
         <Avatar.Image
                 src={getS3ObjectUrl(S3Bucket.WORKSPACES_ICONS, currentWorkspaceId)}
                 alt={`Workspace ${currentWorkspaceId}`}
-                class="w-16 h-16 rounded-full border-4 border-white shadow-lg"
+                class="w-full h-full object-cover"
         />
     </Avatar.Root>
 </div>
+
+
 
 
 
@@ -88,14 +154,19 @@
         </button>
     </div>
 
-    <div class="grid grid-cols-3 gap-4 mb-6">
+    <div class="grid grid-cols-4 gap-4 mb-6">
         {#each stats as stat}
-            <div class="bg-gray-100 p-4 rounded-lg shadow-md text-center">
-                <p class="text-xl font-semibold">{stat.value}</p>
-                <p class="text-gray-600">{stat.label}</p>
+            <div class="bg-gray-100 rounded-lg shadow-md text-left h-36">
+                <p class="font-semibold pl-4 pt-4">{stat.label}</p>
+                <p class="text-xl pl-4 pt-4">{stat.value}</p>
+                {#if stat.label === "Messages" || stat.label === "Visites"}
+                    <div use:chart={chartOptions} class="w-full translate-y-[-1.55rem]"></div>
+                {/if}
             </div>
         {/each}
     </div>
+
+
 
     <div class="grid grid-cols-2 gap-6">
         <div class="bg-white p-4 rounded-lg shadow-md">
