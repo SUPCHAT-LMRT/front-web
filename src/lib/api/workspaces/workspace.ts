@@ -70,3 +70,26 @@ export const getWorkspaceMembers = async (
         throw e;
     }
 }
+
+interface WorkspaceTimeSeries {
+    getMinutelyMessageSents(): Promise<MinutelyMessageSent[]>
+}
+
+type MinutelyMessageSent = {
+    sentAt: Date,
+    count: number
+}
+
+export const getWorkspaceTimeSeries = (workspaceId: string): WorkspaceTimeSeries => {
+    const basePath = "/api/workspaces/" + workspaceId + "/time-series"
+    return {
+        async getMinutelyMessageSents(): Promise<MinutelyMessageSent[]> {
+            try {
+                const resp = await baseClient.get(basePath + "/messages");
+                return resp.data;
+            } catch(e) {
+                throw e;
+            }
+        }
+    }
+}

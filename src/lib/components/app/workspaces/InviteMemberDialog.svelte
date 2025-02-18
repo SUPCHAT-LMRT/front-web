@@ -30,7 +30,7 @@
                     Inviter un membre
                 </Dialog.Title>
                 <p class="text-sm mt-2 text-gray-700">
-                    Ajoute un membre à ton workspace en lui envoyant une invitation.
+                    Ajoute un membre à ton espace de travail en lui envoyant une invitation.
                 </p>
             </div>
         </Dialog.Header>

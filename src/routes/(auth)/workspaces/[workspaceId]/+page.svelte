@@ -1,36 +1,101 @@
 <script lang="ts">
     import {page} from "$app/state";
-    import * as Sidebar from "$lib/components/ui/sidebar";
     import CreateChannelDialog from "$lib/components/app/workspaces/CreateChannelDialog.svelte";
     import workspaceChannelsStore from "$lib/stores/workspaceChannelsStore";
     import InviteMemberDialog from "$lib/components/app/workspaces/InviteMemberDialog.svelte";
     import EditWorkspaceDialog from "$lib/components/app/workspaces/EditWorkspaceDialog.svelte";
-    import {getWorkspaceMembers, type WorksapceMember} from "$lib/api/workspaces/workspace";
+    import {getWorkspaceMembers, getWorkspaceTimeSeries, type WorksapceMember} from "$lib/api/workspaces/workspace";
+    import {getS3ObjectUrl, S3Bucket} from "$lib/api/s3";
+    import {chart} from "$lib/actions/chart";
+    import * as Avatar from "$lib/components/ui/avatar";
 
     let currentWorkspaceId = $derived(page.params.workspaceId);
-
     let createChannelData = $state({
         dialogOpen: false,
         name: "",
         topic: ""
     });
 
-    let stats = [
-        { label: "Membres", value: 42 },
-        { label: "Canaux", value: 8 },
-        { label: "Messages", value: 1245 }
-    ];
+    const defaultChartOptions = {
+        chart: {
+            type: "area",
+            height: 100,
+            toolbar: {
+                show: false
+            },
+            animations: {
+                enabled: true,
+                dynamicAnimation: {
+                    speed: 500
+                }
+            }
+        },
+        noData: {
+            text: "No data available",
+        },
+        series: [{data:[]}],
+        dataLabels: {
+            enabled: false
+        },
+        stroke: {
+            curve: 'smooth',
+            width: 2
+        },
+        markers: {
+            size: 0,
+            hover: {
+                size: 0
+            }
+        },
+        tooltip: {
+            enabled: false
+        },
+        xaxis: {
+            labels: {
+                show: false,
+            },
+            axisBorder: {
+                show: false
+            },
+            axisTicks: {
+                show: false
+            },
+        },
+        yaxis: {
+            labels: {
+                show: false
+            }
+        },
+        grid: {
+            show: false,
+            padding: {
+                left: -10,
+                right: -10,
+            },
+        }
+    }
 
-    let members:WorksapceMember[] = $state([]);
+    let stats = $state([
+        { label: "Messages", value: 1245, chartOptions: defaultChartOptions },
+        { label: "Visites", value: 125, chartOptions: defaultChartOptions },
+        { label: "Membres", value: 42 },
+        { label: "Canaux", value: 8 }
+    ]);
+
+    let members: WorksapceMember[] = $state([]);
     let channels = $state(workspaceChannelsStore.get());
 
     $effect(() => {
-        defineMembers(currentWorkspaceId);
-    });
+        getWorkspaceMembers(currentWorkspaceId).then(result => members = result);
 
-    const defineMembers = async (workspaceid) => {
-        members = await getWorkspaceMembers(workspaceid);
-    }
+        getWorkspaceTimeSeries(currentWorkspaceId).getMinutelyMessageSents()
+            .then((data) => {
+                // response.data is as follow: [{"sentAt":"2025-02-11T18:14:00Z","count":1},{"sentAt":"2025-02-11T18:15:00Z","count":3}]
+                // We need to transform it to the following format: [1, 3]
+                // stats[0] is the "Messages" stat
+                stats[0].chartOptions.series[0].data = data.map((item) => item.count);
+            })
+    });
 
     let recentActivities = [
         { user: "Alice", action: "a ajouté un nouveau canal #design" },
@@ -50,32 +115,55 @@
             console.error(e);
         }
     }
-
 </script>
+
+
+
+<div class="relative">
+    <img
+            src={getS3ObjectUrl(S3Bucket.WORKSPACES_BANNERS, currentWorkspaceId)}
+            alt={`Workspace banner ${currentWorkspaceId}`}
+            class="w-full h-40 mb-6 object-cover"
+    />
+
+    <Avatar.Root class="absolute bottom-0 left-6 transform translate-y-1/2 w-20 h-20 rounded-full border-4 border-white shadow-lg overflow-hidden">
+        <Avatar.Image
+                src={getS3ObjectUrl(S3Bucket.WORKSPACES_ICONS, currentWorkspaceId)}
+                alt={`Workspace ${currentWorkspaceId}`}
+                class="w-full h-full object-cover"
+        />
+    </Avatar.Root>
+</div>
+
 
 <div class="container mx-auto p-6">
     <h1 class="text-2xl font-bold text-gray-800 mb-4">Workspace {currentWorkspaceId}</h1>
 
     <div class="flex gap-4 mb-6">
-        <button class="bg-[#61A0AF] text-white px-4 py-2 rounded-lg shadow-md hover:bg-[#4B7986]">
+        <button class="bg-primary text-white px-4 py-2 rounded-lg shadow-md hover:bg-[#4B7986] duration-300">
             <InviteMemberDialog />
         </button>
-        <button class="bg-[#61A0AF] text-white px-4 py-2 rounded-lg shadow-md hover:bg-[#4B7986]">
+        <button class="bg-primary text-white px-4 py-2 rounded-lg shadow-md hover:bg-[#4B7986] duration-300">
             <CreateChannelDialog {createChannelData} {createChannel} />
         </button>
-        <button class="bg-[#61A0AF] text-white px-4 py-2 rounded-lg shadow-md hover:bg-[#4B7986]">
+        <button class="bg-primary text-white px-4 py-2 rounded-lg shadow-md hover:bg-[#4B7986] duration-300">
             <EditWorkspaceDialog />
         </button>
     </div>
 
-    <div class="grid grid-cols-3 gap-4 mb-6">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         {#each stats as stat}
-            <div class="bg-gray-100 p-4 rounded-lg shadow-md text-center">
-                <p class="text-xl font-semibold">{stat.value}</p>
-                <p class="text-gray-600">{stat.label}</p>
+            <div class="bg-gray-100 rounded-lg shadow-md text-left h-36">
+                <p class="font-semibold pl-4 pt-4">{stat.label}</p>
+                <p class="text-xl pl-4 pt-4">{stat.value}</p>
+                {#if stat.chartOptions}
+                    <div use:chart={stat.chartOptions} class="w-full translate-y-[-1.55rem]"></div>
+                {/if}
             </div>
         {/each}
     </div>
+
+
 
     <div class="grid grid-cols-2 gap-6">
         <div class="bg-white p-4 rounded-lg shadow-md">
