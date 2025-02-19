@@ -56,9 +56,9 @@
 </script>
 
 <div class="flex w-full h-full">
-    <Sidebar.Root class="border-l-2 border-r-2 border-gray-200">
-        <Sidebar.Content>
-            <Sidebar.Group class="p-0">
+    <Sidebar.Root class="border-l-2 border-r-2 border-gray-200 dark:border-gray-700">
+        <Sidebar.Content class="dark:bg-gray-800">
+            <Sidebar.Group class="p-0 ">
                 <Sidebar.GroupContent>
                     <Sidebar.Menu class="flex mx-auto flex-col items-center">
                         {#if isLoading}

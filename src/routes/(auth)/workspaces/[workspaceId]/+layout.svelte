@@ -54,16 +54,15 @@
     const {children} = $props();
 </script>
 
-<div class="flex w-full justify-between">
+<div class="flex w-full justify-between dark:bg-gray-900">
     <div class="h-screen w-full">
         {@render children()}
     </div>
 
-    <Sidebar.Root class="h-full border-l-2 border-r-2 border-gray-200">
+    <Sidebar.Root class="h-full border-l-2 border-r-2 border-gray-200 dark:border-gray-700">
         <ContextMenu.Root>
-            <ContextMenu.Trigger class="h-full">
-                <Sidebar.Content class="h-full flex justify-between">
-
+                    <ContextMenu.Trigger class="h-full">
+                <Sidebar.Content class="h-full flex justify-between dark:bg-gray-800">
                     <Sidebar.Group class="p-0">
                         <Sidebar.GroupLabel>Canaux</Sidebar.GroupLabel>
                         <Sidebar.GroupContent>
