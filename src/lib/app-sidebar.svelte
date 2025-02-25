@@ -9,8 +9,7 @@
     } from "lucide-svelte";
     import { goto } from "$lib/utils/goto";
     import {page} from "$app/state";
-    import Sun from "lucide-svelte/icons/sun";
-    import Moon from "lucide-svelte/icons/moon";
+    import { Moon, Sun } from "lucide-svelte";
 
     import { toggleMode } from "mode-watcher";
     import { Button } from "$lib/components/ui/button/index.js";

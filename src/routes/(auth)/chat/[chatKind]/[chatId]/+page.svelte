@@ -59,7 +59,7 @@
 
 <div class="w-full h-full flex flex-col">
     {#if currentRoom.id !== null}
-        <div class="flex-1 overflow-y-auto px-4 mt-4 space-y-4">
+        <div class="flex-1 overflow-y-auto px-4 space-y-4">
             {#each currentRoom.messages as message (message.id)}
                 <div class="flex gap-x-4 items-center">
                     <!-- In case of system message for example -->

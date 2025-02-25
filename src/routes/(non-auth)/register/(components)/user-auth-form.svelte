@@ -153,7 +153,7 @@
                     </Popover.Content>
                 </Popover.Root>
             </div>
-            <Button class="bg-[#61A0AF]" type="submit" disabled={isLoading}>
+            <Button class="bg-[#61A0AF] dark:text-white" type="submit" disabled={isLoading}>
                 {#if isLoading}
                     <Loader class="mr-2 h-4 w-4 animate-spin"/>
                 {/if}

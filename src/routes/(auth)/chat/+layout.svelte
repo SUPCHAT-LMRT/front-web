@@ -35,26 +35,26 @@
 </script>
 
 <div class="flex w-full h-full">
-    <Sidebar.Root class="border-l-2 border-r-2 border-gray-200">
-        <Sidebar.Content class="p-4 containerTest z-0">
+    <Sidebar.Root class="border-l-2 border-r-2 border-gray-200 dark:border-gray-700">
+        <Sidebar.Content class="p-4 containerTest z-0 dark:bg-gray-800">
             <Sidebar.Menu class="flex flex-col">
                 <Dialog.Root>
                     <Dialog.Trigger
-                            class="flex w-full p-1 mb-2  rounded-md bg-gray-100 border border-gray-300 focus:outline-none focus:ring-2 hover:bg-gray-200 transition">
-                        <span class="text-gray-700 text-sm">Rechercher...</span>
+                            class="flex w-full p-1 mb-2  rounded-md bg-gray-100 border border-gray-300 focus:outline-none focus:ring-2 hover:bg-gray-200 transition dark:bg-gray-700 dark:border-gray-600">
+                        <span class="text-gray-700 text-sm dark:text-gray-300">Rechercher</span>
                     </Dialog.Trigger>
-                    <Dialog.Content class="flex flex-col justify-center items-center max-w-[25rem]">
+                    <Dialog.Content class="flex flex-col justify-center items-center max-w-[25rem] dark:bg-gray-800">
                         <Dialog.Header>
                             <Dialog.Title>
-                                <Input type="text" placeholder="Où désires-tu aller ?" class="max-w-xs"/>
+                                <Input type="text" placeholder="Où désires-tu aller ?" class="max-w-xs dark:bg-gray-800 dark:focus-visible:bg-red"/>
                             </Dialog.Title>
-                            <Dialog.Description class="flex items-center space-x-1">
+                            <Dialog.Description class="flex items-center pt-2">
                                 <p class="text-[#1C9B4B] font-extrabold text-[11px] uppercase">Conseil de pro :</p>
                                 <p class="text-[11px]">
                                     Utiliser
-                                    <span class="p-1 bg-gray-200 font-bold rounded">@</span>
+                                    <span class="p-1 bg-gray-200 dark:bg-gray-700 font-bold rounded">@</span>
                                     et
-                                    <span class="p-1 bg-gray-200 font-bold rounded">#</span>
+                                    <span class="p-1 bg-gray-200 dark:bg-gray-700  font-bold rounded">#</span>
                                     pour affiner les résultats.
                                 </p>
                             </Dialog.Description>
@@ -65,17 +65,17 @@
                 {#each mainItems as item (item.name)}
                     <Sidebar.MenuItem class="mb-2 rounded w-full">
                         <Sidebar.MenuButton
-                                class="flex items-center p-2 rounded transition-all duration-300 hover:bg-gray-100">
+                                class="flex items-center p-2 rounded transition-all duration-300 hover:bg-gray-100 dark:hover:bg-gray-700">
                             <a href={item.url} class="flex items-center w-full">
-                                <item.icon class="h-6 w-6 text-gray-600"/>
-                                <span class="ml-4 text-gray-700">{item.name}</span>
+                                <item.icon class="h-6 w-6 text-gray-600 dark:text-gray-300"/>
+                                <span class="ml-4 text-gray-700 dark:text-gray-300">{item.name}</span>
                             </a>
                         </Sidebar.MenuButton>
                     </Sidebar.MenuItem>
                 {/each}
 
-                <div class="my-4 border-t border-gray-200"></div>
-                <p class="text-xs font-bold p-2 uppercase">Message privés</p>
+                <div class="my-4 border-t border-gray-200 dark:border-gray-700"/>
+                <p class="text-xs font-bold p-2 uppercase text-gray-600 dark:text-gray-300">Messages privés</p>
 
                 {#if recentChats.state === StoreResultState.LOADING}
                     {#each Array(13) as _}
@@ -83,9 +83,9 @@
                     {/each}
                 {:else}
                 {#each recentChats.data.recentChats as chat (chat.id)}
-                        <Sidebar.MenuItem class="mb-2 rounded w-full {currentChatId === chat.id ? 'bg-gray-200' : ''}">
+                        <Sidebar.MenuItem class="mb-2 rounded w-full {currentChatId === chat.id ? 'bg-gray-200 dark:bg-gray-700' : ''}">
                             <div class="relative group">
-                                <div class="flex items-center p-2 rounded transition-all duration-300 hover:bg-gray-200">
+                                <div class="flex items-center p-2 rounded transition-all duration-300 hover:bg-gray-200 dark:hover:bg-gray-700">
                                     <a href="/chat/{chat.kind}/{chat.id}" class="flex items-center w-full">
                                         <Avatar.Root class="h-7 w-7">
                                             <Avatar.Image src={chat.avatarUrl} alt={chat.id}
@@ -99,7 +99,7 @@
                                     </a>
                                 </div>
                                 <button
-                                        class="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                                        class="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300 dark:text-gray-300"
                                 >
                                     <XIcon class="h-4 w-4"/>
                                 </button>

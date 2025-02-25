@@ -48,10 +48,10 @@
 
 
 <section class="px-4 py-2 ml-2 pt-8 w-[500px]">
-    <h1 class="text-gray-700 text-lg font-semibold mb-5">Paramètres vocaux</h1>
+    <h1 class="text-gray-700 text-lg font-semibold mb-5 dark:text-gray-200">Paramètres vocaux</h1>
     <div class="flex flex-col item-center mb-5">
         <div class="flex flex-col mr-4 w-72">
-            <h2 class="text-gray-700 text-xs font-bold uppercase mb-3">Périphérique d'entrée</h2>
+            <h2 class="text-gray-700 text-xs font-bold uppercase mb-3 dark:text-gray-200">Périphérique d'entrée</h2>
             <Select.Root type="single" name="audioInput" bind:value={selectedInput}>
                 <Select.Trigger>
                     {#if selectedInput}
