@@ -45,8 +45,7 @@ type ChannelMessageAuthor = {
 }
 
 type ChannelMessageReaction = {
-    id: string;
-    userId: string;
+    users: {id: string, name: string}[];
     reaction: string;
 }
 

@@ -205,5 +205,5 @@
         </Sidebar.Content>
     </Sidebar.Root>
 
-    {@render children()}
+    {@render children?.()}
 </div>

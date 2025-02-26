@@ -151,8 +151,8 @@ class Ws {
         this.send(JSON.stringify({action: 'leave-room', roomId: roomId}));
     }
 
-    public createChannelMessageReaction = (roomId: string, messageId: string, reaction: string) => {
-        this.send(JSON.stringify({action: 'channel-message-reaction-create', roomId, messageId, reaction}));
+    public toggleChannelMessageReaction = (roomId: string, messageId: string, reaction: string) => {
+        this.send(JSON.stringify({action: 'channel-message-reaction-toggle', roomId, messageId, reaction}));
     }
 
     public subscribe = (action: string, callback: (msg) => void): () => void => {

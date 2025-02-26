@@ -56,7 +56,7 @@
 
 <div class="flex w-full justify-between">
     <div class="h-screen w-full">
-        {@render children()}
+        {@render children?.()}
     </div>
 
     <Sidebar.Root class="h-full border-l-2 border-r-2 border-gray-200">

@@ -7,11 +7,13 @@
     import {RoomKind} from "$lib/api/room";
     import * as Avatar from "$lib/components/ui/avatar";
     import {type ChannelMessage, getWorkspaceChannelMessages} from "$lib/api/workspaces/channels";
-    import {onMount} from "svelte";
     import {format, isToday, isYesterday} from "date-fns";
     import {fr} from "date-fns/locale";
     import {Tooltip, TooltipTrigger, TooltipContent} from "$lib/components/ui/tooltip";
     import * as ContextMenu from "$lib/components/ui/context-menu";
+    import {formatDate} from "$lib/utils/formatDate";
+    import {Pen, Trash2} from "lucide-svelte";
+    import {scale} from "svelte/transition";
 
     const {authenticatedUser} = page.data;
 
@@ -21,14 +23,16 @@
     let currentMessage = $state("");
     let currentRoom: { id: string | null; messages: ChannelMessage[] } = $state({id: null, messages: []});
     let unsubscribeSendMessage = null;
-    let unsubscribeMessageReactionCreate = null;
+    let unsubscribeMessageReactionAdded = null;
+    let unsubscribeMessageReactionRemoved = null;
 
     $effect(() => {
         joinRoomAndListenMessages(currentWorkspaceId, currentChannelId);
 
         return () => {
             unsubscribeSendMessage?.();
-            unsubscribeMessageReactionCreate?.();
+            unsubscribeMessageReactionAdded?.();
+            unsubscribeMessageReactionRemoved?.();
             ws.leaveRoom(currentRoom.id);
             currentRoom.id = null;
             currentRoom.messages = [];
@@ -59,23 +63,47 @@
                 ];
             });
 
-            unsubscribeMessageReactionCreate = ws.subscribe("channel-message-reaction-create", (msg) => {
-                const messageIndex = currentRoom.messages.findIndex(m => m.id === msg.messageId);
-                if (messageIndex !== -1) {
-                    currentRoom.messages[messageIndex].reactions = [...currentRoom.messages[messageIndex].reactions, {
-                        id: msg.reactionId,
-                        userId: msg.member.userId,
-                        reaction: msg.reaction,
-                    }];
+            // Added is triggered when a user adds a reaction to a message,
+            // If the reaction already exists, just update the usernames array with the new user, else add the reaction to the message
+            unsubscribeMessageReactionAdded = ws.subscribe("channel-message-reaction-added", (msg) => {
+                const message = currentRoom.messages.find(m => m.id === msg.messageId);
+                if (message) {
+                    const reaction = message.reactions.find(r => r.reaction === msg.reaction);
+                    if (reaction) {
+                        reaction.users = [...reaction.users, {id: msg.member.userId, name: msg.member.username}];
+                    } else {
+                        message.reactions = [
+                            ...message.reactions,
+                            {
+                                reaction: msg.reaction,
+                                users: [{id: msg.member.userId, name: msg.member.username}],
+                            },
+                        ];
+                    }
                 }
-            })
+            });
+
+            // Removed is triggered when a user removes a reaction from a message,
+            // If the reaction exists, remove the user from the usernames array, if the usernames array is empty, remove the reaction from the message
+            unsubscribeMessageReactionRemoved = ws.subscribe("channel-message-reaction-removed", (msg) => {
+                const message = currentRoom.messages.find(m => m.id === msg.messageId);
+                if (message) {
+                    const reaction = message.reactions.find(r => r.reaction === msg.reaction);
+                    if (reaction) {
+                        reaction.users = reaction.users.filter(({id}) => id !== msg.member.userId);
+                        if (reaction.users.length === 0) {
+                            message.reactions = message.reactions.filter(r => r.reaction !== msg.reaction);
+                        }
+                    }
+                }
+            });
         } catch (e) {
             console.error(e);
         }
     };
 
-    const handleMessageReactionCreate = (messageId: string, reaction: string) => {
-        ws.createChannelMessageReaction(currentRoom.id, messageId, reaction);
+    const handleMessageReactionToggle = (messageId: string, reaction: string) => {
+        ws.toggleChannelMessageReaction(currentRoom.id, messageId, reaction);
     };
 
     const sendMessageToWs = () => {
@@ -92,6 +120,24 @@
                     <ContextMenu.Trigger>
                         <div class="flex gap-x-4 items-start"
                              class:justify-end={message.author.userId === currentUserId}>
+
+                            {#snippet messageReaction()}
+                                <div class="flex items-center gap-2">
+                                    {#each message.reactions as {reaction, users} (reaction)}
+                                        <div class="flex items-center justify-center bg-gray-100 p-1 rounded-lg text-lg gap-x-2 transition-colors duration-300 select-none"
+                                             class:bg-yellow-300={users.find(({id}) => id === currentUserId)}
+                                             transition:scale={{duration: 50}}
+                                             onclick={() => handleMessageReactionToggle(message.id, reaction)}
+                                             onkeydown={() => handleMessageReactionToggle(message.id, reaction)}
+                                             role="button" tabindex="-1"
+                                        >
+                                            <span>{reaction}</span>
+                                            <span>{users.length}</span>
+                                        </div>
+                                    {/each}
+                                </div>
+                            {/snippet}
+
                             {#if message.author !== null && message.author.userId !== currentUserId}
                                 <Avatar.Root class="flex-shrink-0">
                                     <AvatarImage src={getS3ObjectUrl(S3Bucket.USERS_AVATARS, message.author.userId)}/>
@@ -103,11 +149,7 @@
                                         <Tooltip>
                                             <TooltipTrigger>
                                                 <span class="text-sm text-gray-500">
-                                                    {isToday(new Date(message.createdAt))
-                                                        ? format(new Date(message.createdAt), "HH:mm")
-                                                        : isYesterday(new Date(message.createdAt))
-                                                            ? "Hier"
-                                                            : format(new Date(message.createdAt), "dd/MM/yyyy")}
+                                                    {formatDate(message.createdAt)}
                                                 </span>
                                             </TooltipTrigger>
                                             <TooltipContent>
@@ -115,46 +157,48 @@
                                             </TooltipContent>
                                         </Tooltip>
                                     </div>
+                                    <div class="flex flex-col gap-y-2">
+                                        <div class="flex items-center gap-2">
+                                            <span class="p-2 rounded-xl max-w-xs bg-primary text-white shadow-lg">
+                                                {message.content}
+                                            </span>
+                                        </div>
+                                        {@render messageReaction()}
+                                    </div>
                                 </div>
                             {/if}
+
                             {#if message.author.userId === currentUserId}
                                 <div class="flex flex-col items-end">
                                     <Tooltip>
                                         <TooltipTrigger>
                                         <span class="text-sm text-gray-500">
-                                            {isToday(new Date(message.createdAt))
-                                                ? format(new Date(message.createdAt), "HH:mm")
-                                                : isYesterday(new Date(message.createdAt))
-                                                    ? "Hier"
-                                                    : format(new Date(message.createdAt), "dd/MM/yyyy")}
+                                            {formatDate(message.createdAt)}
                                         </span>
                                         </TooltipTrigger>
                                         <TooltipContent>
                                             {format(new Date(message.createdAt), "EEEE d MMMM yyyy à HH:mm", {locale: fr})}
                                         </TooltipContent>
                                     </Tooltip>
-                                    <div class="flex items-center gap-2 ml-auto">
-                                        <span class="p-2 rounded-xl max-w-xs bg-primary text-white shadow-lg">
-                                            {message.content}
-                                        </span>
-                                    </div>
-                                    <div class="flex items-center gap-2">
-                                        {#each message.reactions as reaction (reaction.id)}
-                                            <div class="flex items-center justify-center bg-gray-100 p-2 rounded-full w-8 h-8 text-lg">
-                                                {reaction.reaction}
-                                            </div>
-                                        {/each}
+                                    <div class="flex flex-col gap-y-2">
+                                        <div class="flex items-center gap-2">
+                                            <span class="p-2 rounded-xl max-w-xs bg-primary text-white shadow-lg">
+                                                {message.content}
+                                            </span>
+                                        </div>
+                                        {@render messageReaction()}
                                     </div>
                                 </div>
                             {/if}
+
                         </div>
                     </ContextMenu.Trigger>
                     <ContextMenu.Content class="w-64">
-                        <ContextMenu.Item class="flex justify-between">
-                            {#each [":)", ":/", ":(", ":("] as reaction}
-                                <div class="flex items-center justify-center bg-gray-100 p-2 rounded-full w-8 h-8 text-lg"
-                                     onclick={() => handleMessageReactionCreate(message.id, reaction)}
-                                     onkeydown={() => handleMessageReactionCreate(message.id, reaction)}
+                        <ContextMenu.Item class="flex justify-between hover:!bg-white">
+                            {#each ["😊", "😂", "🤷‍♂️", "👍"] as reaction}
+                                <div class="flex items-center justify-center bg-gray-100 hover:bg-gray-200 transition-colors duration-300 p-2 rounded-full w-8 h-8 text-lg"
+                                     onclick={() => handleMessageReactionToggle(message.id, reaction)}
+                                     onkeydown={() => handleMessageReactionToggle(message.id, reaction)}
                                      role="button" tabindex="-1">
                                     {reaction}
                                 </div>
@@ -162,16 +206,25 @@
                         </ContextMenu.Item>
                         <ContextMenu.Sub>
                             <ContextMenu.SubTrigger>Ajouter une réaction</ContextMenu.SubTrigger>
-                            <ContextMenu.SubContent class="w-48">
-                                <ContextMenu.Item>:)</ContextMenu.Item>
-                                <ContextMenu.Item>:/</ContextMenu.Item>
-                                <ContextMenu.Item>:(</ContextMenu.Item>
+                            <ContextMenu.SubContent class="min-w-max">
+                                <ContextMenu.Item class="text-lg">😉</ContextMenu.Item>
+                                <ContextMenu.Item class="text-lg">😎</ContextMenu.Item>
+                                <ContextMenu.Item class="text-lg">😢</ContextMenu.Item>
                             </ContextMenu.SubContent>
                         </ContextMenu.Sub>
                         <ContextMenu.Separator/>
-                        <ContextMenu.Item>Billing</ContextMenu.Item>
-                        <ContextMenu.Item>Team</ContextMenu.Item>
-                        <ContextMenu.Item>Subscription</ContextMenu.Item>
+                        <ContextMenu.Item class="flex justify-between">
+                            <span>Modifier</span>
+                            <div>
+                                <Pen size="18"/>
+                            </div>
+                        </ContextMenu.Item>
+                        <ContextMenu.Item class="text-red-500 hover:!bg-red-500 hover:!text-white flex justify-between">
+                            <span>Supprimer</span>
+                            <div>
+                                <Trash2 size="18"/>
+                            </div>
+                        </ContextMenu.Item>
                     </ContextMenu.Content>
                 </ContextMenu.Root>
             {/each}
