@@ -169,12 +169,12 @@
                             {/if}
 
                             {#if message.author.userId === currentUserId}
-                                <div class="flex flex-col items-end">
+                                <div class="flex flex-col">
                                     <Tooltip>
-                                        <TooltipTrigger>
-                                        <span class="text-sm text-gray-500">
-                                            {formatDate(message.createdAt)}
-                                        </span>
+                                        <TooltipTrigger class="text-left">
+                                            <span class="text-sm text-gray-500">
+                                                {formatDate(message.createdAt)}
+                                            </span>
                                         </TooltipTrigger>
                                         <TooltipContent>
                                             {format(new Date(message.createdAt), "EEEE d MMMM yyyy à HH:mm", {locale: fr})}
@@ -185,6 +185,12 @@
                                             <span class="p-2 rounded-xl max-w-xs bg-primary text-white shadow-lg">
                                                 {message.content}
                                             </span>
+
+                                            <Avatar.Root class="flex-shrink-0">
+                                                <AvatarImage
+                                                        src={getS3ObjectUrl(S3Bucket.USERS_AVATARS, message.author.userId)}/>
+                                                <AvatarFallback>{message.author.workspacePseudo[0]}</AvatarFallback>
+                                            </Avatar.Root>
                                         </div>
                                         {@render messageReaction()}
                                     </div>

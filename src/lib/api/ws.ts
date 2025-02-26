@@ -57,7 +57,7 @@ class Ws {
         if (this.ws.readyState === WebSocket.OPEN) {
             this.ws.send(message);
         } else if (this.ws.readyState === WebSocket.CONNECTING) {
-            console.log("WebSocket still connecting, queuing message...");
+            console.log(`WebSocket still connecting, queuing message ${message.action}...`);
             this.messageQueue.push(message);
         } else {
             console.log("WebSocket not connected, discarding message.");
