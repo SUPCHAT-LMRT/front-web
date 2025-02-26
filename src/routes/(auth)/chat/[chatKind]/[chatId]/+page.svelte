@@ -32,7 +32,8 @@
             // Todo handle direct chat messages
         }
 
-        currentRoom.id = await ws.asyncJoinRoom(roomId, chatKind)
+        const joinedRoom = await ws.asyncJoinRoom(roomId, chatKind)
+        currentRoom.id = joinedRoom.id;
 
         unsubscribeSendMessage = ws.subscribe("send-message", msg => {
             if (chatKind === RoomKind.GROUP) {
@@ -52,7 +53,7 @@
     }
 
     const sendMessageToWs = () => {
-        ws.sendMessage(currentRoom.id, currentMessage)
+        ws.sendChannelMessage(currentRoom.id, currentMessage)
         currentMessage = "";
     }
 </script>

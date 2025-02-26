@@ -34,6 +34,7 @@ export type ChannelMessage = {
     content: string;
     author: ChannelMessageAuthor;
     createdAt: Date;
+    reactions: ChannelMessageReaction[];
 }
 
 type ChannelMessageAuthor = {
@@ -41,6 +42,12 @@ type ChannelMessageAuthor = {
     pseudo: string;
     workspaceMemberId: string;
     workspacePseudo: string;
+}
+
+type ChannelMessageReaction = {
+    id: string;
+    userId: string;
+    reaction: string;
 }
 
 export const getWorkspaceChannelMessages = async (workspaceId: string, channelId: string): Promise<ChannelMessage[]> => {

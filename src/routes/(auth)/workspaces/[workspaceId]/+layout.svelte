@@ -28,7 +28,7 @@
 
     $effect(() => {
         const unsubscribeChannelCreated = ws.subscribe("channel-created", msg => {
-            const channelCreated = msg.payload as Channel;
+            const channelCreated = msg.channel as Channel;
             if (channelCreated.workspaceId !== currentWorkspaceId) return; // This is not supposed to happen but just in case (because it's handled by the server)
             workspaceChannelsStore.put(channelCreated);
         })
@@ -70,7 +70,8 @@
                             <Sidebar.Menu class="flex mx-auto flex-col items-center min-w-64">
 
                                 {#each channels.data.channels as channel (channel.id)}
-                                    <a href="/workspaces/{currentWorkspaceId}/channels/{channel.id}"  class="mb-[2px] w-full flex justify-center px-4">
+                                    <a href="/workspaces/{currentWorkspaceId}/channels/{channel.id}"
+                                       class="mb-[2px] w-full flex justify-center px-4">
                                         <Sidebar.MenuItem>
                                             <Sidebar.MenuButton>
                                                 {channel.name}
@@ -89,7 +90,7 @@
 
                                 <Sidebar.MenuItem class="mb-[2px] w-full flex justify-center px-4">
                                     <Sidebar.MenuButton>
-                                        <CreateChannelDialog {createChannelData} {createChannel} />
+                                        <CreateChannelDialog {createChannelData} {createChannel}/>
                                     </Sidebar.MenuButton>
                                 </Sidebar.MenuItem>
 
