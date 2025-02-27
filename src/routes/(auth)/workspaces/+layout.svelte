@@ -4,7 +4,7 @@
     import * as Tooltip from "$lib/components/ui/tooltip";
     import * as Dialog from "$lib/components/ui/dialog";
     import workspacesStore from "$lib/stores/workspacesStore";
-    import {onDestroy, onMount} from "svelte";
+    import {onMount} from "svelte";
     import {Globe, Plus} from "lucide-svelte";
     import {Input} from "$lib/components/ui/input";
     import {Label} from "$lib/components/ui/label";
@@ -53,10 +53,6 @@
             console.error("Erreur lors de la création du workspace :", error);
         }
     }
-
-    onDestroy(() => {
-        ws.unselectWorkspace();
-    })
 
     let {children} = $props();
 </script>

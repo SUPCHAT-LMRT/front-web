@@ -36,7 +36,7 @@ class WorkspaceChannelsStore extends Store<WorkspaceChannelsStoreResult> {
     }
 
     public async create(workspaceId: string, name: string, topic: string): Promise<void> {
-        createWorkspaceChannel(workspaceId, name, topic);
+        await createWorkspaceChannel(workspaceId, name, topic);
     }
 
     public put(channel: Channel): void {

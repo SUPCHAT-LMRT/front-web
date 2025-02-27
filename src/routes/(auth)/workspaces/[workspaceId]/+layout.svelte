@@ -6,7 +6,6 @@
     import type {Channel} from "$lib/api/workspaces/channels";
     import ws from "$lib/api/ws";
     import CreateChannelDialog from "$lib/components/app/workspaces/CreateChannelDialog.svelte";
-    import {Label} from "$lib/components/ui/label";
     import {Separator} from "$lib/components/ui/separator";
     import {goto} from "$app/navigation";
 
@@ -27,6 +26,10 @@
     // $effect to send the selectWorkspace message to the server when the workspace changes
     $effect(() => {
         ws.selectWorkspace(currentWorkspaceId);
+
+        return () => {
+            ws.unselectWorkspace();
+        }
     })
 
     $effect(() => {
@@ -64,11 +67,13 @@
 
     <Sidebar.Root class="h-full border-l-2 border-r-2 border-gray-200 dark:border-gray-700">
         <ContextMenu.Root>
-                    <ContextMenu.Trigger class="h-full">
+            <ContextMenu.Trigger class="h-full">
                 <Sidebar.Content class="h-full flex justify-between dark:bg-gray-800">
                     <Sidebar.Group class="p-0">
-                        <Sidebar.MenuButton class="flex mx-auto flex-col items-center mb-2" onclick={() => goto("/workspaces")}>Vue d'ensemble</Sidebar.MenuButton>
-                        <Separator class="dark:bg-gray-700" />
+                        <Sidebar.MenuButton class="flex mx-auto flex-col items-center mb-2"
+                                            onclick={() => goto("/workspaces")}>Vue d'ensemble
+                        </Sidebar.MenuButton>
+                        <Separator class="dark:bg-gray-700"/>
                         <Sidebar.GroupLabel>Canaux</Sidebar.GroupLabel>
                         <Sidebar.GroupContent>
                             <Sidebar.Menu class="flex mx-auto flex-col items-center min-w-64">

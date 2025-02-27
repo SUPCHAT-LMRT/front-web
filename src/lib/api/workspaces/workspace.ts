@@ -11,13 +11,22 @@ export type Workspace = {
     type: WorkspaceType;
 };
 
-export type WorksapceMember = {
+export type WorkspaceMember = {
     id: string;
     userId: string;
     pseudo: string;
 }
 
-export const getWorkspaces = async (): Promise<Workspace[]> => {
+export type WorkspaceDetails = {
+    id: string;
+    name: string;
+    type: WorkspaceType;
+    membersCount: number;
+    channelsCount: number;
+    messagesCount: number;
+}
+
+export const listWorkspaces = async (): Promise<Workspace[]> => {
     try {
         const {data} = await baseClient.get("/api/workspaces");
         return data;
@@ -26,6 +35,16 @@ export const getWorkspaces = async (): Promise<Workspace[]> => {
         throw e;
     }
 };
+
+export const getWorkspaceDetails = async (workspaceId: string): Promise<WorkspaceDetails> => {
+    try {
+        const {data} = await baseClient.get(`/api/workspaces/${workspaceId}/details`);
+        return data;
+    } catch (e) {
+        console.error(e);
+        throw e;
+    }
+}
 
 export const createWorkspace = async (
     name: string,
@@ -61,7 +80,7 @@ export const updateWorkspaceIcon = async (
 
 export const getWorkspaceMembers = async (
     workspaceId: string,
-): Promise<WorksapceMember[]> => {
+): Promise<WorkspaceMember[]> => {
     try {
         const { data } = await baseClient.get(`/api/workspaces/${workspaceId}/members`);
         return data;

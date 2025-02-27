@@ -1,6 +1,5 @@
 import {Store, StoreResultState, type StoreResult} from "./store.svelte"
-import {getWorkspaces, createWorkspace, type Workspace, type WorkspaceType, updateWorkspaceIcon} from "../api/workspaces/workspace"
-
+import {listWorkspaces, createWorkspace, type Workspace, type WorkspaceType, updateWorkspaceIcon} from "../api/workspaces/workspace"
 
 export type WorkspaceStoreResult = {
     workspaces: Workspace[];
@@ -22,7 +21,7 @@ class WorkspacesStore extends Store<WorkspaceStoreResult> {
         return new Promise<WorkspaceStoreResult>(async (resolve, reject) => {
             try {
                 this.changeState(StoreResultState.LOADING);
-                const workspaces = await getWorkspaces();
+                const workspaces = await listWorkspaces();
                 this.changeStateAndData(StoreResultState.LOADED, {
                     workspaces: workspaces
                 });

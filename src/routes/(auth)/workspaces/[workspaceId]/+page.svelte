@@ -1,13 +1,22 @@
 <script lang="ts">
     import {page} from "$app/state";
     import CreateChannelDialog from "$lib/components/app/workspaces/CreateChannelDialog.svelte";
-    import workspaceChannelsStore from "$lib/stores/workspaceChannelsStore";
+    import workspaceChannelsStore, {type WorkspaceChannelsStoreResult} from "$lib/stores/workspaceChannelsStore";
     import InviteMemberDialog from "$lib/components/app/workspaces/InviteMemberDialog.svelte";
     import EditWorkspaceDialog from "$lib/components/app/workspaces/EditWorkspaceDialog.svelte";
-    import {getWorkspaceMembers, getWorkspaceTimeSeries, type WorksapceMember} from "$lib/api/workspaces/workspace";
+    import {
+        getWorkspaceDetails,
+        getWorkspaceMembers,
+        getWorkspaceTimeSeries, type WorkspaceDetails,
+        type WorkspaceMember
+    } from "$lib/api/workspaces/workspace";
     import {getS3ObjectUrl, S3Bucket} from "$lib/api/s3";
     import {chart} from "$lib/actions/chart";
     import * as Avatar from "$lib/components/ui/avatar";
+    import {fallbackAvatarLetters} from "$lib/utils/fallbackAvatarLetters";
+    import {onMount} from "svelte";
+    import ws from "$lib/api/ws";
+    import type {Channel} from "$lib/api/workspaces/channels";
 
     let currentWorkspaceId = $derived(page.params.workspaceId);
     let createChannelData = $state({
@@ -15,6 +24,7 @@
         name: "",
         topic: ""
     });
+    let currentWorkspaceDetails: WorkspaceDetails = $state(null);
 
     const defaultChartOptions = {
         chart: {
@@ -33,7 +43,7 @@
         noData: {
             text: "No data available",
         },
-        series: [{data:[]}],
+        series: [{data: []}],
         dataLabels: {
             enabled: false
         },
@@ -73,17 +83,16 @@
                 right: -10,
             },
         }
-    }
+    };
 
-    let stats = $state([
-        { label: "Messages", value: 1245, chartOptions: defaultChartOptions },
-        { label: "Visites", value: 125, chartOptions: defaultChartOptions },
-        { label: "Membres", value: 42 },
-        { label: "Canaux", value: 8 }
-    ]);
-
-    let members: WorksapceMember[] = $state([]);
+    let members: WorkspaceMember[] = $state([]);
     let channels = $state(workspaceChannelsStore.get());
+    let stats = $state([
+        {label: "Messages", value: 0, chartOptions: defaultChartOptions},
+        {label: "Visites", value: -1, chartOptions: defaultChartOptions},
+        {label: "Membres", value: 0},
+        {label: "Canaux", value: 0}
+    ]);
 
     $effect(() => {
         getWorkspaceMembers(currentWorkspaceId).then(result => members = result);
@@ -97,10 +106,27 @@
             })
     });
 
+    $effect(() => {
+        getWorkspaceDetails(currentWorkspaceId).then(result => {
+            currentWorkspaceDetails = result;
+            stats[0].value = result.messagesCount;
+            stats[2].value = result.membersCount;
+            stats[3].value = result.channelsCount;
+        });
+    });
+
+    onMount(() => {
+        return ws.subscribe("channel-created", msg => {
+            const channelCreated = msg.channel as Channel;
+            if (channelCreated.workspaceId !== currentWorkspaceId) return; // This is not supposed to happen but just in case (because it's handled by the server)
+            stats[3].value++;
+        })
+    })
+
     let recentActivities = [
-        { user: "Alice", action: "a ajouté un nouveau canal #design" },
-        { user: "Bob", action: "a rejoint le workspace" },
-        { user: "Charlie", action: "a modifié les permissions" }
+        {user: "Alice", action: "a ajouté un nouveau canal #design"},
+        {user: "Bob", action: "a rejoint le workspace"},
+        {user: "Charlie", action: "a modifié les permissions"}
     ];
 
     const createChannel = async () => {
@@ -117,83 +143,88 @@
     }
 </script>
 
-<div class="w-full h-full flex flex-col">
-    <div class="flex-1 overflow-y-auto space-y-4">
-        <div class="relative">
-            <img
-                    src={getS3ObjectUrl(S3Bucket.WORKSPACES_BANNERS, currentWorkspaceId)}
-                    alt={`Workspace banner ${currentWorkspaceId}`}
-                    class="w-full h-40 mb-6 object-cover"
-            />
-
-            <Avatar.Root class="absolute bottom-0 left-6 transform translate-y-1/2 w-20 h-20 rounded-full border-4 border-white shadow-lg overflow-hidden">
-                <Avatar.Image
-                        src={getS3ObjectUrl(S3Bucket.WORKSPACES_ICONS, currentWorkspaceId)}
-                        alt={`Workspace ${currentWorkspaceId}`}
-                        class="w-full h-full object-cover"
+{#if currentWorkspaceDetails}
+    <div class="w-full h-full flex flex-col">
+        <div class="flex-1 overflow-y-auto space-y-4">
+            <div class="relative">
+                <img
+                        src={getS3ObjectUrl(S3Bucket.WORKSPACES_BANNERS, currentWorkspaceId)}
+                        alt={`Workspace banner ${currentWorkspaceId}`}
+                        class="w-full h-40 mb-6 object-cover"
                 />
-            </Avatar.Root>
-        </div>
 
-
-        <div class="container mx-auto p-6">
-            <h1 class="text-2xl font-bold text-gray-800 dark:text-gray-200 mb-4">Workspace {currentWorkspaceId}</h1>
-
-            <div class="flex gap-4 mb-6">
-                <button class="bg-primary dark:bg-primary text-white px-4 py-2 rounded-lg shadow-md hover:bg-[#4B7986] duration-300">
-                    <InviteMemberDialog />
-                </button>
-                <button class="bg-primary dark:bg-primary text-white px-4 py-2 rounded-lg shadow-md hover:bg-[#4B7986] duration-300">
-                    <CreateChannelDialog {createChannelData} {createChannel} />
-                </button>
-                <button class="bg-primary dark:bg-primary text-white px-4 py-2 rounded-lg shadow-md hover:bg-[#4B7986] duration-300">
-                    <EditWorkspaceDialog />
-                </button>
+                <Avatar.Root
+                        class="absolute bottom-0 left-6 transform translate-y-1/2 w-20 h-20 rounded-full border-4 border-white shadow-lg overflow-hidden">
+                    <Avatar.Image
+                            src={getS3ObjectUrl(S3Bucket.WORKSPACES_ICONS, currentWorkspaceId)}
+                            alt={`Workspace ${currentWorkspaceId}`}
+                            class="w-full h-full object-cover"
+                    />
+                    <Avatar.Fallback>
+                        {fallbackAvatarLetters(currentWorkspaceDetails.name)}
+                    </Avatar.Fallback>
+                </Avatar.Root>
             </div>
 
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-                {#each stats as stat}
-                    <div class="bg-gray-100 dark:bg-gray-800 rounded-lg shadow-md text-left h-36">
-                        <p class="font-semibold pl-4 pt-4">{stat.label}</p>
-                        <p class="text-xl pl-4 pt-4">{stat.value}</p>
-                        {#if stat.chartOptions}
-                            <div use:chart={stat.chartOptions} class="w-full translate-y-[-1.55rem]"></div>
-                        {/if}
-                    </div>
-                {/each}
-            </div>
 
-            <div class="grid grid-cols-2 gap-6">
-                <div class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md">
-                    <h2 class="text-lg font-semibold mb-3">👥 Membres</h2>
-                    <ul>
-                        {#each members as member}
-                            <li class="p-2 border-b dark:border-gray-700">{member.pseudo}</li>
-                        {/each}
-                    </ul>
+            <div class="container mx-auto p-6">
+                <h1 class="text-2xl font-bold text-gray-800 dark:text-gray-200 mb-4">{currentWorkspaceDetails.name}</h1>
+
+                <div class="flex gap-4 mb-6">
+                    <button class="bg-primary dark:bg-primary text-white px-4 py-2 rounded-lg shadow-md hover:bg-[#4B7986] duration-300">
+                        <InviteMemberDialog/>
+                    </button>
+                    <button class="bg-primary dark:bg-primary text-white px-4 py-2 rounded-lg shadow-md hover:bg-[#4B7986] duration-300">
+                        <CreateChannelDialog {createChannelData} {createChannel}/>
+                    </button>
+                    <button class="bg-primary dark:bg-primary text-white px-4 py-2 rounded-lg shadow-md hover:bg-[#4B7986] duration-300">
+                        <EditWorkspaceDialog/>
+                    </button>
                 </div>
 
-                <div class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md">
-                    <h2 class="text-lg font-semibold mb-3">📢 Canaux</h2>
-                    <ul>
-                        {#each channels.data.channels as channel}
-                            <li class="p-2 border-b dark:border-gray-700"># {channel.name}</li>
-                        {/each}
-                    </ul>
-                </div>
-            </div>
-
-            <div class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md mt-6">
-                <h2 class="text-lg font-semibold mb-3">📝 Activités récentes</h2>
-                <ul>
-                    {#each recentActivities as activity}
-                        <li class="p-2 border-b">
-                            <span class="font-semibold">{activity.user}</span> {activity.action}
-                        </li>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                    {#each stats as stat}
+                        <div class="bg-gray-100 dark:bg-gray-800 rounded-lg shadow-md text-left h-36">
+                            <p class="font-semibold pl-4 pt-4">{stat.label}</p>
+                            <p class="text-xl pl-4 pt-4">{stat.value}</p>
+                            {#if stat.chartOptions}
+                                <div use:chart={stat.chartOptions} class="w-full translate-y-[-1.55rem]"></div>
+                            {/if}
+                        </div>
                     {/each}
-                </ul>
+                </div>
+
+                <div class="grid grid-cols-2 gap-6">
+                    <div class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md">
+                        <h2 class="text-lg font-semibold mb-3">👥 Membres</h2>
+                        <ul>
+                            {#each members as member}
+                                <li class="p-2 border-b dark:border-gray-700">{member.pseudo}</li>
+                            {/each}
+                        </ul>
+                    </div>
+
+                    <div class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md">
+                        <h2 class="text-lg font-semibold mb-3">📢 Canaux</h2>
+                        <ul>
+                            {#each channels.data.channels as channel}
+                                <li class="p-2 border-b dark:border-gray-700"># {channel.name}</li>
+                            {/each}
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md mt-6">
+                    <h2 class="text-lg font-semibold mb-3">📝 Activités récentes</h2>
+                    <ul>
+                        {#each recentActivities as activity}
+                            <li class="p-2 border-b">
+                                <span class="font-semibold">{activity.user}</span> {activity.action}
+                            </li>
+                        {/each}
+                    </ul>
+                </div>
             </div>
         </div>
     </div>
-</div>
-
+{/if}

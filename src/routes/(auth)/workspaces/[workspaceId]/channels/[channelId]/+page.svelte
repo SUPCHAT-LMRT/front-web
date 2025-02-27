@@ -107,6 +107,7 @@
     };
 
     const sendMessageToWs = () => {
+        if (currentMessage.trim() === "") return;
         ws.sendChannelMessage(currentRoom.id, currentMessage);
         currentMessage = "";
     };
@@ -200,7 +201,6 @@
                                     </div>
                                 </div>
                             {/if}
-
                         </div>
                     </ContextMenu.Trigger>
                     <ContextMenu.Content class="w-64">

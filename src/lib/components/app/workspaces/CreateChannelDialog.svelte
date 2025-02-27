@@ -3,8 +3,17 @@
     import { Input } from "$lib/components/ui/input";
     import { Textarea } from "$lib/components/ui/textarea";
     import { Button } from "$lib/components/ui/button";
-    export let createChannelData;
-    export let createChannel;
+
+    type Props = {
+        createChannelData: {
+            dialogOpen: boolean;
+            name: string;
+            topic: string;
+        };
+        createChannel: () => void;
+    }
+
+    const {createChannelData, createChannel}: Props = $props();
 </script>
 
 <Dialog.Root bind:open={createChannelData.dialogOpen}>
