@@ -2,6 +2,7 @@
     import { onMount } from 'svelte';
     import { getWorkspaceInviteLink } from '$lib/api/workspaces/workspace';
     import { page } from '$app/state'
+    import { joinWorkspace } from "$lib/api/workspaces/workspace";
 
     let error;
     let workspace;
@@ -15,9 +16,10 @@
         }
     });
 
-    const joinWorkspace = async () => {
+    const handleJoinWorkspace = async () => {
         try {
-            // Logic to join the workspace
+            await joinWorkspace(token);
+            window.location.href = "/app/workspaces";
         } catch (e) {
             error = "Erreur lors de la tentative de rejoindre le workspace.";
         }
@@ -31,7 +33,7 @@
             <p class="text-red-500 font-semibold">{error}</p>
         {:else if workspace}
             <h1 class="text-xl font-bold text-gray-900 dark:text-white">Invitation au workspace {workspace.workspaceName}</h1>
-            <button class="mt-4 bg-primary hover:hover:bg-[#4B7986] text-white font-bold py-2 px-4 rounded-lg" on:click={joinWorkspace}>
+            <button class="mt-4 bg-primary hover:hover:bg-[#4B7986] text-white font-bold py-2 px-4 rounded-lg" onclick={handleJoinWorkspace}>
                 Rejoindre le Workspace
             </button>
         {:else}

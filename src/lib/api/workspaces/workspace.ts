@@ -151,3 +151,12 @@ export const createWorkspaceInviteLink = async (workspaceId: string): Promise<st
         throw e;
     }
 }
+
+export const joinWorkspace = async (token: string): Promise<void> => {
+    try {
+        await baseClient.post(`/api/workspace-invite-link/${token}/join`);
+    } catch (e) {
+        console.error(e);
+        throw e;
+    }
+}
