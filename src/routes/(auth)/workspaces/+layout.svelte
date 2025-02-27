@@ -15,6 +15,7 @@
     import {Button} from "$lib/components/ui/button";
     import {page} from "$app/state";
     import ws from "$lib/api/ws";
+    import {fallbackAvatarLetters} from "$lib/utils/fallbackAvatarLetters.js";
 
     const currentWorkspaceId = $derived(page.url.pathname.split("/")?.[2]);
 
@@ -96,7 +97,7 @@
 
                                                             <Avatar.Fallback
                                                                     class="rounded-3xl transition-all hover:rounded-2xl hover:scale-105">
-                                                                {workspace.name[0].toUpperCase()}
+                                                                {fallbackAvatarLetters(workspace.name)}
                                                             </Avatar.Fallback>
                                                         </Avatar.Root>
                                                     </a>

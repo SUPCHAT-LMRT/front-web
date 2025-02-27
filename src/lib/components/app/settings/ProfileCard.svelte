@@ -6,6 +6,7 @@
     import {getS3ObjectUrl, S3Bucket} from "$lib/api/s3";
     import {page} from "$app/state";
     import * as Avatar from "$lib/components/ui/avatar";
+    import {fallbackAvatarLetters} from "$lib/utils/fallbackAvatarLetters.js";
 
     const {authenticatedUser} = $props();
 </script>
@@ -21,7 +22,7 @@
                         <Avatar.Image src={getS3ObjectUrl(S3Bucket.USERS_AVATARS, authenticatedUser.id)}/>
                         <Avatar.Fallback>
                             <div class="flex items-center justify-center w-full h-full bg-gray-200 text-gray-500 text-2xl font-bold rounded-full">
-                                {authenticatedUser.pseudo[0]}
+                                {fallbackAvatarLetters(authenticatedUser.pseudo)}
                             </div>
                         </Avatar.Fallback>
                     </Avatar.Root>

@@ -8,6 +8,7 @@
     import {page} from "$app/state";
     import recentChatsStore from "$lib/stores/recentChatsStore";
     import {StoreResultState} from "$lib/stores/store.svelte";
+    import {fallbackAvatarLetters} from "$lib/utils/fallbackAvatarLetters.js";
 
     const currentChatId = $derived(page.url.pathname.split("/").pop());
 
@@ -92,7 +93,7 @@
                                                           class="h-full w-full rounded-full object-cover"/>
                                             <Avatar.Fallback
                                                     class="flex items-center justify-center rounded-full h-full w-full">
-                                                {chat.name.slice(0, 2)}
+                                                {fallbackAvatarLetters(chat.name)}
                                             </Avatar.Fallback>
                                         </Avatar.Root>
                                         <span class="ml-4 text-sm text-gray-700">{chat.name}</span>

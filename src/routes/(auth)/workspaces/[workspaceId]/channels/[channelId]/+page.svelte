@@ -2,18 +2,18 @@
     import {page} from "$app/state";
     import ws from "$lib/api/ws";
     import {Input} from "$lib/components/ui/input";
-    import {AvatarFallback, AvatarImage} from "$lib/components/ui/avatar";
     import {getS3ObjectUrl, S3Bucket} from "$lib/api/s3";
     import {RoomKind} from "$lib/api/room";
     import * as Avatar from "$lib/components/ui/avatar";
     import {type ChannelMessage, getWorkspaceChannelMessages} from "$lib/api/workspaces/channels";
-    import {format, isToday, isYesterday} from "date-fns";
+    import {format} from "date-fns";
     import {fr} from "date-fns/locale";
     import {Tooltip, TooltipTrigger, TooltipContent} from "$lib/components/ui/tooltip";
     import * as ContextMenu from "$lib/components/ui/context-menu";
     import {formatDate} from "$lib/utils/formatDate";
     import {Pen, Trash2} from "lucide-svelte";
     import {scale} from "svelte/transition";
+    import {fallbackAvatarLetters} from "$lib/utils/fallbackAvatarLetters.js";
 
     const {authenticatedUser} = page.data;
 
@@ -49,7 +49,7 @@
                 currentRoom.messages = [
                     ...currentRoom.messages,
                     {
-                        id: msg.id,
+                        id: msg.messageId,
                         content: msg.content,
                         author: {
                             userId: msg.sender.userId,
@@ -140,8 +140,8 @@
 
                             {#if message.author !== null && message.author.userId !== currentUserId}
                                 <Avatar.Root class="flex-shrink-0">
-                                    <AvatarImage src={getS3ObjectUrl(S3Bucket.USERS_AVATARS, message.author.userId)}/>
-                                    <AvatarFallback>{message.author.workspacePseudo[0]}</AvatarFallback>
+                                    <Avatar.Image src={getS3ObjectUrl(S3Bucket.USERS_AVATARS, message.author.userId)}/>
+                                    <Avatar.Fallback>{fallbackAvatarLetters(message.author.workspacePseudo)}</Avatar.Fallback>
                                 </Avatar.Root>
                                 <div class="flex flex-col">
                                     <div class="flex items-center gap-2">
@@ -170,28 +170,32 @@
 
                             {#if message.author.userId === currentUserId}
                                 <div class="flex flex-col">
-                                    <Tooltip>
-                                        <TooltipTrigger class="text-left">
-                                            <span class="text-sm text-gray-500">
-                                                {formatDate(message.createdAt)}
-                                            </span>
-                                        </TooltipTrigger>
-                                        <TooltipContent>
-                                            {format(new Date(message.createdAt), "EEEE d MMMM yyyy à HH:mm", {locale: fr})}
-                                        </TooltipContent>
-                                    </Tooltip>
                                     <div class="flex flex-col gap-y-2">
-                                        <div class="flex items-center gap-2">
-                                            <span class="p-2 rounded-xl max-w-xs bg-primary text-white shadow-lg">
-                                                {message.content}
-                                            </span>
+                                        <div class="flex items-end gap-2 justify-end">
 
-                                            <Avatar.Root class="flex-shrink-0">
-                                                <AvatarImage
+                                            <div class="flex flex-col items-end gap-y-2">
+                                                <Tooltip>
+                                                    <TooltipTrigger class="text-left">
+                                                        <span class="text-sm text-gray-500">
+                                                            {formatDate(message.createdAt)}
+                                                        </span>
+                                                    </TooltipTrigger>
+                                                    <TooltipContent>
+                                                        {format(new Date(message.createdAt), "EEEE d MMMM yyyy à HH:mm", {locale: fr})}
+                                                    </TooltipContent>
+                                                </Tooltip>
+                                                <span class="p-2 rounded-xl max-w-xs bg-primary text-white shadow-lg w-max">
+                                                    {message.content}
+                                                </span>
+                                            </div>
+
+                                            <Avatar.Root class="flex-shrink-0 -translate-y-[2px] -p-[2px]">
+                                                <Avatar.Image
                                                         src={getS3ObjectUrl(S3Bucket.USERS_AVATARS, message.author.userId)}/>
-                                                <AvatarFallback>{message.author.workspacePseudo[0]}</AvatarFallback>
+                                                <Avatar.Fallback>{fallbackAvatarLetters(message.author.workspacePseudo)}</Avatar.Fallback>
                                             </Avatar.Root>
                                         </div>
+
                                         {@render messageReaction()}
                                     </div>
                                 </div>

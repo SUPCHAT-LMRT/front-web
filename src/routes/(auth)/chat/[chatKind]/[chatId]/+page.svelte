@@ -2,11 +2,11 @@
     import {page} from "$app/state";
     import ws from "$lib/api/ws";
     import {Input} from "$lib/components/ui/input";
-    import {AvatarFallback, AvatarImage} from "$lib/components/ui/avatar";
     import {getS3ObjectUrl, S3Bucket} from "$lib/api/s3";
     import {RoomKind} from "$lib/api/room";
     import * as Avatar from "$lib/components/ui/avatar";
     import {getGroupMessages, type GroupMessage} from "$lib/api/group/message";
+    import {fallbackAvatarLetters} from "$lib/utils/fallbackAvatarLetters.js";
 
     let currentChatId = $derived(page.params.chatId);
     let currentChatKind: RoomKind = $derived(RoomKind[page.params.chatKind as keyof typeof RoomKind]);
@@ -66,9 +66,9 @@
                     <!-- In case of system message for example -->
                     {#if message.author !== null}
                         <Avatar.Root>
-                            <AvatarImage
+                            <Avatar.Image
                                     src={getS3ObjectUrl(S3Bucket.USERS_AVATARS, message.author.userId)}/>
-                            <AvatarFallback>{message.author.pseudo[0]}</AvatarFallback>
+                            <Avatar.Fallback>{fallbackAvatarLetters(message.author.pseudo)}</Avatar.Fallback>
                         </Avatar.Root>
                         <span>{message.author.pseudo}</span>
                     {/if}
