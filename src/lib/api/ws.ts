@@ -57,7 +57,7 @@ class Ws {
         if (this.ws.readyState === WebSocket.OPEN) {
             this.ws.send(message);
         } else if (this.ws.readyState === WebSocket.CONNECTING) {
-            console.log("WebSocket still connecting, queuing message...");
+            console.log(`WebSocket still connecting, queuing message ${message.action}...`);
             this.messageQueue.push(message);
         } else {
             console.log("WebSocket not connected, discarding message.");
@@ -84,18 +84,15 @@ class Ws {
         }
     }
 
-    private handleRoomJoined = (msg) => {
-        const room = msg.target;
+    private handleRoomJoined = ({room}: { room: { id: string, kind: RoomKind } }) => {
         setCurrentOpenedRoom(room.id, this.mapRoomKind(room.kind));
     }
 
-    public sendMessage = (roomId, message) => {
+    public sendChannelMessage = (roomId, message) => {
         this.send(JSON.stringify({
-            action: 'send-message',
-            message: message,
-            target: {
-                id: roomId,
-            }
+            action: 'send-channel-message',
+            content: message,
+            channelId: roomId
         }));
     }
 
@@ -105,32 +102,30 @@ class Ws {
             this.leaveRoom(currentOpenedRoom.id);
         }
 
-        let action: string;
         switch (roomKind) {
             case RoomKind.DIRECT:
-                action = "join-direct-room";
+                this.send(JSON.stringify({action: "join-direct-room", message: roomId}));
                 break;
             case RoomKind.GROUP:
-                action = "join-group-room";
+                this.send(JSON.stringify({action: "join-group-room", message: roomId}));
                 break;
             case RoomKind.CHANNEL:
-                action = "join-channel-room";
+                this.send(JSON.stringify({action: "join-channel-room", channelId: roomId}));
                 break;
             default:
                 throw new Error("Invalid room kind " + roomKind);
         }
 
-        this.send(JSON.stringify({action: action, message: roomId}));
     }
 
-    public asyncJoinRoom = async (roomId: string, roomKind: RoomKind): Promise<string> => {
-        return new Promise<string>((resolve) => {
-            this.joinRoom(roomId, roomKind);
-
+    public asyncJoinRoom = async (roomId: string, roomKind: RoomKind): Promise<{ id: string, kind: RoomKind }> => {
+        return new Promise<{ id: string, kind: RoomKind }>((resolve) => {
             const unsubscribe = this.subscribe("room-joined", (msg) => {
-                resolve(msg.target.id);
+                resolve(msg.room);
                 unsubscribe();
             });
+
+            this.joinRoom(roomId, roomKind);
         })
     }
 
@@ -140,17 +135,24 @@ class Ws {
             this.unselectWorkspace();
         }
         setCurrentSelectedWorkspace(workspaceId);
-        this.send(JSON.stringify({action: 'select-workspace', message: workspaceId}));
+        this.send(JSON.stringify({action: 'select-workspace', workspaceId: workspaceId}));
     }
 
     public unselectWorkspace = () => {
+        if (getCurrentSelectedWorkspace() === "") {
+            return;
+        }
         setCurrentSelectedWorkspace("");
         this.send(JSON.stringify({action: 'unselect-workspace'}));
     }
 
     public leaveRoom = (roomId) => {
         setCurrentOpenedRoom("", RoomKind.UNKNOWN);
-        this.send(JSON.stringify({action: 'leave-room', message: roomId}));
+        this.send(JSON.stringify({action: 'leave-room', roomId: roomId}));
+    }
+
+    public toggleChannelMessageReaction = (roomId: string, messageId: string, reaction: string) => {
+        this.send(JSON.stringify({action: 'channel-message-reaction-toggle', roomId, messageId, reaction}));
     }
 
     public subscribe = (action: string, callback: (msg) => void): () => void => {

@@ -4,7 +4,7 @@
     import * as Tooltip from "$lib/components/ui/tooltip";
     import * as Dialog from "$lib/components/ui/dialog";
     import workspacesStore from "$lib/stores/workspacesStore";
-    import {onMount} from "svelte";
+    import {onDestroy, onMount} from "svelte";
     import {Globe, Plus} from "lucide-svelte";
     import {Input} from "$lib/components/ui/input";
     import {Label} from "$lib/components/ui/label";
@@ -14,6 +14,7 @@
     import {WorkspaceType} from "$lib/api/workspaces/workspace";
     import {Button} from "$lib/components/ui/button";
     import {page} from "$app/state";
+    import ws from "$lib/api/ws";
 
     const currentWorkspaceId = $derived(page.url.pathname.split("/")?.[2]);
 
@@ -52,6 +53,10 @@
         }
     }
 
+    onDestroy(() => {
+        ws.unselectWorkspace();
+    })
+
     let {children} = $props();
 </script>
 
@@ -89,7 +94,8 @@
                                                                 />
                                                             {/key}
 
-                                                            <Avatar.Fallback class="rounded-3xl transition-all hover:rounded-2xl hover:scale-105">
+                                                            <Avatar.Fallback
+                                                                    class="rounded-3xl transition-all hover:rounded-2xl hover:scale-105">
                                                                 {workspace.name[0].toUpperCase()}
                                                             </Avatar.Fallback>
                                                         </Avatar.Root>
@@ -148,7 +154,7 @@
                                                     <Input onchange={({currentTarget}) => {
                                                         workspaceIconImage = currentTarget.files?.[0];
                                                     }} id="picture" type="file"
-                                                           accept="image/png, image/jpeg, image/webp" />
+                                                           accept="image/png, image/jpeg, image/webp"/>
                                                 </div>
                                                 <RadioGroup.Root bind:value={type} class="pt-4">
                                                     <div class="flex items-center space-x-2">
@@ -199,5 +205,5 @@
         </Sidebar.Content>
     </Sidebar.Root>
 
-    {@render children()}
+    {@render children?.()}
 </div>
