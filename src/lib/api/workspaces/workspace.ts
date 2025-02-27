@@ -112,3 +112,23 @@ export const getWorkspaceTimeSeries = (workspaceId: string): WorkspaceTimeSeries
         }
     }
 }
+
+export const getWorkspaceInviteLink = async (token: string): Promise<string> => {
+    try {
+        const { data } = await baseClient.get(`/api/workspace-invite-link/${token}`);
+        return data;
+    } catch (e) {
+        console.error(e);
+        throw e;
+    }
+}
+
+export const createWorkspaceInviteLink = async (workspaceId: string): Promise<string> => {
+    try {
+        const { data } = await baseClient.post(`/api/workspace-invite-link`, {workspaceId});
+        return data;
+    } catch (e) {
+        console.error(e);
+        throw e;
+    }
+}

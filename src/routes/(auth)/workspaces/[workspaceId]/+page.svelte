@@ -170,17 +170,17 @@
             <div class="container mx-auto p-6">
                 <h1 class="text-2xl font-bold text-gray-800 dark:text-gray-200 mb-4">{currentWorkspaceDetails.name}</h1>
 
-                <div class="flex gap-4 mb-6">
-                    <button class="bg-primary dark:bg-primary text-white px-4 py-2 rounded-lg shadow-md hover:bg-[#4B7986] duration-300">
-                        <InviteMemberDialog/>
-                    </button>
-                    <button class="bg-primary dark:bg-primary text-white px-4 py-2 rounded-lg shadow-md hover:bg-[#4B7986] duration-300">
-                        <CreateChannelDialog {createChannelData} {createChannel}/>
-                    </button>
-                    <button class="bg-primary dark:bg-primary text-white px-4 py-2 rounded-lg shadow-md hover:bg-[#4B7986] duration-300">
-                        <EditWorkspaceDialog/>
-                    </button>
-                </div>
+            <div class="flex gap-4 mb-6">
+                <button class="bg-primary dark:bg-primary text-white px-4 py-2 rounded-lg shadow-md hover:bg-[#4B7986] duration-300">
+                    <InviteMemberDialog workspaceId={currentWorkspaceId} />
+                </button>
+                <button class="bg-primary dark:bg-primary text-white px-4 py-2 rounded-lg shadow-md hover:bg-[#4B7986] duration-300">
+                    <CreateChannelDialog {createChannelData} {createChannel} />
+                </button>
+                <button class="bg-primary dark:bg-primary text-white px-4 py-2 rounded-lg shadow-md hover:bg-[#4B7986] duration-300">
+                    <EditWorkspaceDialog />
+                </button>
+            </div>
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
                     {#each stats as stat}
