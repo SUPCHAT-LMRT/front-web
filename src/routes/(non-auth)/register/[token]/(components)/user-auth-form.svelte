@@ -1,20 +1,22 @@
 <script lang="ts">
-    import { Button, buttonVariants } from "$lib/components/ui/button/index.js";
-    import { Input } from "$lib/components/ui/input/index.js";
-    import { Label } from "$lib/components/ui/label/index.js";
-    import { Loader } from "lucide-svelte";
-    import { Calendar1 } from "lucide-svelte";
+    import {onMount} from "svelte";
+    import {Button, buttonVariants} from "$lib/components/ui/button";
+    import {Input} from "$lib/components/ui/input";
+    import {Label} from "$lib/components/ui/label";
+    import {Loader} from "lucide-svelte";
+    import {Calendar1} from "lucide-svelte";
     import {
         DateFormatter,
         type DateValue,
         getLocalTimeZone
     } from "@internationalized/date";
-    import { cn } from "$lib/utils.js";
+    import {cn} from "$lib/utils.js";
     import * as Popover from "$lib/components/ui/popover";
-    import { registerUser } from "$lib/api/user";
+    import {registerUser, getInviteLinkData} from "$lib/api/user";
     import CalendarNew from "./CalendarNew.svelte";
-    import { goto } from "$lib/utils/goto";
-    import { success, notifyByLevel } from "$lib/toast/toast";
+    import {goto} from "$lib/utils/goto";
+    import {success, notifyByLevel} from "$lib/toast/toast";
+    import {page} from "$app/state";
 
     const df = new DateFormatter("en-US", {
         dateStyle: "long"
@@ -24,7 +26,7 @@
     let contentRef = $state<HTMLElement | null>(null);
 
     let className: string | undefined | null = $state("undefined");
-    export { className as class };
+    export {className as class};
 
     let isLoading = $state(false);
     let email = $state("");
@@ -33,6 +35,19 @@
     let firstName = $state("");
     let lastName = $state("");
     let pseudo = $state("");
+
+    const {token} = page.params;
+
+    onMount(async () => {
+        try {
+            const inviteData = await getInviteLinkData(token);
+            email = inviteData.email;
+            firstName = inviteData.firstName;
+            lastName = inviteData.lastName;
+        } catch (error) {
+            console.error("Error fetching invite link data:", error);
+        }
+    });
 
     function formatToISODate(value: DateValue, timeZone: string): string {
         const date = value.toDate(timeZone);
@@ -62,7 +77,7 @@
             const title = "Erreur lors de l'inscription";
             const level: 'warning' | 'error' = errorData.level || 'error';
             const message = errorData.messageDisplay || "Une erreur est survenue";
-            notifyByLevel({ title, level, message });
+            notifyByLevel({title, level, message});
         } finally {
             isLoading = false;
         }

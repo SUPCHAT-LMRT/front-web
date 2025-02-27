@@ -115,3 +115,13 @@ export const getLoginUser = async (): Promise<User> => {
         throw e;
     }
 }
+
+export const getInviteLinkData = async (token: string): Promise<User> => {
+    try {
+        const { data } = await baseClient.get(`/api/account/invite-link/${token}`);
+        return data;
+    } catch (e) {
+        console.error(e);
+        throw e;
+    }
+}
