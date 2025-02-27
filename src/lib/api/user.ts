@@ -19,16 +19,12 @@ export type AuthResponse = {
 };
 
 export const registerUser = async (
-    email: string,
+    token: string,
     password: string,
     passwordConfirmation: string,
-    firstName: string,
-    lastName: string,
-    pseudo: string,
-    birthDate: string
 ): Promise<AuthResponse> => {
     try {
-        const { data } = await baseClient.post("/api/account/auth/register", { email, password, passwordConfirmation, firstName, lastName, pseudo, birthDate });
+        const { data } = await baseClient.post("/api/account/auth/register", { token, password, passwordConfirmation });
         return data;
     } catch (e) {
         console.error(e);

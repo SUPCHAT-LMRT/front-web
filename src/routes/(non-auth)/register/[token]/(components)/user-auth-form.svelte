@@ -49,24 +49,13 @@
         }
     });
 
-    function formatToISODate(value: DateValue, timeZone: string): string {
-        const date = value.toDate(timeZone);
-        const normalizedDate = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
-        return normalizedDate.toISOString().slice(0, 10);
-    }
-
     async function onSubmit() {
         isLoading = true;
         try {
-            const formattedBirthDate = value ? formatToISODate(value, getLocalTimeZone()) : "";
             const response = await registerUser(
-                email,
+                token,
                 password,
                 passwordConfirmation,
-                firstName,
-                lastName,
-                pseudo,
-                formattedBirthDate
             );
             console.log("User registered successfully:", response);
             goto("/login");
@@ -105,7 +94,7 @@
                         autocomplete="email"
                         autocorrect="off"
                         bind:value={email}
-                        disabled={isLoading}
+                        disabled={true}
                 />
                 <Label class="sr-only" for="password">Password</Label>
                 <Input
@@ -130,7 +119,7 @@
                             placeholder="First Name"
                             type="text"
                             bind:value={firstName}
-                            disabled={isLoading}
+                            disabled={true}
                     />
                     <Label class="sr-only" for="lastName">Last Name</Label>
                     <Input
@@ -138,35 +127,9 @@
                             placeholder="Last Name"
                             type="text"
                             bind:value={lastName}
-                            disabled={isLoading}
+                            disabled={true}
                     />
                 </div>
-                <Label class="sr-only" for="pseudo">Pseudo</Label>
-                <Input
-                        id="pseudo"
-                        placeholder="Pseudo"
-                        type="text"
-                        bind:value={pseudo}
-                        disabled={isLoading}
-                />
-                <Label class="sr-only" for="birthDate">Birth Date</Label>
-                <Popover.Root>
-                    <Popover.Trigger
-                            class={cn(
-                                          buttonVariants({
-                                            variant: "outline",
-                                            class: "w-[380px] justify-start text-left font-normal"
-                                          }),
-                                          !value && "text-muted-foreground"
-                                        )}
-                    >
-                        <Calendar1/>
-                        {value ? df.format(value.toDate(getLocalTimeZone())) : "Pick a date"}
-                    </Popover.Trigger>
-                    <Popover.Content bind:ref={contentRef} class="w-auto p-0">
-                        <CalendarNew bind:value id="birthDate" disabled={isLoading} type="single"/>
-                    </Popover.Content>
-                </Popover.Root>
             </div>
             <Button class="bg-[#61A0AF] dark:text-white" type="submit" disabled={isLoading}>
                 {#if isLoading}
