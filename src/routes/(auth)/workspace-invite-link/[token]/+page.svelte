@@ -3,6 +3,7 @@
     import { getWorkspaceInviteLink } from '$lib/api/workspaces/workspace';
     import { page } from '$app/state'
     import { joinWorkspace } from "$lib/api/workspaces/workspace";
+    import {goto} from "$app/navigation";
 
     let error;
     let workspace;
@@ -19,7 +20,7 @@
     const handleJoinWorkspace = async () => {
         try {
             await joinWorkspace(token);
-            window.location.href = "/app/workspaces";
+            goto("/workspaces/" + workspace.id);
         } catch (e) {
             error = "Erreur lors de la tentative de rejoindre le workspace.";
         }
