@@ -4,9 +4,12 @@
     import { Toaster } from "$lib/components/ui/sonner/index.js";
     import Validate from "$lib/components/app/icon/Validate.svelte";
     import Error from "$lib/components/app/icon/Error.svelte";
+    import { ModeWatcher } from "mode-watcher";
 
     let {children} = $props();
 </script>
+
+<ModeWatcher />
 
 <div class="app">
     <Sidebar.Provider>

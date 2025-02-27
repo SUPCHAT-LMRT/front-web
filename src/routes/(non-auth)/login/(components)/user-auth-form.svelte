@@ -39,13 +39,6 @@
 </script>
 
 <div class={cn("grid gap-6", className)}>
-    <Button
-            href="/register"
-            variant="ghost"
-            class="absolute right-2 top-2"
-    >
-        S'enregistrer
-    </Button>
     <form onsubmit={preventDefault(onSubmit)}>
         <div class="grid gap-2">
             <div class="grid gap-1">
@@ -88,7 +81,7 @@
                     Mot de passe oublié ?
                 </Button>
             </div>
-            <Button class="bg-[#61A0AF]" type="submit" disabled={isSubmitting}
+            <Button class="bg-[#61A0AF] dark:text-white" type="submit" disabled={isSubmitting}
             >
                 {#if isSubmitting}
                     <Loader class="mr-2 h-4 w-4 animate-spin" />
@@ -102,7 +95,7 @@
             <span class="w-full border-t"></span>
         </div>
         <div class="relative flex justify-center text-xs uppercase">
-            <span class="bg-background text-muted-foreground px-2"> Ou continuer avec </span>
+            <span class="bg-background dark:bg-gray-900 text-muted-foreground px-2 dark:text-white"> Ou continuer avec </span>
         </div>
     </div>
     <div class="flex gap-1">

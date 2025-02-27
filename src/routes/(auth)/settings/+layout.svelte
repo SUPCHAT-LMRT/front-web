@@ -34,30 +34,30 @@
     let { children } = $props();
 </script>
 
-<section class="ml-15 border-l-2 border-gray-200 ">
+<section class="ml-15 border-l-2 border-gray-200 dark:border-gray-800 dark:bg-gray-800 w-full">
         <div class="flex flex-col px-4 py-2">
             <section>
                 <div class="flex items-end mb-4">
-                    <h1 class="text-3xl font-bold text-gray-700">Paramètres</h1>
+                    <h1 class="text-3xl font-bold text-gray-700 dark:text-gray-200">Paramètres</h1>
                     <span class="mx-2 mb-1">-</span>
-                    <span class="text-gray-700 text-lg font-semibold">{activeTab.displayName}</span>
+                    <span class="text-gray-700 text-lg font-semibold dark:text-gray-200">{activeTab.displayName}</span>
                 </div>
             </section>
 
             <section>
                 <div>
                     <Tabs.Root value={activeTab.label}>
-                        <Tabs.List class="ml-auto">
-                            <Tabs.Trigger value="account" class="text-gray-600" onclick={() => handleTabChange({displayName: "Mon compte", label: "account"}, "/settings/account")}>
+                        <Tabs.List class="ml-auto dark:bg-gray-900">
+                            <Tabs.Trigger value="account" class="text-gray-600 dark:text-gray-200" onclick={() => handleTabChange({displayName: "Mon compte", label: "account"}, "/settings/account")}>
                                 Mon compte
                             </Tabs.Trigger>
-                            <Tabs.Trigger value="connections" class="text-gray-600" onclick={() => handleTabChange({displayName: "Connexion", label: "connections"}, "/settings/connection")}>
+                            <Tabs.Trigger value="connections" class="text-gray-600 dark:text-gray-200" onclick={() => handleTabChange({displayName: "Connexion", label: "connections"}, "/settings/connection")}>
                                 Connexion
                             </Tabs.Trigger>
-                            <Tabs.Trigger value="voiceAndVideo" class="text-gray-600" onclick={() => handleTabChange({displayName: "Voix & Vidéo", label: "voiceAndVideo"}, "/settings/voice")}>
+                            <Tabs.Trigger value="voiceAndVideo" class="text-gray-600 dark:text-gray-200" onclick={() => handleTabChange({displayName: "Voix & Vidéo", label: "voiceAndVideo"}, "/settings/voice")}>
                                 Voix & Vidéo
                             </Tabs.Trigger>
-                            <Tabs.Trigger value="languages" class="text-gray-600" onclick={() => handleTabChange({displayName: "Langues", label: "languages"}, "/settings/language")}>
+                            <Tabs.Trigger value="languages" class="text-gray-600 dark:text-gray-200" onclick={() => handleTabChange({displayName: "Langues", label: "languages"}, "/settings/language")}>
                                 Langues
                             </Tabs.Trigger>
                         </Tabs.List>

@@ -117,82 +117,83 @@
     }
 </script>
 
+<div class="w-full h-full flex flex-col">
+    <div class="flex-1 overflow-y-auto space-y-4">
+        <div class="relative">
+            <img
+                    src={getS3ObjectUrl(S3Bucket.WORKSPACES_BANNERS, currentWorkspaceId)}
+                    alt={`Workspace banner ${currentWorkspaceId}`}
+                    class="w-full h-40 mb-6 object-cover"
+            />
+
+            <Avatar.Root class="absolute bottom-0 left-6 transform translate-y-1/2 w-20 h-20 rounded-full border-4 border-white shadow-lg overflow-hidden">
+                <Avatar.Image
+                        src={getS3ObjectUrl(S3Bucket.WORKSPACES_ICONS, currentWorkspaceId)}
+                        alt={`Workspace ${currentWorkspaceId}`}
+                        class="w-full h-full object-cover"
+                />
+            </Avatar.Root>
+        </div>
 
 
-<div class="relative">
-    <img
-            src={getS3ObjectUrl(S3Bucket.WORKSPACES_BANNERS, currentWorkspaceId)}
-            alt={`Workspace banner ${currentWorkspaceId}`}
-            class="w-full h-40 mb-6 object-cover"
-    />
+        <div class="container mx-auto p-6">
+            <h1 class="text-2xl font-bold text-gray-800 dark:text-gray-200 mb-4">Workspace {currentWorkspaceId}</h1>
 
-    <Avatar.Root class="absolute bottom-0 left-6 transform translate-y-1/2 w-20 h-20 rounded-full border-4 border-white shadow-lg overflow-hidden">
-        <Avatar.Image
-                src={getS3ObjectUrl(S3Bucket.WORKSPACES_ICONS, currentWorkspaceId)}
-                alt={`Workspace ${currentWorkspaceId}`}
-                class="w-full h-full object-cover"
-        />
-    </Avatar.Root>
-</div>
-
-
-<div class="container mx-auto p-6">
-    <h1 class="text-2xl font-bold text-gray-800 mb-4">Workspace {currentWorkspaceId}</h1>
-
-    <div class="flex gap-4 mb-6">
-        <button class="bg-primary text-white px-4 py-2 rounded-lg shadow-md hover:bg-[#4B7986] duration-300">
-            <InviteMemberDialog />
-        </button>
-        <button class="bg-primary text-white px-4 py-2 rounded-lg shadow-md hover:bg-[#4B7986] duration-300">
-            <CreateChannelDialog {createChannelData} {createChannel} />
-        </button>
-        <button class="bg-primary text-white px-4 py-2 rounded-lg shadow-md hover:bg-[#4B7986] duration-300">
-            <EditWorkspaceDialog />
-        </button>
-    </div>
-
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        {#each stats as stat}
-            <div class="bg-gray-100 rounded-lg shadow-md text-left h-36">
-                <p class="font-semibold pl-4 pt-4">{stat.label}</p>
-                <p class="text-xl pl-4 pt-4">{stat.value}</p>
-                {#if stat.chartOptions}
-                    <div use:chart={stat.chartOptions} class="w-full translate-y-[-1.55rem]"></div>
-                {/if}
+            <div class="flex gap-4 mb-6">
+                <button class="bg-primary dark:bg-primary text-white px-4 py-2 rounded-lg shadow-md hover:bg-[#4B7986] duration-300">
+                    <InviteMemberDialog />
+                </button>
+                <button class="bg-primary dark:bg-primary text-white px-4 py-2 rounded-lg shadow-md hover:bg-[#4B7986] duration-300">
+                    <CreateChannelDialog {createChannelData} {createChannel} />
+                </button>
+                <button class="bg-primary dark:bg-primary text-white px-4 py-2 rounded-lg shadow-md hover:bg-[#4B7986] duration-300">
+                    <EditWorkspaceDialog />
+                </button>
             </div>
-        {/each}
-    </div>
 
-
-
-    <div class="grid grid-cols-2 gap-6">
-        <div class="bg-white p-4 rounded-lg shadow-md">
-            <h2 class="text-lg font-semibold mb-3">👥 Membres</h2>
-            <ul>
-                {#each members as member}
-                    <li class="p-2 border-b">{member.pseudo}</li>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                {#each stats as stat}
+                    <div class="bg-gray-100 dark:bg-gray-800 rounded-lg shadow-md text-left h-36">
+                        <p class="font-semibold pl-4 pt-4">{stat.label}</p>
+                        <p class="text-xl pl-4 pt-4">{stat.value}</p>
+                        {#if stat.chartOptions}
+                            <div use:chart={stat.chartOptions} class="w-full translate-y-[-1.55rem]"></div>
+                        {/if}
+                    </div>
                 {/each}
-            </ul>
-        </div>
+            </div>
 
-        <div class="bg-white p-4 rounded-lg shadow-md">
-            <h2 class="text-lg font-semibold mb-3">📢 Canaux</h2>
-            <ul>
-                {#each channels.data.channels as channel}
-                    <li class="p-2 border-b"># {channel.name}</li>
-                {/each}
-            </ul>
-        </div>
-    </div>
+            <div class="grid grid-cols-2 gap-6">
+                <div class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md">
+                    <h2 class="text-lg font-semibold mb-3">👥 Membres</h2>
+                    <ul>
+                        {#each members as member}
+                            <li class="p-2 border-b dark:border-gray-700">{member.pseudo}</li>
+                        {/each}
+                    </ul>
+                </div>
 
-    <div class="bg-white p-4 rounded-lg shadow-md mt-6">
-        <h2 class="text-lg font-semibold mb-3">📝 Activités récentes</h2>
-        <ul>
-            {#each recentActivities as activity}
-                <li class="p-2 border-b">
-                    <span class="font-semibold">{activity.user}</span> {activity.action}
-                </li>
-            {/each}
-        </ul>
+                <div class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md">
+                    <h2 class="text-lg font-semibold mb-3">📢 Canaux</h2>
+                    <ul>
+                        {#each channels.data.channels as channel}
+                            <li class="p-2 border-b dark:border-gray-700"># {channel.name}</li>
+                        {/each}
+                    </ul>
+                </div>
+            </div>
+
+            <div class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md mt-6">
+                <h2 class="text-lg font-semibold mb-3">📝 Activités récentes</h2>
+                <ul>
+                    {#each recentActivities as activity}
+                        <li class="p-2 border-b">
+                            <span class="font-semibold">{activity.user}</span> {activity.action}
+                        </li>
+                    {/each}
+                </ul>
+            </div>
+        </div>
     </div>
 </div>
+
