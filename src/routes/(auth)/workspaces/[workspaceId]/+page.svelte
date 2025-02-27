@@ -7,7 +7,7 @@
     import {
         getWorkspaceDetails,
         getWorkspaceMembers,
-        getWorkspaceTimeSeries, type WorkspaceDetails,
+        getWorkspaceTimeSeries, updateWorkspaceBanner, type WorkspaceDetails,
         type WorkspaceMember
     } from "$lib/api/workspaces/workspace";
     import {getS3ObjectUrl, S3Bucket} from "$lib/api/s3";
@@ -17,6 +17,12 @@
     import {onMount} from "svelte";
     import ws from "$lib/api/ws";
     import type {Channel} from "$lib/api/workspaces/channels";
+    import {ImageDown} from "lucide-svelte";
+    import * as Dialog from '$lib/components/ui/dialog';
+    import {Button, buttonVariants} from '$lib/components/ui/button';
+    import {Label} from '$lib/components/ui/label';
+    import {Input} from '$lib/components/ui/input';
+
 
     let currentWorkspaceId = $derived(page.params.workspaceId);
     let createChannelData = $state({
@@ -94,6 +100,8 @@
         {label: "Canaux", value: 0}
     ]);
 
+    let forceRenderBanner = $state(0);
+
     $effect(() => {
         getWorkspaceMembers(currentWorkspaceId).then(result => members = result);
 
@@ -141,6 +149,25 @@
             console.error(e);
         }
     }
+
+    const updateBanner = async (file: File) => {
+        try {
+            await updateWorkspaceBanner(currentWorkspaceId, file);
+            forceRenderBanner = Date.now();
+        } catch (e) {
+            console.error(e);
+        }
+    }
+
+    const handleFormSubmit = (event: Event) => {
+        event.preventDefault();
+        const form = event.target as HTMLFormElement;
+        const input = form.querySelector("input[type=file]") as HTMLInputElement;
+        console.log(input);
+        if (input.files && input.files[0]) {
+            updateBanner(input.files[0]);
+        }
+    }
 </script>
 
 {#if currentWorkspaceDetails}
@@ -148,13 +175,13 @@
         <div class="flex-1 overflow-y-auto space-y-4">
             <div class="relative">
                 <img
-                        src={getS3ObjectUrl(S3Bucket.WORKSPACES_BANNERS, currentWorkspaceId)}
+                        src="{getS3ObjectUrl(S3Bucket.WORKSPACES_BANNERS, currentWorkspaceId)}?{forceRenderBanner}"
                         alt={`Workspace banner ${currentWorkspaceId}`}
                         class="w-full h-40 mb-6 object-cover"
                 />
 
                 <Avatar.Root
-                        class="absolute bottom-0 left-6 transform translate-y-1/2 w-20 h-20 rounded-full border-4 border-white shadow-lg overflow-hidden">
+                        class="absolute bottom-0 left-6 transform translate-y-1/2 w-20 h-20 rounded-full border-4 border-white shadow-lg overflow-hidden bg-white">
                     <Avatar.Image
                             src={getS3ObjectUrl(S3Bucket.WORKSPACES_ICONS, currentWorkspaceId)}
                             alt={`Workspace ${currentWorkspaceId}`}
@@ -170,17 +197,39 @@
             <div class="container mx-auto p-6">
                 <h1 class="text-2xl font-bold text-gray-800 dark:text-gray-200 mb-4">{currentWorkspaceDetails.name}</h1>
 
-            <div class="flex gap-4 mb-6">
-                <button class="bg-primary dark:bg-primary text-white px-4 py-2 rounded-lg shadow-md hover:bg-[#4B7986] duration-300">
-                    <InviteMemberDialog workspaceId={currentWorkspaceId} />
-                </button>
-                <button class="bg-primary dark:bg-primary text-white px-4 py-2 rounded-lg shadow-md hover:bg-[#4B7986] duration-300">
-                    <CreateChannelDialog {createChannelData} {createChannel} />
-                </button>
-                <button class="bg-primary dark:bg-primary text-white px-4 py-2 rounded-lg shadow-md hover:bg-[#4B7986] duration-300">
-                    <EditWorkspaceDialog />
-                </button>
-            </div>
+                <div class="flex justify-between items-center mb-6">
+                    <div class="flex gap-4 mb-6">
+                        <button class="bg-primary dark:bg-primary text-white px-4 py-2 rounded-lg shadow-md hover:bg-[#4B7986] duration-300">
+                            <InviteMemberDialog workspaceId={currentWorkspaceId}/>
+                        </button>
+                        <button class="bg-primary dark:bg-primary text-white px-4 py-2 rounded-lg shadow-md hover:bg-[#4B7986] duration-300">
+                            <CreateChannelDialog {createChannelData} {createChannel}/>
+                        </button>
+                        <button class="bg-primary dark:bg-primary text-white px-4 py-2 rounded-lg shadow-md hover:bg-[#4B7986] duration-300">
+                            <EditWorkspaceDialog/>
+                        </button>
+                    </div>
+                    <div>
+                        <Dialog.Root>
+                            <Dialog.Trigger class={buttonVariants({ variant: "ghost" })}>
+                                <ImageDown class="w-6 h-6 text-gray-500 dark:text-gray-400 cursor-pointer"/>
+                            </Dialog.Trigger>
+                            <Dialog.Content class="sm:max-w-[425px] dark:bg-gray-800">
+                                <form onsubmit="{handleFormSubmit}">
+                                    <div class="grid w-full max-w-sm items-center gap-1.5 pt-2 pb-2 dark:text-gray-300">
+                                        <Label for="picture">Picture</Label>
+                                        <Input id="picture" type="file" accept="image/*" class="w-full dark:bg-gray-700 dark:border-gray-700"/>
+                                    </div>
+                                    <Dialog.Footer>
+                                        <Dialog.Close>
+                                            <Button type="submit">Changer</Button>
+                                        </Dialog.Close>
+                                    </Dialog.Footer>
+                                </form>
+                            </Dialog.Content>
+                        </Dialog.Root>
+                    </div>
+                </div>
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
                     {#each stats as stat}

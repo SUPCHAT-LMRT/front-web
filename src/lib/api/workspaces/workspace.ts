@@ -78,6 +78,25 @@ export const updateWorkspaceIcon = async (
     }
 };
 
+export const updateWorkspaceBanner = async (
+    workspaceId: string,
+    image: File,
+): Promise<Workspace> => {
+    try {
+        const formData = new FormData();
+        formData.append("image", new Blob([image], {type: image.type}), image.name);
+        const {data} = await baseClient.put(`/api/workspaces/${workspaceId}/banner`, formData, {
+            headers: {
+                "Content-Type": "multipart/form-data",
+            },
+        })
+        return data;
+    } catch (e) {
+        console.error(e);
+        throw e;
+    }
+}
+
 export const getWorkspaceMembers = async (
     workspaceId: string,
 ): Promise<WorkspaceMember[]> => {
