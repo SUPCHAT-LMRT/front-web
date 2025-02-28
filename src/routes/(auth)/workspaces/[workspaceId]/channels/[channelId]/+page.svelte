@@ -281,7 +281,7 @@
     </div>
 
     {#if currentChannel}
-        <div class="p-2 border-none border-t-[2px] bg-gray-100 dark:bg-gray-800 border-t-primary max-h-12 overflow-y-auto w-full break-all"
+        <div class="p-2 border-none border-t-[2px] bg-gray-100 dark:bg-gray-800 border-t-primary max-h-12 overflow-y-auto w-full break-all cursor-text"
              contenteditable
              placeholder="Écrivez un message dans #{currentChannel.name}"
              bind:this={inputElement}
@@ -297,5 +297,6 @@
         position: absolute;
         color: gray;
         background-color: transparent;
+        cursor: text;
     }
 </style>
