@@ -2,6 +2,7 @@ import {getCurrentOpenedRoom, setCurrentOpenedRoom} from "./currentOpenedRoom.js
 import {RoomKind} from "./room";
 import {env} from '$env/dynamic/public';
 import {getCurrentSelectedWorkspace, setCurrentSelectedWorkspace} from "$lib/api/currentSelectedWorkspace";
+import {refreshAccessToken} from "$lib/api/user";
 
 class Ws {
     private subscribers = [];
@@ -13,7 +14,8 @@ class Ws {
         this.initWebSocket();
     }
 
-    private initWebSocket = () => {
+    private initWebSocket = async () => {
+        await refreshAccessToken();
         this.ws = new WebSocket(env.PUBLIC_API_WS);
 
         this.ws.onopen = () => {

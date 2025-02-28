@@ -5,29 +5,40 @@
     import {getS3ObjectUrl, S3Bucket} from "$lib/api/s3";
     import {RoomKind} from "$lib/api/room";
     import * as Avatar from "$lib/components/ui/avatar";
-    import {type ChannelMessage, getWorkspaceChannelMessages} from "$lib/api/workspaces/channels";
+    import {
+        type Channel,
+        type ChannelMessage,
+        getWorkspaceChannel,
+        getWorkspaceChannelMessages
+    } from "$lib/api/workspaces/channels";
     import {format} from "date-fns";
     import {fr} from "date-fns/locale";
     import {Tooltip, TooltipTrigger, TooltipContent} from "$lib/components/ui/tooltip";
     import * as ContextMenu from "$lib/components/ui/context-menu";
     import {formatDate} from "$lib/utils/formatDate";
     import {Pen, Trash2} from "lucide-svelte";
-    import {scale} from "svelte/transition";
     import {fallbackAvatarLetters} from "$lib/utils/fallbackAvatarLetters.js";
+    import {cn} from "$lib/utils";
+    import {tick} from "svelte";
+    import {scrollToBottom} from "$lib/utils/scrollToBottom";
 
     const {authenticatedUser} = page.data;
 
     let currentUserId = authenticatedUser.id;
     let currentWorkspaceId = $derived(page.params.workspaceId);
     let currentChannelId = $derived(page.params.channelId);
+    let currentChannel: Channel = $state(null);
     let currentMessage = $state("");
     let currentRoom: { id: string | null; messages: ChannelMessage[] } = $state({id: null, messages: []});
     let unsubscribeSendMessage = null;
     let unsubscribeMessageReactionAdded = null;
     let unsubscribeMessageReactionRemoved = null;
+    let inputElement: HTMLDivElement = $state(null);
+    let elementsList: HTMLDivElement = $state(null);
 
     $effect(() => {
         joinRoomAndListenMessages(currentWorkspaceId, currentChannelId);
+        getWorkspaceChannel(currentWorkspaceId, currentChannelId).then(channel => currentChannel = channel);
 
         return () => {
             unsubscribeSendMessage?.();
@@ -45,7 +56,10 @@
             const joinedRoom = await ws.asyncJoinRoom(channelId, RoomKind.CHANNEL);
             currentRoom.id = joinedRoom.id;
 
-            unsubscribeSendMessage = ws.subscribe("send-channel-message", (msg) => {
+            await tick();
+            await scrollToBottom(elementsList, "auto");
+
+            unsubscribeSendMessage = ws.subscribe("send-channel-message", async (msg) => {
                 currentRoom.messages = [
                     ...currentRoom.messages,
                     {
@@ -61,6 +75,9 @@
                         reactions: [],
                     },
                 ];
+
+                await tick();
+                await scrollToBottom(elementsList);
             });
 
             // Added is triggered when a user adds a reaction to a message,
@@ -111,11 +128,30 @@
         ws.sendChannelMessage(currentRoom.id, currentMessage);
         currentMessage = "";
     };
+
+    // Set the input placeholder if the input is empty
+    $effect(() => {
+        if (currentMessage.trim() === "" && inputElement) inputElement.innerText = "";
+    })
+
+    const handleInputKeyDown = (e) => {
+        if (e.key === "Enter" && !e.shiftKey) {
+            e.preventDefault();
+            sendMessageToWs();
+        }
+    }
 </script>
 
-<div class="w-full h-full flex flex-col text-[18px]">
-    {#if currentRoom.id !== null}
-        <div class="flex-1 overflow-y-auto px-4 space-y-4">
+<div class="w-full h-full flex flex-col gap-y-4">
+    {#if currentChannel}
+        <div class="flex items-center gap-x-2 bg-gray-100 dark:bg-gray-800 p-4">
+            <span class="font-semibold text-2xl">#{currentChannel.name}</span>
+            <span class="text-gray-500 text-lg translate-y-[1px]">{currentChannel.topic}</span>
+        </div>
+    {/if}
+
+    <div class="flex-1 overflow-y-auto px-4 space-y-4" bind:this={elementsList}>
+        {#if currentRoom.id !== null}
             {#each currentRoom.messages as message (message.id)}
                 <ContextMenu.Root>
                     <ContextMenu.Trigger>
@@ -125,14 +161,14 @@
                             {#snippet messageReaction()}
                                 <div class="flex items-center gap-2">
                                     {#each message.reactions as {reaction, users} (reaction)}
-                                        <div class="flex items-center justify-center bg-gray-100 p-1 rounded-lg text-lg gap-x-2 transition-colors duration-300 select-none"
-                                             class:bg-yellow-300={users.find(({id}) => id === currentUserId)}
-                                             transition:scale={{duration: 50}}
-                                             onclick={() => handleMessageReactionToggle(message.id, reaction)}
-                                             role="button" tabindex="-1"
-                                        >
+                                        <div
+                                                class={cn("flex items-center justify-center bg-gray-100 dark:bg-gray-800 p-1 rounded-lg text-lg gap-x-2 transition-colors duration-300 select-none", {
+                                                    "border-primary border-[1px] !bg-primary/30": users.find(({id}) => id === currentUserId),
+                                                })}
+                                                onclick={() => handleMessageReactionToggle(message.id, reaction)}
+                                                role="button" tabindex="-1">
                                             <span>{reaction}</span>
-                                            <span>{users.length}</span>
+                                            <span class="tabular-nums">{users.length}</span>
                                         </div>
                                     {/each}
                                 </div>
@@ -159,7 +195,7 @@
                                     </div>
                                     <div class="flex flex-col gap-y-2">
                                         <div class="flex items-center gap-2">
-                                            <span class="p-2 rounded-xl max-w-xs bg-primary text-white shadow-lg">
+                                            <span class="p-2 rounded-xl break-all bg-primary text-white shadow-lg">
                                                 {message.content}
                                             </span>
                                         </div>
@@ -184,7 +220,7 @@
                                                         {format(new Date(message.createdAt), "EEEE d MMMM yyyy à HH:mm", {locale: fr})}
                                                     </TooltipContent>
                                                 </Tooltip>
-                                                <span class="p-2 rounded-xl max-w-xs bg-primary text-white shadow-lg w-max">
+                                                <span class="p-2 rounded-xl break-all bg-primary text-white shadow-lg w-full">
                                                     {message.content}
                                                 </span>
                                             </div>
@@ -204,20 +240,25 @@
                     </ContextMenu.Trigger>
                     <ContextMenu.Content class="w-64">
                         <ContextMenu.Item class="flex justify-between hover:!bg-white">
-                            {#each ["😊", "😂", "🤷‍♂️", "👍"] as reaction}
+                            {#each ["😊", "😂", "🤷‍♂️", "👍"] as emoji}
                                 <div class="flex items-center justify-center bg-gray-100 hover:bg-gray-200 transition-colors duration-300 p-2 rounded-full w-8 h-8 text-lg"
-                                     onclick={() => handleMessageReactionToggle(message.id, reaction)}
+                                     onclick={() => handleMessageReactionToggle(message.id, emoji)}
                                      role="button" tabindex="-1">
-                                    {reaction}
+                                    {emoji}
                                 </div>
                             {/each}
                         </ContextMenu.Item>
                         <ContextMenu.Sub>
                             <ContextMenu.SubTrigger>Ajouter une réaction</ContextMenu.SubTrigger>
                             <ContextMenu.SubContent class="min-w-max">
-                                <ContextMenu.Item class="text-lg">😉</ContextMenu.Item>
-                                <ContextMenu.Item class="text-lg">😎</ContextMenu.Item>
-                                <ContextMenu.Item class="text-lg">😢</ContextMenu.Item>
+                                {#each ["😉", "😎", "😢"] as emoji}
+                                    <ContextMenu.Item
+                                            class="text-lg"
+                                            onclick={() => handleMessageReactionToggle(message.id, emoji)}
+                                            role="button" tabindex={-1}>
+                                        {emoji}
+                                    </ContextMenu.Item>
+                                {/each}
                             </ContextMenu.SubContent>
                         </ContextMenu.Sub>
                         <ContextMenu.Separator/>
@@ -236,11 +277,25 @@
                     </ContextMenu.Content>
                 </ContextMenu.Root>
             {/each}
-        </div>
+        {/if}
+    </div>
 
-        <div class="p-2 border-t">
-            <Input placeholder="Enter your message" bind:value={currentMessage}
-                   onkeyup={e => e.key === 'Enter' && sendMessageToWs()}/>
-        </div>
+    {#if currentChannel}
+        <div class="p-2 border-none border-t-[2px] bg-gray-100 dark:bg-gray-800 border-t-primary max-h-12 overflow-y-auto w-full break-all"
+             contenteditable
+             placeholder="Écrivez un message dans #{currentChannel.name}"
+             bind:this={inputElement}
+             bind:innerText={currentMessage}
+             onkeydown={handleInputKeyDown}
+        ></div>
     {/if}
 </div>
+
+<style>
+    [contenteditable][placeholder]:empty:before {
+        content: attr(placeholder);
+        position: absolute;
+        color: gray;
+        background-color: transparent;
+    }
+</style>

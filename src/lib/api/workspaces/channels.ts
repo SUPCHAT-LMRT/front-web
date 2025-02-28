@@ -29,6 +29,16 @@ export const createWorkspaceChannel = async (workspaceId: string, name: string, 
     }
 }
 
+export const getWorkspaceChannel = async (workspaceId: string, channelId: string): Promise<Channel> => {
+    try {
+        const {data} = await baseClient.get(`/api/workspaces/${workspaceId}/channels/${channelId}`);
+        return data;
+    } catch (e) {
+        console.error(e);
+        throw e;
+    }
+}
+
 export type ChannelMessage = {
     id: string;
     content: string;
@@ -45,7 +55,7 @@ type ChannelMessageAuthor = {
 }
 
 type ChannelMessageReaction = {
-    users: {id: string, name: string}[];
+    users: { id: string, name: string }[];
     reaction: string;
 }
 

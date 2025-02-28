@@ -22,6 +22,7 @@
     import {Button, buttonVariants} from '$lib/components/ui/button';
     import {Label} from '$lib/components/ui/label';
     import {Input} from '$lib/components/ui/input';
+    import MembersList from "./MembersList.svelte";
 
 
     let currentWorkspaceId = $derived(page.params.workspaceId);
@@ -48,6 +49,10 @@
         },
         noData: {
             text: "No data available",
+            style: {
+                fontSize: '14px',
+                color: '#6c757d'
+            }
         },
         series: [{data: []}],
         dataLabels: {
@@ -163,7 +168,6 @@
         event.preventDefault();
         const form = event.target as HTMLFormElement;
         const input = form.querySelector("input[type=file]") as HTMLInputElement;
-        console.log(input);
         if (input.files && input.files[0]) {
             updateBanner(input.files[0]);
         }
@@ -173,12 +177,34 @@
 {#if currentWorkspaceDetails}
     <div class="w-full h-full flex flex-col">
         <div class="flex-1 overflow-y-auto space-y-4">
-            <div class="relative">
+            <div class="relative group">
                 <img
                         src="{getS3ObjectUrl(S3Bucket.WORKSPACES_BANNERS, currentWorkspaceId)}?{forceRenderBanner}"
                         alt={`Workspace banner ${currentWorkspaceId}`}
                         class="w-full h-40 mb-6 object-cover"
                 />
+
+                <div class="absolute bottom-0 right-0 p-4 hidden group-hover:block">
+                    <Dialog.Root>
+                        <Dialog.Trigger class={buttonVariants({ variant: "ghost" })}>
+                            <ImageDown class="w-6 h-6 text-gray-500 dark:text-gray-400 cursor-pointer"/>
+                        </Dialog.Trigger>
+                        <Dialog.Content class="sm:max-w-[425px] dark:bg-gray-800">
+                            <form onsubmit="{handleFormSubmit}">
+                                <div class="grid w-full max-w-sm items-center gap-1.5 pt-2 pb-2 dark:text-gray-300">
+                                    <Label for="picture">Picture</Label>
+                                    <Input id="picture" type="file" accept="image/*"
+                                           class="w-full dark:bg-gray-700 dark:border-gray-700"/>
+                                </div>
+                                <Dialog.Footer>
+                                    <Dialog.Close>
+                                        <Button type="submit">Changer</Button>
+                                    </Dialog.Close>
+                                </Dialog.Footer>
+                            </form>
+                        </Dialog.Content>
+                    </Dialog.Root>
+                </div>
 
                 <Avatar.Root
                         class="absolute bottom-0 left-6 transform translate-y-1/2 w-20 h-20 rounded-full border-4 border-white shadow-lg overflow-hidden bg-white">
@@ -209,26 +235,6 @@
                             <EditWorkspaceDialog/>
                         </button>
                     </div>
-                    <div>
-                        <Dialog.Root>
-                            <Dialog.Trigger class={buttonVariants({ variant: "ghost" })}>
-                                <ImageDown class="w-6 h-6 text-gray-500 dark:text-gray-400 cursor-pointer"/>
-                            </Dialog.Trigger>
-                            <Dialog.Content class="sm:max-w-[425px] dark:bg-gray-800">
-                                <form onsubmit="{handleFormSubmit}">
-                                    <div class="grid w-full max-w-sm items-center gap-1.5 pt-2 pb-2 dark:text-gray-300">
-                                        <Label for="picture">Picture</Label>
-                                        <Input id="picture" type="file" accept="image/*" class="w-full dark:bg-gray-700 dark:border-gray-700"/>
-                                    </div>
-                                    <Dialog.Footer>
-                                        <Dialog.Close>
-                                            <Button type="submit">Changer</Button>
-                                        </Dialog.Close>
-                                    </Dialog.Footer>
-                                </form>
-                            </Dialog.Content>
-                        </Dialog.Root>
-                    </div>
                 </div>
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
@@ -244,14 +250,7 @@
                 </div>
 
                 <div class="grid grid-cols-2 gap-6">
-                    <div class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md">
-                        <h2 class="text-lg font-semibold mb-3">👥 Membres</h2>
-                        <ul>
-                            {#each members as member}
-                                <li class="p-2 border-b dark:border-gray-700">{member.pseudo}</li>
-                            {/each}
-                        </ul>
-                    </div>
+                    <MembersList workspaceId={currentWorkspaceId} />
 
                     <div class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md">
                         <h2 class="text-lg font-semibold mb-3">📢 Canaux</h2>

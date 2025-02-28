@@ -20,7 +20,7 @@
     const handleJoinWorkspace = async () => {
         try {
             await joinWorkspace(token);
-            goto("/workspaces/" + workspace.id);
+            await goto("/workspaces/" + workspace.workspaceId);
         } catch (e) {
             error = "Erreur lors de la tentative de rejoindre le workspace.";
         }
