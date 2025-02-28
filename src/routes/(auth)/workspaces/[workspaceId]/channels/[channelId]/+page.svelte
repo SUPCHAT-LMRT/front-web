@@ -21,6 +21,7 @@
     import {cn} from "$lib/utils";
     import {tick} from "svelte";
     import {scrollToBottom} from "$lib/utils/scrollToBottom";
+    import NumberFlow from '@number-flow/svelte'
 
     const {authenticatedUser} = page.data;
 
@@ -163,12 +164,14 @@
                                     {#each message.reactions as {reaction, users} (reaction)}
                                         <div
                                                 class={cn("flex items-center justify-center bg-gray-100 dark:bg-gray-800 p-1 rounded-lg text-lg gap-x-2 transition-colors duration-300 select-none", {
-                                                    "border-primary border-[1px] !bg-primary/30": users.find(({id}) => id === currentUserId),
+                                                    "ring-2 ring-primary !bg-primary/30": users.find(({id}) => id === currentUserId),
                                                 })}
                                                 onclick={() => handleMessageReactionToggle(message.id, reaction)}
                                                 role="button" tabindex="-1">
                                             <span>{reaction}</span>
-                                            <span class="tabular-nums">{users.length}</span>
+                                            <NumberFlow
+                                                    spinTiming={{duration: 150}}
+                                                    value={users.length}/>
                                         </div>
                                     {/each}
                                 </div>
