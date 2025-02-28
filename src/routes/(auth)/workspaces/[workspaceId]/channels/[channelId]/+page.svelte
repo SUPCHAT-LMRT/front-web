@@ -239,9 +239,9 @@
                         </div>
                     </ContextMenu.Trigger>
                     <ContextMenu.Content class="w-64">
-                        <ContextMenu.Item class="flex justify-between hover:!bg-white">
+                        <ContextMenu.Item class="flex justify-between hover:!bg-white dark:hover:!bg-popover">
                             {#each ["😊", "😂", "🤷‍♂️", "👍"] as emoji}
-                                <div class="flex items-center justify-center bg-gray-100 hover:bg-gray-200 transition-colors duration-300 p-2 rounded-full w-8 h-8 text-lg"
+                                <div class="flex items-center justify-center bg-gray-100 dark:bg-gray-800 transition-colors duration-300 p-2 rounded-full w-8 h-8 text-lg"
                                      onclick={() => handleMessageReactionToggle(message.id, emoji)}
                                      role="button" tabindex="-1">
                                     {emoji}
