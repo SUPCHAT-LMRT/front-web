@@ -23,6 +23,7 @@
     import {Label} from '$lib/components/ui/label';
     import {Input} from '$lib/components/ui/input';
     import MembersList from "./MembersList.svelte";
+    import type {ApexOptions} from "apexcharts";
 
 
     let currentWorkspaceId = $derived(page.params.workspaceId);
@@ -33,10 +34,11 @@
     });
     let currentWorkspaceDetails: WorkspaceDetails = $state(null);
 
-    const defaultChartOptions = {
+    const defaultChartOptions: ApexOptions = {
         chart: {
             type: "area",
-            height: 100,
+            width: "100%",
+            height: "70%",
             toolbar: {
                 show: false
             },
@@ -45,6 +47,12 @@
                 dynamicAnimation: {
                     speed: 500
                 }
+            },
+            zoom: {
+                enabled: false
+            },
+            sparkline: {
+                enabled: true
             }
         },
         noData: {
@@ -84,8 +92,8 @@
         },
         yaxis: {
             labels: {
-                show: false
-            }
+                show: false,
+            },
         },
         grid: {
             show: false,
@@ -96,7 +104,6 @@
         }
     };
 
-    let members: WorkspaceMember[] = $state([]);
     let channels = $state(workspaceChannelsStore.get());
     let stats = $state([
         {label: "Messages", value: 0, chartOptions: defaultChartOptions},
@@ -108,8 +115,6 @@
     let forceRenderBanner = $state(0);
 
     $effect(() => {
-        getWorkspaceMembers(currentWorkspaceId).then(result => members = result);
-
         getWorkspaceTimeSeries(currentWorkspaceId).getMinutelyMessageSents()
             .then((data) => {
                 // response.data is as follow: [{"sentAt":"2025-02-11T18:14:00Z","count":1},{"sentAt":"2025-02-11T18:15:00Z","count":3}]
@@ -239,18 +244,20 @@
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
                     {#each stats as stat}
-                        <div class="bg-gray-100 dark:bg-gray-800 rounded-lg shadow-md text-left h-36">
+                        <div class="bg-gray-100 dark:bg-gray-800 shadow-md text-left border-[1px] dark:border-gray-800 rounded-lg">
                             <p class="font-semibold pl-4 pt-4">{stat.label}</p>
                             <p class="text-xl pl-4 pt-4">{stat.value}</p>
-                            {#if stat.chartOptions}
-                                <div use:chart={stat.chartOptions} class="w-full translate-y-[-1.55rem]"></div>
-                            {/if}
+                            <div class="flex items-end">
+                                {#if stat.chartOptions}
+                                    <div use:chart={stat.chartOptions} class="w-full"></div>
+                                {/if}
+                            </div>
                         </div>
                     {/each}
                 </div>
 
                 <div class="grid grid-cols-2 gap-6">
-                    <MembersList workspaceId={currentWorkspaceId} />
+                    <MembersList workspaceId={currentWorkspaceId}/>
 
                     <div class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md">
                         <h2 class="text-lg font-semibold mb-3">📢 Canaux</h2>
