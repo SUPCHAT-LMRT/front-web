@@ -129,7 +129,6 @@
                                              class:bg-yellow-300={users.find(({id}) => id === currentUserId)}
                                              transition:scale={{duration: 50}}
                                              onclick={() => handleMessageReactionToggle(message.id, reaction)}
-                                             onkeydown={() => handleMessageReactionToggle(message.id, reaction)}
                                              role="button" tabindex="-1"
                                         >
                                             <span>{reaction}</span>
@@ -208,7 +207,6 @@
                             {#each ["😊", "😂", "🤷‍♂️", "👍"] as reaction}
                                 <div class="flex items-center justify-center bg-gray-100 hover:bg-gray-200 transition-colors duration-300 p-2 rounded-full w-8 h-8 text-lg"
                                      onclick={() => handleMessageReactionToggle(message.id, reaction)}
-                                     onkeydown={() => handleMessageReactionToggle(message.id, reaction)}
                                      role="button" tabindex="-1">
                                     {reaction}
                                 </div>
