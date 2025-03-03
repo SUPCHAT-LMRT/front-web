@@ -1,4 +1,4 @@
-import { baseClient } from "$lib/api/client";
+import {baseClient} from "$lib/api/client";
 
 export type User = {
     id: string;
@@ -24,7 +24,7 @@ export const registerUser = async (
     passwordConfirmation: string,
 ): Promise<AuthResponse> => {
     try {
-        const { data } = await baseClient.post("/api/account/auth/register", { token, password, passwordConfirmation });
+        const {data} = await baseClient.post("/api/account/auth/register", {token, password, passwordConfirmation});
         return data;
     } catch (e) {
         console.error(e);
@@ -35,10 +35,9 @@ export const registerUser = async (
 
 export const loginUser = async (email: string, password: string, rememberMe: boolean): Promise<AuthResponse> => {
     try {
-        const { data } = await baseClient.post("/api/account/auth/login", { email, password, rememberMe });
+        const {data} = await baseClient.post("/api/account/auth/login", {email, password, rememberMe});
         return data;
-    }
-    catch (e) {
+    } catch (e) {
         console.error(e);
         throw e;
     }
@@ -104,7 +103,7 @@ export const resetPassword = async (token: string, newPassword: string, newPassw
 
 export const getLoginUser = async (): Promise<User> => {
     try {
-        const { data } = await baseClient.get("/api/account/me");
+        const {data} = await baseClient.get("/api/account/me");
         return data;
     } catch (e) {
         console.error(e);
@@ -114,7 +113,24 @@ export const getLoginUser = async (): Promise<User> => {
 
 export const getInviteLinkData = async (token: string): Promise<User> => {
     try {
-        const { data } = await baseClient.get(`/api/account/invite-link/${token}`);
+        const {data} = await baseClient.get(`/api/account/invite-link/${token}`);
+        return data;
+    } catch (e) {
+        console.error(e);
+        throw e;
+    }
+}
+
+export type UserProfile = {
+    id: string;
+    email: string;
+    firstName: string;
+    lastName: string;
+}
+
+export const getUserProfile = async (userId: string): Promise<UserProfile> => {
+    try {
+        const {data} = await baseClient.get(`/api/account/${userId}/profile`);
         return data;
     } catch (e) {
         console.error(e);
