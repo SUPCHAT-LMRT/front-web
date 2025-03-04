@@ -22,6 +22,7 @@
     import {tick} from "svelte";
     import {scrollToBottom} from "$lib/utils/scrollToBottom";
     import NumberFlow from '@number-flow/svelte'
+    import HoveredUserProfile from "$lib/components/app/HoveredUserProfile.svelte";
 
     const {authenticatedUser} = page.data;
 
@@ -160,7 +161,7 @@
                              class:justify-end={message.author.userId === currentUserId}>
 
                             {#snippet messageReaction()}
-                                <div class="flex items-center gap-2">
+                                <div class="flex items-center gap-2 mb-4">
                                     {#each message.reactions as {reaction, users} (reaction)}
                                         <div
                                                 class={cn("flex items-center justify-center bg-gray-100 dark:bg-gray-800 p-1 rounded-lg text-lg gap-x-2 transition-colors duration-300 select-none", {
@@ -178,13 +179,18 @@
                             {/snippet}
 
                             {#if message.author !== null && message.author.userId !== currentUserId}
-                                <Avatar.Root class="flex-shrink-0">
-                                    <Avatar.Image src={getS3ObjectUrl(S3Bucket.USERS_AVATARS, message.author.userId)}/>
-                                    <Avatar.Fallback>{fallbackAvatarLetters(message.author.workspacePseudo)}</Avatar.Fallback>
-                                </Avatar.Root>
+                                <HoveredUserProfile userId={message.author.userId}>
+                                    <Avatar.Root class="flex-shrink-0">
+                                        <Avatar.Image
+                                                src={getS3ObjectUrl(S3Bucket.USERS_AVATARS, message.author.userId)}/>
+                                        <Avatar.Fallback>{fallbackAvatarLetters(message.author.workspacePseudo)}</Avatar.Fallback>
+                                    </Avatar.Root>
+                                </HoveredUserProfile>
                                 <div class="flex flex-col">
                                     <div class="flex items-center gap-2">
-                                        <span class="font-semibold">{message.author.workspacePseudo}</span>
+                                        <HoveredUserProfile userId={message.author.userId}>
+                                            <span class="font-semibold">{message.author.workspacePseudo}</span>
+                                        </HoveredUserProfile>
                                         <Tooltip>
                                             <TooltipTrigger>
                                                 <span class="text-sm text-gray-500">
@@ -228,11 +234,13 @@
                                                 </span>
                                             </div>
 
-                                            <Avatar.Root class="flex-shrink-0 -translate-y-[2px] -p-[2px]">
-                                                <Avatar.Image
-                                                        src={getS3ObjectUrl(S3Bucket.USERS_AVATARS, message.author.userId)}/>
-                                                <Avatar.Fallback>{fallbackAvatarLetters(message.author.workspacePseudo)}</Avatar.Fallback>
-                                            </Avatar.Root>
+                                            <HoveredUserProfile userId={message.author.userId}>
+                                                <Avatar.Root class="flex-shrink-0 -translate-y-[2px] -p-[2px]">
+                                                    <Avatar.Image
+                                                            src={getS3ObjectUrl(S3Bucket.USERS_AVATARS, message.author.userId)}/>
+                                                    <Avatar.Fallback>{fallbackAvatarLetters(message.author.workspacePseudo)}</Avatar.Fallback>
+                                                </Avatar.Root>
+                                            </HoveredUserProfile>
                                         </div>
 
                                         {@render messageReaction()}

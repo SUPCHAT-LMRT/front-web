@@ -1,8 +1,8 @@
 <script lang="ts">
     import {getWorkspaceMembers, type WorkspaceMember} from "$lib/api/workspaces/workspace";
     import * as Pagination from "$lib/components/ui/pagination";
-    import ChevronRight from "lucide-svelte/icons/chevron-right";
-    import ChevronLeft from "lucide-svelte/icons/chevron-left";
+    import {ChevronRight} from "lucide-svelte";
+    import {ChevronLeft} from "lucide-svelte";
     import HoveredUserProfile from "$lib/components/app/HoveredUserProfile.svelte";
 
     const {workspaceId}: { workspaceId: string } = $props();
@@ -40,11 +40,11 @@
         <h2 class="text-lg font-semibold mb-3">👥 Membres</h2>
         <ul>
             {#each members as member, i (i)}
-                <HoveredUserProfile userId={member.userId}>
-                    <li class="p-2 dark:border-gray-700" class:border-b={i !== members.length - 1}>
+                <li class="p-2 dark:border-gray-700" class:border-b={i !== members.length - 1}>
+                    <HoveredUserProfile userId={member.userId}>
                         {member.pseudo}
-                    </li>
-                </HoveredUserProfile>
+                    </HoveredUserProfile>
+                </li>
             {/each}
         </ul>
     </div>

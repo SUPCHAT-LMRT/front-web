@@ -4,8 +4,9 @@
     import * as Avatar from "$lib/components/ui/avatar";
     import {fallbackAvatarLetters} from "$lib/utils/fallbackAvatarLetters";
     import {Skeleton} from "$lib/components/ui/skeleton";
-    import {fade} from "svelte/transition";
-    import {MessageCircle, Phone, Video} from "lucide-svelte";
+    import {Maximize2, MessageCircle, Phone, Video} from "lucide-svelte";
+    import * as Dialog from "$lib/components/ui/dialog";
+    import * as Popover from "$lib/components/ui/popover/index.js";
 
     type Props = {
         userId: string,
@@ -14,35 +15,120 @@
 
     const {userId, children}: Props = $props();
 
-    let hovered = $state(true);
+    let popoverOpened = $state(false);
+    let openedData: { opened: boolean, data: UserProfile } = $state({
+        opened: false,
+        data: null
+    });
+
+    function handleSeeMore(userProfile: UserProfile) {
+        popoverOpened = false;
+        openedData = {opened: true, data: userProfile}
+    }
 </script>
 
-<div class="relative group"
-     onmouseenter={() => hovered = true}
-     onmouseleave={() => hovered = false}
-     role="button"
-     tabindex="-1"
->
-    <div class="absolute hidden group-hover:block z-10 bg-white dark:bg-gray-800 text-black shadow-box-lg shadow-gray-300 dark:shadow-gray-900 rounded-lg px-2 py-4">
-        {#if hovered}
-            <div transition:fade>
-                {#await getUserProfile(userId)}
+<div>
+    <Popover.Root bind:open={popoverOpened}>
+        <Popover.Trigger>{@render children?.()}</Popover.Trigger>
+        <Popover.Content>
+            {#await getUserProfile(userId)}
+                <div class="flex flex-col gap-y-4">
                     <div class="flex items-center gap-x-2">
                         <Skeleton class="size-12 rounded-full"/>
                         <Skeleton class="w-20 h-6 rounded-lg"/>
                     </div>
-                {:then userProfile}
+
+                    <!-- Quick actions -->
+                    <div class="flex items-center gap-x-4 text-gray-600 dark:text-gray-400">
+                        <Skeleton class="size-6 rounded-full"/>
+                        <Skeleton class="size-6 rounded-full"/>
+                        <Skeleton class="size-6 rounded-full"/>
+                    </div>
+
+                    <!-- More details -->
+                    <div class="flex flex-col gap-y-2">
+                        <div class="flex items-center gap-x-2">
+                            <Skeleton class="w-20 h-6 rounded-lg"/>
+                            <Skeleton class="w-40 h-6 rounded-lg"/>
+                        </div>
+                        <div class="flex items-center gap-x-2">
+                            <Skeleton class="w-20 h-6 rounded-lg"/>
+                            <Skeleton class="w-40 h-6 rounded-lg"/>
+                        </div>
+                    </div>
+                </div>
+            {:then userProfile}
+                <div class="flex flex-col gap-y-4">
+                    <div class="flex items-center gap-x-2" onclick={() => handleSeeMore(userProfile)} role="button"
+                         tabindex="-1">
+                        <Avatar.Root>
+                            <Avatar.Image src={getS3ObjectUrl(S3Bucket.USERS_AVATARS, userId)}
+                                          alt="Avatar de {userProfile.firstName} {userProfile.lastName}"/>
+                            <Avatar.Fallback class="text-white bg-primary">
+                                {fallbackAvatarLetters(userProfile.firstName + " " + userProfile.lastName)}
+                            </Avatar.Fallback>
+                        </Avatar.Root>
+
+                        <span class="text-black dark:text-white">{userProfile.firstName} {userProfile.lastName}</span>
+                    </div>
+
+                    <!-- Quick actions -->
+                    <div class="flex items-center gap-x-4 text-gray-600 dark:text-gray-400">
+                        <button title="Envoyer un message">
+                            <MessageCircle strokeWidth={1.5}/>
+                        </button>
+                        <button title="Appeler">
+                            <Phone strokeWidth={1.5}/>
+                        </button>
+                        <button title="Vidéo">
+                            <Video strokeWidth={1.5}/>
+                        </button>
+                    </div>
+
+                    <!-- More details -->
+                    <div class="flex flex-col gap-y-2">
+                        <div class="flex items-center gap-x-2">
+                            <span class="text-gray-600 dark:text-gray-400">Email:</span>
+                            <a href="mailto:{userProfile.email}"
+                               class="text-black dark:text-white">{userProfile.email}</a>
+                        </div>
+                        <div class="flex items-center gap-x-2">
+                            <span class="text-gray-600 dark:text-gray-400">Poste:</span>
+                            <span class="text-black dark:text-white">{userProfile?.poste ?? "Aucun poste"}</span>
+                        </div>
+                    </div>
+
+                    <!-- See more -->
+                    <div class="flex justify-end">
+                        <button class="text-primary flex items-center gap-x-2"
+                                onclick={() => handleSeeMore(userProfile)}>
+                            <span>Voir plus</span>
+                            <Maximize2 strokeWidth={1.5} size={17} class="translate-y-[2px]"/>
+                        </button>
+                    </div>
+                </div>
+            {:catch error}
+                <div class="text-red-700">{error}</div>
+            {/await}
+        </Popover.Content>
+    </Popover.Root>
+
+    <Dialog.Root bind:open={openedData.opened}>
+        <Dialog.Content>
+            <Dialog.Header>
+                <Dialog.Description>
+                    {@const userProfile = openedData.data}
                     <div class="flex flex-col gap-y-4">
                         <div class="flex items-center gap-x-2">
-                            <Avatar.Root>
+                            <Avatar.Root class="size-14">
                                 <Avatar.Image src={getS3ObjectUrl(S3Bucket.USERS_AVATARS, userId)}
                                               alt="Avatar de {userProfile.firstName} {userProfile.lastName}"/>
-                                <Avatar.Fallback class="text-white bg-primary">
+                                <Avatar.Fallback class="text-white bg-primary text-lg">
                                     {fallbackAvatarLetters(userProfile.firstName + " " + userProfile.lastName)}
                                 </Avatar.Fallback>
                             </Avatar.Root>
 
-                            <span class="text-black dark:text-white">{userProfile.firstName} {userProfile.lastName}</span>
+                            <span class="text-black dark:text-white text-lg">{userProfile.firstName} {userProfile.lastName}</span>
                         </div>
 
                         <!-- Quick actions -->
@@ -62,7 +148,8 @@
                         <div class="flex flex-col gap-y-2">
                             <div class="flex items-center gap-x-2">
                                 <span class="text-gray-600 dark:text-gray-400">Email:</span>
-                                <a href="mailto:{userProfile.email}" class="text-black dark:text-white">{userProfile.email}</a>
+                                <a href="mailto:{userProfile.email}"
+                                   class="text-black dark:text-white">{userProfile.email}</a>
                             </div>
                             <div class="flex items-center gap-x-2">
                                 <span class="text-gray-600 dark:text-gray-400">Poste:</span>
@@ -70,13 +157,8 @@
                             </div>
                         </div>
                     </div>
-                {:catch error}
-                    <div class="text-red-700">{error}</div>
-                {/await}
-            </div>
-
-        {/if}
-    </div>
-
-    {@render children?.()}
+                </Dialog.Description>
+            </Dialog.Header>
+        </Dialog.Content>
+    </Dialog.Root>
 </div>

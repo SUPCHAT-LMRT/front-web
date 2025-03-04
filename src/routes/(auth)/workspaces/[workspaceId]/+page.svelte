@@ -111,7 +111,6 @@
         {label: "Membres", value: 0},
         {label: "Canaux", value: 0}
     ]);
-
     let forceRenderBanner = $state(0);
 
     $effect(() => {
@@ -185,8 +184,8 @@
             <div class="relative group">
                 <img
                         src="{getS3ObjectUrl(S3Bucket.WORKSPACES_BANNERS, currentWorkspaceId)}?{forceRenderBanner}"
-                        alt={`Workspace banner ${currentWorkspaceId}`}
-                        class="w-full h-40 mb-6 object-cover"
+                        alt=""
+                        class="w-full h-40 mb-6 object-cover bg-gray-200 dark:bg-gray-800"
                 />
 
                 <div class="absolute bottom-0 right-0 p-4 hidden group-hover:block">

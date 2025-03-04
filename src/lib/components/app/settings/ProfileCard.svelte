@@ -22,7 +22,7 @@
                         <Avatar.Image src={getS3ObjectUrl(S3Bucket.USERS_AVATARS, authenticatedUser.id)}/>
                         <Avatar.Fallback>
                             <div class="flex items-center justify-center w-full h-full bg-gray-200 text-gray-500 text-2xl font-bold rounded-full">
-                                {fallbackAvatarLetters(authenticatedUser.pseudo)}
+                                {fallbackAvatarLetters(authenticatedUser.firstName + " " + authenticatedUser.lastName)}
                             </div>
                         </Avatar.Fallback>
                     </Avatar.Root>
@@ -33,16 +33,6 @@
 
         <Card class="mt-16 bg-white border border-gray-200 text-gray-800 p-6 shadow-sm max-w-3xl mx-auto">
             <div class="space-y-4">
-                <div class="flex justify-between items-center">
-                    <div>
-                        <div class="text-sm font-medium text-gray-500 uppercase">NOM D&apos;AFFICHAGE</div>
-                        <div>{authenticatedUser.pseudo}</div>
-                    </div>
-                    <Button variant="secondary" class="bg-gray-200 hover:bg-gray-300 text-gray-700" size="sm">
-                        Modifier
-                    </Button>
-                </div>
-
                 <div class="flex justify-between items-center">
                     <div>
                         <div class="text-sm font-medium text-gray-500 uppercase">prénom nom</div>
