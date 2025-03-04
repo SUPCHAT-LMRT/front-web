@@ -71,7 +71,7 @@
                         </div>
                     </div>
                 {:catch error}
-                    <div class="bg-red-200 dark:bg-red-700 w-20 h-20 rounded-full">{error}</div>
+                    <div class="text-red-700">{error}</div>
                 {/await}
             </div>
 
