@@ -14,7 +14,7 @@
     import { toggleMode } from "mode-watcher";
     import { Button } from "$lib/components/ui/button/index.js";
 
-    let selected = page.url.pathname.split("/")[1];
+    let selected = $derived(page.url.pathname.split("/")[1]);
 
     function select(id: string) {
         if (id === "chat") goto("/chat");
@@ -22,7 +22,6 @@
         if (id === "store") goto("/store");
         if (id === "settings") goto("/settings");
         if (id === "discover") goto("/discover");
-        selected = id;
     }
 </script>
 

@@ -179,7 +179,7 @@
                             {/snippet}
 
                             {#if message.author !== null && message.author.userId !== currentUserId}
-                                <HoveredUserProfile userId={message.author.userId}>
+                                <HoveredUserProfile userId={message.author.userId} self={false}>
                                     <Avatar.Root class="flex-shrink-0">
                                         <Avatar.Image
                                                 src={getS3ObjectUrl(S3Bucket.USERS_AVATARS, message.author.userId)}/>
@@ -188,7 +188,7 @@
                                 </HoveredUserProfile>
                                 <div class="flex flex-col">
                                     <div class="flex items-center gap-2">
-                                        <HoveredUserProfile userId={message.author.userId}>
+                                        <HoveredUserProfile userId={message.author.userId} self={false}>
                                             <span class="font-semibold">{message.author.workspacePseudo}</span>
                                         </HoveredUserProfile>
                                         <Tooltip>
@@ -234,7 +234,7 @@
                                                 </span>
                                             </div>
 
-                                            <HoveredUserProfile userId={message.author.userId}>
+                                            <HoveredUserProfile userId={message.author.userId} self={true}>
                                                 <Avatar.Root class="flex-shrink-0 -translate-y-[2px] -p-[2px]">
                                                     <Avatar.Image
                                                             src={getS3ObjectUrl(S3Bucket.USERS_AVATARS, message.author.userId)}/>

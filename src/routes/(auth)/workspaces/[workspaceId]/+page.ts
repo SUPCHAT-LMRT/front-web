@@ -1,4 +1,4 @@
-import type {PageLoad} from "../../../../../.svelte-kit/types/src/routes";
+import type {PageLoad} from "./$types";
 
 export const load = (async ({params}) => {
     localStorage.setItem("currentWorkspace", params.workspaceId);

@@ -24,7 +24,8 @@
     import {Input} from '$lib/components/ui/input';
     import MembersList from "./MembersList.svelte";
     import type {ApexOptions} from "apexcharts";
-
+    import * as ImageCropper from '$lib/components/extra/ui/image-cropper';
+    import {getFileFromUrl} from '$lib/components/extra/ui/image-cropper';
 
     let currentWorkspaceId = $derived(page.params.workspaceId);
     let createChannelData = $state({
@@ -111,7 +112,7 @@
         {label: "Membres", value: 0},
         {label: "Canaux", value: 0}
     ]);
-    let forceRenderBanner = $state(0);
+    let forceRenderBanner = $state(Date.now());
 
     $effect(() => {
         getWorkspaceTimeSeries(currentWorkspaceId).getMinutelyMessageSents()
@@ -176,6 +177,11 @@
             updateBanner(input.files[0]);
         }
     }
+
+    const handleBannerCrop = async (url) => {
+        const file = await getFileFromUrl(url);
+        await updateBanner(file);
+    }
 </script>
 
 {#if currentWorkspaceDetails}
@@ -185,29 +191,25 @@
                 <img
                         src="{getS3ObjectUrl(S3Bucket.WORKSPACES_BANNERS, currentWorkspaceId)}?{forceRenderBanner}"
                         alt=""
-                        class="w-full h-40 mb-6 object-cover bg-gray-200 dark:bg-gray-800"
+                        class="w-full max-h-64 mb-6 object-cover bg-gray-200 dark:bg-gray-800"
                 />
 
+                <!-- TODO display only if the user has permission to edit the banner -->
                 <div class="absolute bottom-0 right-0 p-4 hidden group-hover:block">
-                    <Dialog.Root>
-                        <Dialog.Trigger class={buttonVariants({ variant: "ghost" })}>
+                    <ImageCropper.Root
+                            onCropped={handleBannerCrop}
+                    >
+                        <ImageCropper.UploadTrigger>
                             <ImageDown class="w-6 h-6 text-gray-500 dark:text-gray-400 cursor-pointer"/>
-                        </Dialog.Trigger>
-                        <Dialog.Content class="sm:max-w-[425px] dark:bg-gray-800">
-                            <form onsubmit="{handleFormSubmit}">
-                                <div class="grid w-full max-w-sm items-center gap-1.5 pt-2 pb-2 dark:text-gray-300">
-                                    <Label for="picture">Picture</Label>
-                                    <Input id="picture" type="file" accept="image/*"
-                                           class="w-full dark:bg-gray-700 dark:border-gray-700"/>
-                                </div>
-                                <Dialog.Footer>
-                                    <Dialog.Close>
-                                        <Button type="submit">Changer</Button>
-                                    </Dialog.Close>
-                                </Dialog.Footer>
-                            </form>
-                        </Dialog.Content>
-                    </Dialog.Root>
+                        </ImageCropper.UploadTrigger>
+                        <ImageCropper.Dialog>
+                            <ImageCropper.Cropper cropShape="rect" aspect={21 / 5}/>
+                            <ImageCropper.Controls>
+                                <ImageCropper.Cancel/>
+                                <ImageCropper.Crop/>
+                            </ImageCropper.Controls>
+                        </ImageCropper.Dialog>
+                    </ImageCropper.Root>
                 </div>
 
                 <Avatar.Root

@@ -3,6 +3,7 @@
     import {page} from "$app/state";
     import * as Sidebar from "$lib/components/ui/sidebar";
     import * as ContextMenu from "$lib/components/ui/context-menu";
+    import * as Dialog from "$lib/components/ui/dialog/index.js";
     import type {Channel} from "$lib/api/workspaces/channels";
     import ws from "$lib/api/ws";
     import CreateChannelDialog from "$lib/components/app/workspaces/CreateChannelDialog.svelte";
@@ -58,6 +59,10 @@
     }
 
     const {children} = $props();
+
+    let dialogOpen = $state({
+        createChannel: false
+    })
 </script>
 
 <div class="flex w-full justify-between dark:bg-gray-900">
@@ -110,7 +115,7 @@
                 </Sidebar.Content>
             </ContextMenu.Trigger>
             <ContextMenu.Content>
-                <ContextMenu.Item>Créer un canal</ContextMenu.Item>
+                <ContextMenu.Item onclick={() => dialogOpen.createChannel = true}>Créer un canal</ContextMenu.Item>
                 <ContextMenu.Item>Billing</ContextMenu.Item>
                 <ContextMenu.Item>Team</ContextMenu.Item>
                 <ContextMenu.Item>Subscription</ContextMenu.Item>
@@ -118,3 +123,16 @@
         </ContextMenu.Root>
     </Sidebar.Root>
 </div>
+
+<!-- Example dialog in context menu -->
+<Dialog.Root bind:open={dialogOpen.createChannel}>
+    <Dialog.Content>
+        <Dialog.Header>
+            <Dialog.Title>Are you sure absolutely sure?</Dialog.Title>
+            <Dialog.Description>
+                This action cannot be undone. This will permanently delete your account
+                and remove your data from our servers.
+            </Dialog.Description>
+        </Dialog.Header>
+    </Dialog.Content>
+</Dialog.Root>

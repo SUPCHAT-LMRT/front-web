@@ -9,11 +9,12 @@
     import * as Popover from "$lib/components/ui/popover/index.js";
 
     type Props = {
-        userId: string,
-        children?: () => any
+        userId: string;
+        children?: () => any;
+        self: boolean;
     }
 
-    const {userId, children}: Props = $props();
+    const {userId, children, self}: Props = $props();
 
     let popoverOpened = $state(false);
     let openedData: { opened: boolean, data: UserProfile } = $state({
@@ -38,12 +39,14 @@
                         <Skeleton class="w-20 h-6 rounded-lg"/>
                     </div>
 
-                    <!-- Quick actions -->
-                    <div class="flex items-center gap-x-4 text-gray-600 dark:text-gray-400">
-                        <Skeleton class="size-6 rounded-full"/>
-                        <Skeleton class="size-6 rounded-full"/>
-                        <Skeleton class="size-6 rounded-full"/>
-                    </div>
+                    {#if !self}
+                        <!-- Quick actions -->
+                        <div class="flex items-center gap-x-4 text-gray-600 dark:text-gray-400">
+                            <Skeleton class="size-6 rounded-full"/>
+                            <Skeleton class="size-6 rounded-full"/>
+                            <Skeleton class="size-6 rounded-full"/>
+                        </div>
+                    {/if}
 
                     <!-- More details -->
                     <div class="flex flex-col gap-y-2">
@@ -72,18 +75,20 @@
                         <span class="text-black dark:text-white">{userProfile.firstName} {userProfile.lastName}</span>
                     </div>
 
-                    <!-- Quick actions -->
-                    <div class="flex items-center gap-x-4 text-gray-600 dark:text-gray-400">
-                        <button title="Envoyer un message">
-                            <MessageCircle strokeWidth={1.5}/>
-                        </button>
-                        <button title="Appeler">
-                            <Phone strokeWidth={1.5}/>
-                        </button>
-                        <button title="Vidéo">
-                            <Video strokeWidth={1.5}/>
-                        </button>
-                    </div>
+                    {#if !self}
+                        <!-- Quick actions -->
+                        <div class="flex items-center gap-x-4 text-gray-600 dark:text-gray-400">
+                            <a title="Envoyer un message" href="/chat/DIRECT/{userId}">
+                                <MessageCircle strokeWidth={1.5}/>
+                            </a>
+                            <button title="Appeler">
+                                <Phone strokeWidth={1.5}/>
+                            </button>
+                            <button title="Vidéo">
+                                <Video strokeWidth={1.5}/>
+                            </button>
+                        </div>
+                    {/if}
 
                     <!-- More details -->
                     <div class="flex flex-col gap-y-2">
@@ -131,18 +136,20 @@
                             <span class="text-black dark:text-white text-lg">{userProfile.firstName} {userProfile.lastName}</span>
                         </div>
 
-                        <!-- Quick actions -->
-                        <div class="flex items-center gap-x-4 text-gray-600 dark:text-gray-400">
-                            <button title="Envoyer un message">
-                                <MessageCircle strokeWidth={1.5}/>
-                            </button>
-                            <button title="Appeler">
-                                <Phone strokeWidth={1.5}/>
-                            </button>
-                            <button title="Vidéo">
-                                <Video strokeWidth={1.5}/>
-                            </button>
-                        </div>
+                        {#if !self}
+                            <!-- Quick actions -->
+                            <div class="flex items-center gap-x-4 text-gray-600 dark:text-gray-400">
+                                <a title="Envoyer un message" href="/chat/DIRECT/{userId}">
+                                    <MessageCircle strokeWidth={1.5}/>
+                                </a>
+                                <button title="Appeler">
+                                    <Phone strokeWidth={1.5}/>
+                                </button>
+                                <button title="Vidéo">
+                                    <Video strokeWidth={1.5}/>
+                                </button>
+                            </div>
+                        {/if}
 
                         <!-- More details -->
                         <div class="flex flex-col gap-y-2">
