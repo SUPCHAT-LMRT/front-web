@@ -177,7 +177,7 @@
                 <img
                         src="{getS3ObjectUrl(S3Bucket.WORKSPACES_BANNERS, currentWorkspaceId)}?{forceRenderBanner}"
                         alt=""
-                        class="w-full max-h-64 mb-6 object-cover bg-gray-200 dark:bg-gray-800"
+                        class="w-full h-64 mb-6 object-cover bg-gray-200 dark:bg-gray-800"
                 />
 
                 <!-- TODO display only if the user has permission to edit the banner -->

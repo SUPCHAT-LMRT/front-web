@@ -8,6 +8,7 @@
   import * as Dialog from "$lib/components/ui/dialog";
   import * as Popover from "$lib/components/ui/popover/index.js";
   import type { Snippet } from "svelte";
+  import { RoomKind } from "$lib/api/room";
 
   type Props = {
     userId: string;
@@ -79,7 +80,7 @@
           {#if !self}
             <!-- Quick actions -->
             <div class="flex items-center gap-x-4 text-gray-600 dark:text-gray-400">
-              <a title="Envoyer un message" href="/chat/DIRECT/{userId}">
+              <a title="Envoyer un message" href="/chat/{RoomKind.DIRECT.toLowerCase()}/{userId}">
                 <MessageCircle strokeWidth={1.5} />
               </a>
               <button title="Appeler">
@@ -140,7 +141,7 @@
             {#if !self}
               <!-- Quick actions -->
               <div class="flex items-center gap-x-4 text-gray-600 dark:text-gray-400">
-                <a title="Envoyer un message" href="/chat/DIRECT/{userId}">
+                <a title="Envoyer un message" href="/chat/{RoomKind.DIRECT.toLowerCase()}/{userId}">
                   <MessageCircle strokeWidth={1.5} />
                 </a>
                 <button title="Appeler">

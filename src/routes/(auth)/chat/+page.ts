@@ -11,7 +11,7 @@ export const load = (async ({ parent }) => {
     if (!recentChats.find((chat) => chat === currentRecentChat)) {
       localStorage.removeItem("currentRecentChat");
       // Set the currentRecentChat to the first chat in the recentChats
-      currentRecentChat = recentChats[0].kind + "/" + recentChats[0].id;
+      currentRecentChat = recentChats[0].kind.toLowerCase() + "/" + recentChats[0].id;
       console.log(
         "currentRecentChat is not in the recentChats, setting it to the first chat in the recentChats",
       );
@@ -23,6 +23,6 @@ export const load = (async ({ parent }) => {
   // Redirect to the last selected chat if there is one
   if (currentRecentChat) {
     const [chatKind, chatId] = currentRecentChat.split("/");
-    return redirect(302, `/chat/${chatKind}/${chatId}`);
+    return redirect(302, `/chat/${chatKind.toLowerCase()}/${chatId}`);
   }
 }) as PageLoad;

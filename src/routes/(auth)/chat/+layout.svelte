@@ -9,6 +9,7 @@
     import recentChatsStore from "$lib/stores/recentChatsStore";
     import {StoreResultState} from "$lib/stores/store.svelte";
     import {fallbackAvatarLetters} from "$lib/utils/fallbackAvatarLetters.js";
+    import { getS3ObjectUrl, S3Bucket } from "$lib/api/s3";
 
     const currentChatId = $derived(page.url.pathname.split("/").pop());
 
@@ -87,16 +88,16 @@
                         <Sidebar.MenuItem class="mb-2 rounded w-full {currentChatId === chat.id ? 'bg-gray-200 dark:bg-gray-700' : ''}">
                             <div class="relative group">
                                 <div class="flex items-center p-2 rounded transition-all duration-300 hover:bg-gray-200 dark:hover:bg-gray-700">
-                                    <a href="/chat/{chat.kind}/{chat.id}" class="flex items-center w-full">
+                                    <a href="/chat/{chat.kind.toLowerCase()}/{chat.id}" class="flex items-center w-full">
                                         <Avatar.Root class="h-7 w-7">
-                                            <Avatar.Image src={chat.avatarUrl} alt={chat.id}
+                                            <Avatar.Image src={getS3ObjectUrl(S3Bucket.USERS_AVATARS, chat.id)} alt={chat.id}
                                                           class="h-full w-full rounded-full object-cover"/>
                                             <Avatar.Fallback
                                                     class="flex items-center justify-center rounded-full h-full w-full">
                                                 {fallbackAvatarLetters(chat.name)}
                                             </Avatar.Fallback>
                                         </Avatar.Root>
-                                        <span class="ml-4 text-sm text-gray-700">{chat.name}</span>
+                                        <span class="ml-4 text-sm text-gray-700 dark:text-inherit">{chat.name}</span>
                                     </a>
                                 </div>
                                 <button

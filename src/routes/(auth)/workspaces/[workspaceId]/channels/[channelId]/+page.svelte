@@ -1,4 +1,5 @@
 <script lang="ts">
+    import "$lib/assets/styles/chats.scss";
     import {page} from "$app/state";
     import ws from "$lib/api/ws";
     import {getS3ObjectUrl, S3Bucket} from "$lib/api/s3";
@@ -25,12 +26,12 @@
 
     const {authenticatedUser} = page.data;
 
-    let currentUserId = authenticatedUser.id;
     let currentWorkspaceId = $derived(page.params.workspaceId);
     let currentChannelId = $derived(page.params.channelId);
     let currentChannel: Channel = $state(null);
     let currentMessage = $state("");
     let currentRoom: { id: string | null; messages: ChannelMessage[] } = $state({id: null, messages: []});
+
     let unsubscribeSendMessage = null;
     let unsubscribeMessageReactionAdded = null;
     let unsubscribeMessageReactionRemoved = null;
@@ -157,14 +158,14 @@
                 <ContextMenu.Root>
                     <ContextMenu.Trigger>
                         <div class="flex gap-x-4 items-start"
-                             class:justify-end={message.author.userId === currentUserId}>
+                             class:justify-end={message.author.userId === authenticatedUser.id}>
 
                             {#snippet messageReaction()}
                                 <div class="flex items-center gap-2 mb-4">
                                     {#each message.reactions as {reaction, users} (reaction)}
                                         <div
                                                 class={cn("flex items-center justify-center bg-gray-100 dark:bg-gray-800 p-1 rounded-lg text-lg gap-x-2 transition-colors duration-300 select-none", {
-                                                    "ring-2 ring-primary !bg-primary/30": users.find(({id}) => id === currentUserId),
+                                                    "ring-2 ring-primary !bg-primary/30": users.find(({id}) => id === authenticatedUser.id),
                                                 })}
                                                 onclick={() => handleMessageReactionToggle(message.id, reaction)}
                                                 role="button" tabindex="-1">
@@ -177,7 +178,7 @@
                                 </div>
                             {/snippet}
 
-                            {#if message.author !== null && message.author.userId !== currentUserId}
+                            {#if message.author !== null && message.author.userId !== authenticatedUser.id}
                                 <HoveredUserProfile userId={message.author.userId} self={false}>
                                     <Avatar.Root class="flex-shrink-0">
                                         <Avatar.Image
@@ -212,7 +213,7 @@
                                 </div>
                             {/if}
 
-                            {#if message.author.userId === currentUserId}
+                            {#if message.author.userId === authenticatedUser.id}
                                 <div class="flex flex-col">
                                     <div class="flex flex-col gap-y-2">
                                         <div class="flex items-end gap-2 justify-end">
@@ -300,13 +301,3 @@
         ></div>
     {/if}
 </div>
-
-<style>
-    [contenteditable][placeholder]:empty:before {
-        content: attr(placeholder);
-        position: absolute;
-        color: gray;
-        background-color: transparent;
-        cursor: text;
-    }
-</style>

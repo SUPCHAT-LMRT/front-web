@@ -112,6 +112,16 @@ class Ws {
     );
   };
 
+  public sendDirectMessage = (otherUserId, message) => {
+    this.send(
+      JSON.stringify({
+        action: "send-direct-message",
+        content: message,
+        otherUserId,
+      }),
+    );
+  }
+
   public joinRoom = (roomId: string, roomKind: RoomKind) => {
     const currentOpenedRoom = getCurrentOpenedRoom();
     if (currentOpenedRoom.id !== "") {
@@ -121,11 +131,12 @@ class Ws {
     switch (roomKind) {
       case RoomKind.DIRECT:
         this.send(
-          JSON.stringify({ action: "join-direct-room", message: roomId }),
+          JSON.stringify({ action: "join-direct-room", otherUserId: roomId }),
         );
         break;
       case RoomKind.GROUP:
         this.send(
+          // TODO handle group rooms
           JSON.stringify({ action: "join-group-room", message: roomId }),
         );
         break;
