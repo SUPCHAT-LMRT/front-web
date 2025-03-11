@@ -11,45 +11,28 @@
  * @note svelte/types/runtime/dom.d.ts includes definitions for DOM APIs, making "lib": ["dom"] redundant here
  */
 {
-	"extends": "./.svelte-kit/tsconfig.json",
-	"include": [
-		"src/**/*",
-		"src/node_modules",
-		".svelte-kit/ambient.d.ts"
-	],
-	"exclude": [
-		"node_modules/*",
-		"public/*"
-	],
-	"compilerOptions": {
-		"types": [
-			"svelte",
-			"vite/client"
-		],
-		"lib": [
-			"es2019",
-			"dom"
-		],
-		"moduleResolution": "node",
-		"target": "es6",
-		"isolatedModules": true,
-		"resolveJsonModule": true,
-		"sourceMap": true,
-		"esModuleInterop": true,
-		"skipLibCheck": true,
-		"forceConsistentCasingInFileNames": true,
-		"baseUrl": ".",
-		"paths": {
-			"$lib": [
-				"src/lib"
-			],
-			"$lib/*": [
-				"src/lib/*"
-			]
-		},
-		"allowJs": true,
-		"checkJs": true,
-		"useDefineForClassFields": true,
-		"module": "ESNext"
-	}
+  "extends": "./.svelte-kit/tsconfig.json",
+  "include": ["src/**/*", "src/node_modules", ".svelte-kit/ambient.d.ts"],
+  "exclude": ["node_modules/*", "public/*"],
+  "compilerOptions": {
+    "types": ["svelte", "vite/client"],
+    "lib": ["es2019", "dom"],
+    "moduleResolution": "node",
+    "target": "es6",
+    "isolatedModules": true,
+    "resolveJsonModule": true,
+    "sourceMap": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "baseUrl": ".",
+    "paths": {
+      "$lib": ["src/lib"],
+      "$lib/*": ["src/lib/*"]
+    },
+    "allowJs": true,
+    "checkJs": true,
+    "useDefineForClassFields": true,
+    "module": "ESNext"
+  }
 }

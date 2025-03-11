@@ -26,6 +26,7 @@
             const link = await createWorkspaceInviteLink(workspaceId);
             inviteLink.set(link);
         } catch (e) {
+            console.error(e);
             error.set("Erreur lors de la création du lien d'invitation.");
         } finally {
             loading.set(false);

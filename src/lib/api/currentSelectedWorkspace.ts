@@ -1,9 +1,10 @@
-let currentSelectedWorkspace = ""
+let currentSelectedWorkspace = "";
 
 export const setCurrentSelectedWorkspace = (workspaceId: string) => {
-    currentSelectedWorkspace = workspaceId;
-}
+  currentSelectedWorkspace = workspaceId;
+};
 
-export const getCurrentSelectedWorkspace = (): typeof currentSelectedWorkspace => {
+export const getCurrentSelectedWorkspace =
+  (): typeof currentSelectedWorkspace => {
     return currentSelectedWorkspace;
-}
+  };

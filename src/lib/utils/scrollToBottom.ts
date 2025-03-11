@@ -1,3 +1,3 @@
-export const scrollToBottom = async (node, behavior = 'smooth') => {
-    node.scroll({ top: node.scrollHeight, behavior });
+export const scrollToBottom = async (node, behavior = "smooth") => {
+  node.scroll({ top: node.scrollHeight, behavior });
 };

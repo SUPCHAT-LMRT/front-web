@@ -1,7 +1,6 @@
 <script lang="ts">
     import * as Tabs from "$lib/components/ui/tabs";
     import {goto} from "$lib/utils/goto";
-    import ProfileCard from "$lib/components/app/settings/ProfileCard.svelte";
     import {page} from "$app/state";
 
     type Tab = {

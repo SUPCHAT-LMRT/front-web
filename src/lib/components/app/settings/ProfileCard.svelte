@@ -1,10 +1,7 @@
 <script>
     import {Button} from "$lib/components/ui/button";
-    import {Hash, Settings, Shield} from "lucide-svelte";
-    import {Badge} from "$lib/components/ui/badge";
     import {Card} from "$lib/components/ui/card";
     import {getS3ObjectUrl, S3Bucket} from "$lib/api/s3";
-    import {page} from "$app/state";
     import * as Avatar from "$lib/components/ui/avatar";
     import {fallbackAvatarLetters} from "$lib/utils/fallbackAvatarLetters.js";
 

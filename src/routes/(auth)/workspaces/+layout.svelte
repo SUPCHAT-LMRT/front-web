@@ -14,7 +14,6 @@
     import {WorkspaceType} from "$lib/api/workspaces/workspace";
     import {Button} from "$lib/components/ui/button";
     import {page} from "$app/state";
-    import ws from "$lib/api/ws";
     import {fallbackAvatarLetters} from "$lib/utils/fallbackAvatarLetters.js";
 
     const currentWorkspaceId = $derived(page.url.pathname.split("/")?.[2]);

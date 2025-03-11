@@ -13,6 +13,7 @@
             success("Compte validé", "Votre compte a été validé avec succès. Vous pouvez maintenant vous connecter.");
             goto("/login");
         } catch(e) {
+            console.error(e);
             error("Erreur", "Erreur lors de la validation de votre compte.");
         }
     }

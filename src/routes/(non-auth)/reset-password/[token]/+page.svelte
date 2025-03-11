@@ -3,7 +3,7 @@
     import {cn} from "$lib/utils";
     import {Input} from "$lib/components/ui/input";
     import {Label} from "$lib/components/ui/label";
-    import {forgotPassword, resetPassword} from "$lib/api/user";
+    import {resetPassword} from "$lib/api/user";
     import {page} from "$app/state";
     import {error, success} from "$lib/toast/toast";
     import {goto} from "$lib/utils/goto";

@@ -1,14 +1,12 @@
 <script lang="ts">
     import {page} from "$app/state";
     import CreateChannelDialog from "$lib/components/app/workspaces/CreateChannelDialog.svelte";
-    import workspaceChannelsStore, {type WorkspaceChannelsStoreResult} from "$lib/stores/workspaceChannelsStore";
+    import workspaceChannelsStore from "$lib/stores/workspaceChannelsStore";
     import InviteMemberDialog from "$lib/components/app/workspaces/InviteMemberDialog.svelte";
     import EditWorkspaceDialog from "$lib/components/app/workspaces/EditWorkspaceDialog.svelte";
     import {
         getWorkspaceDetails,
-        getWorkspaceMembers,
         getWorkspaceTimeSeries, updateWorkspaceBanner, type WorkspaceDetails,
-        type WorkspaceMember
     } from "$lib/api/workspaces/workspace";
     import {getS3ObjectUrl, S3Bucket} from "$lib/api/s3";
     import {chart} from "$lib/actions/chart";
@@ -19,9 +17,6 @@
     import type {Channel} from "$lib/api/workspaces/channels";
     import {ImageDown} from "lucide-svelte";
     import * as Dialog from '$lib/components/ui/dialog';
-    import {Button, buttonVariants} from '$lib/components/ui/button';
-    import {Label} from '$lib/components/ui/label';
-    import {Input} from '$lib/components/ui/input';
     import MembersList from "./MembersList.svelte";
     import type {ApexOptions} from "apexcharts";
     import * as ImageCropper from '$lib/components/extra/ui/image-cropper';
@@ -166,15 +161,6 @@
             forceRenderBanner = Date.now();
         } catch (e) {
             console.error(e);
-        }
-    }
-
-    const handleFormSubmit = (event: Event) => {
-        event.preventDefault();
-        const form = event.target as HTMLFormElement;
-        const input = form.querySelector("input[type=file]") as HTMLInputElement;
-        if (input.files && input.files[0]) {
-            updateBanner(input.files[0]);
         }
     }
 

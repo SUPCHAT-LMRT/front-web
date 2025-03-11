@@ -1,7 +1,6 @@
 <script lang="ts">
     import {page} from "$app/state";
     import ws from "$lib/api/ws";
-    import {Input} from "$lib/components/ui/input";
     import {getS3ObjectUrl, S3Bucket} from "$lib/api/s3";
     import {RoomKind} from "$lib/api/room";
     import * as Avatar from "$lib/components/ui/avatar";

@@ -1,17 +1,17 @@
-import {RoomKind} from "./room";
+import { RoomKind } from "./room";
 
 let currentOpenedRoom = {
-    id: "",
-    kind: RoomKind.UNKNOWN
+  id: "",
+  kind: RoomKind.UNKNOWN,
 };
 
 export const setCurrentOpenedRoom = (roomId: string, roomKind: RoomKind) => {
-    currentOpenedRoom = {
-        id: roomId,
-        kind: roomKind
-    }
-}
+  currentOpenedRoom = {
+    id: roomId,
+    kind: roomKind,
+  };
+};
 
 export const getCurrentOpenedRoom = (): typeof currentOpenedRoom => {
-    return currentOpenedRoom;
-}
+  return currentOpenedRoom;
+};

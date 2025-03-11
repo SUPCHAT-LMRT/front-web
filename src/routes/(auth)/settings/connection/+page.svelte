@@ -1,7 +1,3 @@
-<script lang="ts">
-    import {Button} from "$lib/components/ui/button";
-</script>
-
 <section class="px-4 py-2 ml-2 pt-8 w-[500px]">
     <h2 class="text-gray-700 text-lg font-semibold mb-3 dark:text-gray-200">Connexion au profil</h2>
     <div class="space-y-4">

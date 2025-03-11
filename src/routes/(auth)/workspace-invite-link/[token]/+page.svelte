@@ -13,6 +13,7 @@
         try {
             workspace = await getWorkspaceInviteLink(token);
         } catch (e) {
+            console.error(e);
             error = "Erreur lors de la récupération des informations du workspace.";
         }
     });
@@ -22,6 +23,7 @@
             await joinWorkspace(token);
             await goto("/workspaces/" + workspace.workspaceId);
         } catch (e) {
+            console.error(e);
             error = "Erreur lors de la tentative de rejoindre le workspace.";
         }
     };
