@@ -120,7 +120,7 @@ class Ws {
         otherUserId,
       }),
     );
-  }
+  };
 
   public joinRoom = (roomId: string, roomKind: RoomKind) => {
     const currentOpenedRoom = getCurrentOpenedRoom();
@@ -197,6 +197,21 @@ class Ws {
       JSON.stringify({
         action: "channel-message-reaction-toggle",
         roomId,
+        messageId,
+        reaction,
+      }),
+    );
+  };
+
+  public toggleDirectMessageReaction = (
+    otherUserId: string,
+    messageId: string,
+    reaction: string,
+  ) => {
+    this.send(
+      JSON.stringify({
+        action: "direct-message-reaction-toggle",
+        otherUserId,
         messageId,
         reaction,
       }),

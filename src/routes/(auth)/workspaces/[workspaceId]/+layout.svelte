@@ -66,7 +66,7 @@
 </script>
 
 <div class="flex w-full justify-between dark:bg-gray-900">
-    <div class="h-screen w-full">
+    <div class="h-full w-full">
         {@render children?.()}
     </div>
 

@@ -25,7 +25,7 @@
     }
 </script>
 
-<Sidebar.Root class="w-24 flex flex-col items-center">
+<Sidebar.Root class="h-full w-24 flex flex-col items-center">
     <Sidebar.Content class="pt-4 dark:bg-gray-900">
         <Sidebar.Group>
             <Sidebar.GroupContent>

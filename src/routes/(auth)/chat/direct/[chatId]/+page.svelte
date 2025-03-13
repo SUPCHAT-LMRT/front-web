@@ -118,7 +118,7 @@
   };
 
   const handleMessageReactionToggle = (messageId: string, reaction: string) => {
-    ws.toggleChannelMessageReaction(currentRoom.id, messageId, reaction);
+    ws.toggleDirectMessageReaction(currentChatId, messageId, reaction);
   };
 
   const sendMessageToWs = () => {
@@ -139,7 +139,6 @@
     }
   };
 </script>
-
 
 <div class="w-full h-full flex flex-col gap-y-4">
   {#if otherUserProfile}
