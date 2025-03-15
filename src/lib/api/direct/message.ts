@@ -21,9 +21,15 @@ type DirectMessageReaction = {
 
 export const getDirectMessages = async (
   otherUserId: string,
+  params: {
+    limit?: number;
+    before?: Date;
+    after?: Date;
+    aroundMessageId?: string;
+  } = {},
 ): Promise<DirectMessage[]> => {
   try {
-    let { data } = await baseClient.get(`/api/chats/direct/${otherUserId}/messages`);
+    let { data } = await baseClient.get(`/api/chats/direct/${otherUserId}/messages?limit=${params.limit}${params.before ? `&before=${params.before.toISOString()}` : ""}${params.after ? `&after=${params.after.toISOString()}` : ""}${params.aroundMessageId ? `&aroundMessageId=${params.aroundMessageId}` : ""}`);
     data = data.map((message: Record<string, never>) => ({
       ...message,
       createdAt: new Date(message.createdAt),

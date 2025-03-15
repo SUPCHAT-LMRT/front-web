@@ -1,0 +1,180 @@
+<script lang="ts">
+  import { cn } from "$lib/utils";
+  import { getS3ObjectUrl, S3Bucket } from "$lib/api/s3";
+  import { fallbackAvatarLetters } from "$lib/utils/fallbackAvatarLetters";
+  import { Input } from "$lib/components/ui/input/index";
+  import { Skeleton } from "$lib/components/ui/skeleton/index";
+  import { baseClient } from "$lib/api/client";
+  import * as Dialog from "$lib/components/ui/dialog";
+  import * as Avatar from "$lib/components/ui/avatar";
+
+  // Define TypeScript types matching your API
+  type SearchResultKind = "channel" | "message" | "user";
+
+  type SearchResult = {
+    kind: SearchResultKind;
+    data: SearchResultChannel | SearchResultMessage | SearchResultUser;
+  }
+
+  type SearchResultChannel = {
+    id: string;
+    name: string;
+    topic: string;
+    href: string;
+  }
+
+  type SearchResultMessage = {
+    id: string;
+    content: string;
+    authorId: string;
+    authorName: string;
+    href: string;
+  }
+
+  type SearchResultUser = {
+    id: string;
+    highlightedFirstName: string;
+    highlightedLastName: string;
+    highlightedEmail: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+    href: string;
+  }
+
+  const listSearchResults = async (term: string): Promise<SearchResult[]> => {
+    if (term === "") return [];
+    try {
+      const response = await baseClient.get(`/api/search?q=${term}&kind=${kindFilter ?? ""}`);
+      return response.data;
+    } catch (error) {
+      console.error(error);
+      return [];
+    }
+  };
+
+  let dialogSearchOpen = $state(false);
+  let searchQuery = $state("");
+  let kindFilter = $state<SearchResultKind | null>(null);
+  let searchResults = $derived(listSearchResults(searchQuery));
+
+  const closeDialogSearch = () => {
+    dialogSearchOpen = false;
+    searchQuery = "";
+  };
+</script>
+
+<Dialog.Root bind:open={dialogSearchOpen}>
+  <Dialog.Trigger
+    class="flex items-center w-1/3 px-2 py-1 rounded-md bg-gray-100 border border-gray-300 focus:outline-none focus:ring-2 hover:bg-gray-200 transition dark:bg-gray-700 dark:border-gray-600"
+  >
+    <span class="text-gray-700 text-sm dark:text-gray-300">Rechercher</span>
+  </Dialog.Trigger>
+  <Dialog.Content class="flex flex-col justify-center items-center max-w-[30rem] dark:bg-gray-800">
+    <Dialog.Header>
+      <Dialog.Title class="relative">
+        <Input
+          type="text"
+          placeholder="Que souhaites-tu chercher ?"
+          bind:value={searchQuery}
+          class="max-w-xs dark:bg-gray-800 border border-gray-400 dark:focus-visible:bg-red"
+        />
+      </Dialog.Title>
+      <Dialog.Description class="flex items-center pt-2">
+        <p class="text-[#1C9B4B] font-extrabold text-[11px] uppercase">Conseil de pro :</p>
+        <p class="text-[11px]">
+          Utilise
+          <button
+            class={cn("p-1 bg-gray-200 dark:bg-gray-700 font-bold rounded", kindFilter === "message" && "!bg-green-500 text-white")}
+            onclick={() => kindFilter = (kindFilter === "message" ? null : "message")}>
+            Message
+          </button>
+          ,
+          <button
+            class={cn("p-1 bg-gray-200 dark:bg-gray-700 font-bold rounded", kindFilter === "channel" && "!bg-green-500 text-white")}
+            onclick={() => kindFilter = (kindFilter === "channel" ? null : "channel")}>
+            Canal
+          </button>
+          et
+          <button
+            class={cn("p-1 bg-gray-200 dark:bg-gray-700 font-bold rounded", kindFilter === "user" && "!bg-green-500 text-white")}
+            onclick={() => kindFilter = (kindFilter === "user" ? null : "user")}>
+            Utilisateur
+          </button>
+          pour affiner les résultats.
+        </p>
+      </Dialog.Description>
+    </Dialog.Header>
+
+    {#await searchResults}
+      <div class="mt-4">
+        <Skeleton class="h-8 w-full" />
+        <Skeleton class="h-8 w-full" />
+        <Skeleton class="h-8 w-full" />
+      </div>
+    {:then results}
+      <!-- Search Results Display -->
+      {#if results.length > 0}
+        <div class="w-full max-h-60 overflow-y-auto mt-4">
+          {#each results as result}
+            <a href={result.data.href}
+               class="block p-2 border-b rounded-sm hover:!bg-gray-600 border-gray-200 dark:border-gray-700"
+               onclick={closeDialogSearch}>
+                  <span class="text-xs font-semibold text-gray-500 dark:text-gray-400">
+                    {result.kind}
+                  </span>
+              {#if result.kind === "channel"}
+                {@render renderChannel(result.data)}
+              {:else if result.kind === "message"}
+                {@render renderMessage(result.data)}
+              {:else if result.kind === "user"}
+                {@render renderUser(result.data)}
+              {/if}
+            </a>
+          {/each}
+        </div>
+      {:else if searchQuery}
+        <div class="mt-4 text-sm text-gray-500 dark:text-gray-400">
+          Aucun résultat trouvé
+        </div>
+      {/if}
+    {/await}
+
+  </Dialog.Content>
+</Dialog.Root>
+
+{#snippet renderChannel(data: SearchResultChannel)}
+   <span class="text-sm block">
+    {@html data.name} ({@html data.topic})
+  </span>
+{/snippet}
+
+{#snippet renderMessage(data: SearchResultMessage)}
+  <div>
+    <div class="flex items-center gap-x-2">
+      <Avatar.Root class="flex-shrink-0">
+        <Avatar.Image
+          src={getS3ObjectUrl(S3Bucket.USERS_AVATARS, data.authorId)} />
+        <Avatar.Fallback>{fallbackAvatarLetters(data.authorName)}</Avatar.Fallback>
+      </Avatar.Root>
+      <span>{data.authorName}</span>
+    </div>
+
+    <span class="mt-4 text-sm">{@html data.content}</span>
+  </div>
+{/snippet}
+
+{#snippet renderUser(data: SearchResultUser)}
+  <div>
+    <div class="flex items-center gap-x-2">
+      <Avatar.Root class="flex-shrink-0">
+        <Avatar.Image
+          src={getS3ObjectUrl(S3Bucket.USERS_AVATARS, data.id)} />
+        <Avatar.Fallback class="bg-primary">{fallbackAvatarLetters(data.firstName)}</Avatar.Fallback>
+      </Avatar.Root>
+      <span>{@html data.highlightedFirstName} {@html data.highlightedLastName}</span>
+    </div>
+
+    <span class="mt-4 text-sm">{@html data.highlightedEmail}</span>
+  </div>
+{/snippet}

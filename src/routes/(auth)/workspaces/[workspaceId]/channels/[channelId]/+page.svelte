@@ -23,9 +23,11 @@
   import { scrollToBottom } from "$lib/utils/scrollToBottom";
   import NumberFlow from "@number-flow/svelte";
   import HoveredUserProfile from "$lib/components/app/HoveredUserProfile.svelte";
+  import { goto } from "$lib/utils/goto";
 
   const { authenticatedUser } = page.data;
 
+  const aroundMessageId = $derived(page.url.searchParams.get("aroundMessageId"));
   let currentWorkspaceId = $derived(page.params.workspaceId);
   let currentChannelId = $derived(page.params.channelId);
   let currentChannel: Channel = $state(null);
@@ -37,6 +39,7 @@
   let unsubscribeMessageReactionRemoved = null;
   let inputElement: HTMLDivElement = $state(null);
   let elementsList: HTMLDivElement = $state(null);
+  let isAutoScrolling = $state(false);
 
   // Ces deux références DOM serviront de sentinelles
   let topSentinel: HTMLDivElement = $state(null);
@@ -65,13 +68,26 @@
 
   const joinRoomAndListenMessages = async (workspaceId: string, channelId: string) => {
     try {
-      currentRoom.messages = await getWorkspaceChannelMessages(workspaceId, channelId, { limit: LIMIT_LOAD });
+      currentRoom.messages = await getWorkspaceChannelMessages(workspaceId, channelId, {
+        limit: LIMIT_LOAD,
+        aroundMessageId
+      });
       currentRoom.messages = currentRoom.messages.sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
       const joinedRoom = await ws.asyncJoinRoom(channelId, RoomKind.CHANNEL);
       currentRoom.id = joinedRoom.id;
 
       await tick();
-      await scrollToBottom(elementsList, "auto");
+      if (aroundMessageId) {
+        const aroundMessageElement = document.querySelector("[data-message-id='" + aroundMessageId + "']");
+        if (aroundMessageElement) {
+          aroundMessageElement.scrollIntoView({ block: "center" });
+          // Remove the aroundMessageId from the URL
+          page.url.searchParams.delete("aroundMessageId");
+          goto(page.url.toString());
+        }
+      } else {
+        await scrollToBottom(elementsList, "auto");
+      }
 
       topObserver = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
@@ -84,7 +100,7 @@
 
       bottomObserver = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
-          if (entry.isIntersecting) {
+          if (entry.isIntersecting && !isAutoScrolling) {
             // Quand la sentinelle du bas est visible, on charge les messages suivants
             loadNextMessages();
           }
@@ -110,13 +126,13 @@
               workspaceMemberId: msg.sender.workspaceMemberId,
               workspacePseudo: msg.sender.workspacePseudo
             },
-            createdAt: msg.createdAt,
+            createdAt: new Date(msg.createdAt),
             reactions: []
           }
         ];
 
         await tick();
-        await scrollToBottom(elementsList);
+        await scrollToBottomSafe(elementsList);
       });
 
       // Added is triggered when a user adds a reaction to a message,
@@ -156,6 +172,13 @@
     } catch (e) {
       console.error(e);
     }
+  };
+
+  const scrollToBottomSafe = async (element) => {
+    if (!element) return;
+    isAutoScrolling = true;
+    await scrollToBottom(element, "auto");
+    setTimeout(() => { isAutoScrolling = false; }, 300); // Petite pause pour éviter le déclenchement immédiat
   };
 
   // Charge les messages plus anciens (en remontant)
@@ -208,10 +231,23 @@
     ws.toggleChannelMessageReaction(currentRoom.id, messageId, reaction);
   };
 
-  const sendMessageToWs = () => {
+  const sendMessageToWs = async () => {
     if (currentMessage.trim() === "") return;
+
+    const now = new Date();
+    const lastMessage = currentRoom.messages[currentRoom.messages.length - 1];
+    const timeDiff = lastMessage ? (now.getTime() - lastMessage.createdAt.getTime()) / 1000 / 60 : 0; // Différence en minutes
+
     ws.sendChannelMessage(currentRoom.id, currentMessage);
     currentMessage = "";
+
+    // Si l'utilisateur est "loin" dans l'historique (ex. dernier message > 5 min), recharge les messages récents
+    if (timeDiff > 5 || !lastMessage) {
+      currentRoom.messages = await getWorkspaceChannelMessages(currentWorkspaceId, currentChannelId, {
+        limit: LIMIT_LOAD
+      });
+      currentRoom.messages = currentRoom.messages.sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
+    }
   };
 
   // Set the input placeholder if the input is empty
@@ -246,139 +282,142 @@
       <div bind:this={topSentinel} class="sentinel mt-4"></div>
 
       {#each currentRoom.messages as message (message.id)}
-        <ContextMenu.Root>
-          <ContextMenu.Trigger>
-            <div class="flex gap-x-4 items-start"
-                 class:justify-end={message.author.userId === authenticatedUser.id}>
+        <div data-message-id={message.id}>
+          <ContextMenu.Root>
+            <ContextMenu.Trigger>
+              <div class="flex gap-x-4 items-start"
+                   class:justify-end={message.author.userId === authenticatedUser.id}>
 
-              {#snippet messageReaction()}
-                <div class="flex items-center gap-2 mb-4">
-                  {#each message.reactions as { reaction, users } (reaction)}
-                    <div
-                      class={cn("flex items-center justify-center bg-gray-100 dark:bg-gray-800 p-1 rounded-lg text-lg gap-x-2 transition-colors duration-300 select-none", {
-                                                    "ring-2 ring-primary !bg-primary/30": users.find(({id}) => id === authenticatedUser.id),
-                                                })}
-                      onclick={() => handleMessageReactionToggle(message.id, reaction)}
-                      role="button" tabindex="-1">
-                      <span>{reaction}</span>
-                      <NumberFlow
-                        spinTiming={{duration: 150}}
-                        value={users.length} />
-                    </div>
-                  {/each}
-                </div>
-              {/snippet}
+                {#snippet messageReaction()}
+                  <div class="flex items-center gap-2 mb-4">
+                    {#each message.reactions as { reaction, users } (reaction)}
+                      <div
+                        class={cn("flex items-center justify-center bg-gray-100 dark:bg-gray-800 p-1 rounded-lg text-lg gap-x-2 transition-colors duration-300 select-none",
+                         {
+                            "ring-2 ring-primary !bg-primary/30": users.find(({id}) => id === authenticatedUser.id),
+                         })}
+                        onclick={() => handleMessageReactionToggle(message.id, reaction)}
+                        role="button" tabindex="-1">
+                        <span>{reaction}</span>
+                        <NumberFlow
+                          spinTiming={{duration: 150}}
+                          value={users.length} />
+                      </div>
+                    {/each}
+                  </div>
+                {/snippet}
 
-              {#if message.author !== null && message.author.userId !== authenticatedUser.id}
-                <HoveredUserProfile userId={message.author.userId} self={false}>
-                  <Avatar.Root class="flex-shrink-0">
-                    <Avatar.Image
-                      src={getS3ObjectUrl(S3Bucket.USERS_AVATARS, message.author.userId)} />
-                    <Avatar.Fallback>{fallbackAvatarLetters(message.author.workspacePseudo)}</Avatar.Fallback>
-                  </Avatar.Root>
-                </HoveredUserProfile>
-                <div class="flex flex-col">
-                  <div class="flex items-center gap-2">
-                    <HoveredUserProfile userId={message.author.userId} self={false}>
-                      <span class="font-semibold">{message.author.workspacePseudo}</span>
-                    </HoveredUserProfile>
-                    <Tooltip>
-                      <TooltipTrigger>
+                {#if message.author !== null && message.author.userId !== authenticatedUser.id}
+                  <HoveredUserProfile userId={message.author.userId} self={false}>
+                    <Avatar.Root class="flex-shrink-0">
+                      <Avatar.Image
+                        src={getS3ObjectUrl(S3Bucket.USERS_AVATARS, message.author.userId)} />
+                      <Avatar.Fallback>{fallbackAvatarLetters(message.author.workspacePseudo)}</Avatar.Fallback>
+                    </Avatar.Root>
+                  </HoveredUserProfile>
+                  <div class="flex flex-col">
+                    <div class="flex items-center gap-2">
+                      <HoveredUserProfile userId={message.author.userId} self={false}>
+                        <span class="font-semibold">{message.author.workspacePseudo}</span>
+                      </HoveredUserProfile>
+                      <Tooltip>
+                        <TooltipTrigger>
                                                 <span class="text-sm text-gray-500">
                                                     {formatDate(message.createdAt)}
                                                 </span>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        {format(new Date(message.createdAt), "EEEE d MMMM yyyy à HH:mm", { locale: fr })}
-                      </TooltipContent>
-                    </Tooltip>
-                  </div>
-                  <div class="flex flex-col gap-y-2">
-                    <div class="flex items-center gap-2">
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          {format(new Date(message.createdAt), "EEEE d MMMM yyyy à HH:mm", { locale: fr })}
+                        </TooltipContent>
+                      </Tooltip>
+                    </div>
+                    <div class="flex flex-col gap-y-2">
+                      <div class="flex items-center gap-2">
                                             <span class="p-2 rounded-xl break-all bg-primary text-white shadow-lg">
                                                 {message.content}
                                             </span>
+                      </div>
+                      {@render messageReaction()}
                     </div>
-                    {@render messageReaction()}
                   </div>
-                </div>
-              {/if}
+                {/if}
 
-              {#if message.author.userId === authenticatedUser.id}
-                <div class="flex flex-col">
-                  <div class="flex flex-col gap-y-2">
-                    <div class="flex items-end gap-2 justify-end">
+                {#if message.author.userId === authenticatedUser.id}
+                  <div class="flex flex-col">
+                    <div class="flex flex-col gap-y-2">
+                      <div class="flex items-end gap-2 justify-end">
 
-                      <div class="flex flex-col items-end gap-y-2">
-                        <Tooltip>
-                          <TooltipTrigger class="text-left">
+                        <div class="flex flex-col items-end gap-y-2">
+                          <Tooltip>
+                            <TooltipTrigger class="text-left">
                                                         <span class="text-sm text-gray-500">
                                                             {formatDate(message.createdAt)}
                                                         </span>
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            {format(new Date(message.createdAt), "EEEE d MMMM yyyy à HH:mm", { locale: fr })}
-                          </TooltipContent>
-                        </Tooltip>
-                        <span class="p-2 rounded-xl break-all bg-primary text-white shadow-lg w-full">
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              {format(new Date(message.createdAt), "EEEE d MMMM yyyy à HH:mm", { locale: fr })}
+                            </TooltipContent>
+                          </Tooltip>
+                          <span class="p-2 rounded-xl break-all bg-primary text-white shadow-lg w-full">
                                                     {message.content}
                                                 </span>
+                        </div>
+
+                        <HoveredUserProfile userId={message.author.userId} self={true}>
+                          <Avatar.Root class="flex-shrink-0 -translate-y-[2px] -p-[2px]">
+                            <Avatar.Image
+                              src={getS3ObjectUrl(S3Bucket.USERS_AVATARS, message.author.userId)} />
+                            <Avatar.Fallback>{fallbackAvatarLetters(message.author.workspacePseudo)}</Avatar.Fallback>
+                          </Avatar.Root>
+                        </HoveredUserProfile>
                       </div>
 
-                      <HoveredUserProfile userId={message.author.userId} self={true}>
-                        <Avatar.Root class="flex-shrink-0 -translate-y-[2px] -p-[2px]">
-                          <Avatar.Image
-                            src={getS3ObjectUrl(S3Bucket.USERS_AVATARS, message.author.userId)} />
-                          <Avatar.Fallback>{fallbackAvatarLetters(message.author.workspacePseudo)}</Avatar.Fallback>
-                        </Avatar.Root>
-                      </HoveredUserProfile>
+                      {@render messageReaction()}
                     </div>
-
-                    {@render messageReaction()}
                   </div>
-                </div>
-              {/if}
-            </div>
-          </ContextMenu.Trigger>
-          <ContextMenu.Content class="w-64">
-            <ContextMenu.Item class="flex justify-between hover:!bg-white dark:hover:!bg-popover">
-              {#each ["😊", "😂", "🤷‍♂️", "👍"] as emoji}
-                <div
-                  class="flex items-center justify-center bg-gray-100 dark:bg-gray-800 transition-colors duration-300 p-2 rounded-full w-8 h-8 text-lg"
-                  onclick={() => handleMessageReactionToggle(message.id, emoji)}
-                  role="button" tabindex="-1">
-                  {emoji}
-                </div>
-              {/each}
-            </ContextMenu.Item>
-            <ContextMenu.Sub>
-              <ContextMenu.SubTrigger>Ajouter une réaction</ContextMenu.SubTrigger>
-              <ContextMenu.SubContent class="min-w-max">
-                {#each ["😉", "😎", "😢"] as emoji}
-                  <ContextMenu.Item
-                    class="text-lg"
+                {/if}
+              </div>
+            </ContextMenu.Trigger>
+            <ContextMenu.Content class="w-64">
+              <ContextMenu.Item class="flex justify-between hover:!bg-white dark:hover:!bg-popover">
+                {#each ["😊", "😂", "🤷‍♂️", "👍"] as emoji}
+                  <div
+                    class="flex items-center justify-center bg-gray-100 dark:bg-gray-800 transition-colors duration-300 p-2 rounded-full w-8 h-8 text-lg"
                     onclick={() => handleMessageReactionToggle(message.id, emoji)}
-                    role="button" tabindex={-1}>
+                    role="button" tabindex="-1">
                     {emoji}
-                  </ContextMenu.Item>
+                  </div>
                 {/each}
-              </ContextMenu.SubContent>
-            </ContextMenu.Sub>
-            <ContextMenu.Separator />
-            <ContextMenu.Item class="flex justify-between">
-              <span>Modifier</span>
-              <div>
-                <Pen size="18" />
-              </div>
-            </ContextMenu.Item>
-            <ContextMenu.Item class="text-red-500 hover:!bg-red-500 hover:!text-white flex justify-between">
-              <span>Supprimer</span>
-              <div>
-                <Trash2 size="18" />
-              </div>
-            </ContextMenu.Item>
-          </ContextMenu.Content>
-        </ContextMenu.Root>
+              </ContextMenu.Item>
+              <ContextMenu.Sub>
+                <ContextMenu.SubTrigger>Ajouter une réaction</ContextMenu.SubTrigger>
+                <ContextMenu.SubContent class="min-w-max">
+                  {#each ["😉", "😎", "😢"] as emoji}
+                    <ContextMenu.Item
+                      class="text-lg"
+                      onclick={() => handleMessageReactionToggle(message.id, emoji)}
+                      role="button" tabindex={-1}>
+                      {emoji}
+                    </ContextMenu.Item>
+                  {/each}
+                </ContextMenu.SubContent>
+              </ContextMenu.Sub>
+              <ContextMenu.Separator />
+              <ContextMenu.Item class="flex justify-between">
+                <span>Modifier</span>
+                <div>
+                  <Pen size="18" />
+                </div>
+              </ContextMenu.Item>
+              <ContextMenu.Item class="text-red-500 hover:!bg-red-500 hover:!text-white flex justify-between">
+                <span>Supprimer</span>
+                <div>
+                  <Trash2 size="18" />
+                </div>
+              </ContextMenu.Item>
+            </ContextMenu.Content>
+          </ContextMenu.Root>
+        </div>
       {/each}
 
       <!-- Sentinel en bas -->

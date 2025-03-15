@@ -75,11 +75,16 @@ type ChannelMessageReaction = {
 export const getWorkspaceChannelMessages = async (
   workspaceId: string,
   channelId: string,
-  params: { limit?: number; before?: Date; after?: Date } = {},
+  params: {
+    limit?: number;
+    before?: Date;
+    after?: Date;
+    aroundMessageId?: string;
+  } = {},
 ): Promise<ChannelMessage[]> => {
   try {
     let { data } = await baseClient.get(
-      `/api/workspaces/${workspaceId}/channels/${channelId}/messages?limit=${params.limit}${params.before ? `&before=${params.before.toISOString()}` : ""}${params.after ? `&after=${params.after.toISOString()}` : ""}`,
+      `/api/workspaces/${workspaceId}/channels/${channelId}/messages?limit=${params.limit}${params.before ? `&before=${params.before.toISOString()}` : ""}${params.after ? `&after=${params.after.toISOString()}` : ""}${params.aroundMessageId ? `&aroundMessageId=${params.aroundMessageId}` : ""}`,
     );
     data = data.map((message: Record<string, never>) => ({
       ...message,
