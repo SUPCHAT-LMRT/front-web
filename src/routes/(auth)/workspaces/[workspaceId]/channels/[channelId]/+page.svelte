@@ -81,9 +81,6 @@
         const aroundMessageElement = document.querySelector("[data-message-id='" + aroundMessageId + "']");
         if (aroundMessageElement) {
           aroundMessageElement.scrollIntoView({ block: "center" });
-          // Remove the aroundMessageId from the URL
-          page.url.searchParams.delete("aroundMessageId");
-          goto(page.url.toString());
         }
       } else {
         await scrollToBottom(elementsList, "auto");
