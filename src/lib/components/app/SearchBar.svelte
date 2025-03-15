@@ -2,11 +2,12 @@
   import { cn } from "$lib/utils";
   import { getS3ObjectUrl, S3Bucket } from "$lib/api/s3";
   import { fallbackAvatarLetters } from "$lib/utils/fallbackAvatarLetters";
-  import { Input } from "$lib/components/ui/input/index";
-  import { Skeleton } from "$lib/components/ui/skeleton/index";
+  import { Input } from "$lib/components/ui/input";
+  import { Skeleton } from "$lib/components/ui/skeleton";
   import { baseClient } from "$lib/api/client";
   import * as Dialog from "$lib/components/ui/dialog";
   import * as Avatar from "$lib/components/ui/avatar";
+  import {Hash, Volume1} from "lucide-svelte";
 
   // Define TypeScript types matching your API
   type SearchResultKind = "channel" | "message" | "user";
@@ -20,6 +21,7 @@
     id: string;
     name: string;
     topic: string;
+    kind: 'text' | 'voice';
     href: string;
   }
 
@@ -120,14 +122,20 @@
             <a href={result.data.href}
                class="block p-2 border-b rounded-sm hover:!bg-gray-600 border-gray-200 dark:border-gray-700"
                onclick={closeDialogSearch}>
-                  <span class="text-xs font-semibold text-gray-500 dark:text-gray-400">
-                    {result.kind}
-                  </span>
               {#if result.kind === "channel"}
+                <span class="text-xs font-semibold text-gray-500 dark:text-gray-400">
+                  Canal
+                </span>
                 {@render renderChannel(result.data)}
               {:else if result.kind === "message"}
+                <span class="text-xs font-semibold text-gray-500 dark:text-gray-400">
+                  Message
+                </span>
                 {@render renderMessage(result.data)}
               {:else if result.kind === "user"}
+                <span class="text-xs font-semibold text-gray-500 dark:text-gray-400">
+                  Utilisateur
+                </span>
                 {@render renderUser(result.data)}
               {/if}
             </a>
@@ -144,8 +152,10 @@
 </Dialog.Root>
 
 {#snippet renderChannel(data: SearchResultChannel)}
-   <span class="text-sm block">
-    {@html data.name} ({@html data.topic})
+  {@const Icon = data.kind === "text" ? Hash : Volume1}
+   <span class="text-sm flex items-center">
+     <Icon size={14}/>
+     <span>{@html data.name} {@html data.topic ? `(${data.topic})` : ''}</span>
   </span>
 {/snippet}
 

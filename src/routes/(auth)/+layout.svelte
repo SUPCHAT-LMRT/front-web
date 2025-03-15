@@ -7,7 +7,7 @@
   import Validate from "$lib/components/app/icon/Validate.svelte";
   import Error from "$lib/components/app/icon/Error.svelte";
   import { ModeWatcher } from "mode-watcher";
-  import SearchBar from "$lib/components/SearchBar.svelte";
+  import SearchBar from "$lib/components/app/SearchBar.svelte";
 
   let { children } = $props();
 </script>
