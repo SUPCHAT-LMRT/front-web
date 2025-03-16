@@ -262,7 +262,7 @@
   });
 </script>
 
-<div class="w-full h-full flex flex-col gap-y-4">
+<div class="relative w-full h-full flex flex-col gap-y-4">
   {#if otherUserProfile}
     <div class="flex items-center gap-x-2 bg-gray-100 dark:bg-gray-800 p-4">
       <span class="font-semibold text-2xl">{otherUserProfile.firstName} {otherUserProfile.lastName}</span>
@@ -270,7 +270,7 @@
     </div>
   {/if}
 
-  <div class="flex-1 overflow-y-auto px-4 space-y-4" bind:this={elementsList}>
+  <div class="flex-1 h-full overflow-y-auto px-4 space-y-4 mb-8" bind:this={elementsList}>
     {#if currentRoom.id !== null}
       <!-- Sentinel en haut -->
       <div bind:this={topSentinel} class="sentinel mt-4"></div>
@@ -420,7 +420,7 @@
 
   {#if otherUserProfile}
     <div
-      class="p-2 border-none border-t-[2px] bg-gray-100 dark:bg-gray-800 border-t-primary max-h-12 overflow-y-auto w-full break-all cursor-text"
+      class="absolute bottom-0 p-2 border-none border-t-[2px] bg-gray-100 dark:bg-gray-800 border-t-primary max-h-12 overflow-y-auto w-full break-all cursor-text"
       contenteditable
       placeholder="Écrivez un message à {otherUserProfile.firstName} {otherUserProfile.lastName}"
       bind:this={inputElement}

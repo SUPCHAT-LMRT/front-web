@@ -14,16 +14,14 @@
 
 <ModeWatcher />
 
-<div>
+<div class="min-h-screen-safe lg:min-h-[95svh] h-screen-safe lg:h-[95svh]">
   <div class="flex justify-center p-2 z-10  bg-gray-200 hover:!bg-gray-200 dark:bg-gray-800 hover:dark:!bg-gray-800">
     <SearchBar />
   </div>
 
-  <Sidebar.Provider class="!min-h-[95svh] h-[95svh]">
-    <div class="flex w-full h-full">
+  <Sidebar.Provider class="!min-h-full h-full">
       <AppSidebar />
       {@render children?.()}
-    </div>
   </Sidebar.Provider>
 
   <Toaster>

@@ -222,7 +222,7 @@ class Ws {
     action: string,
     callback: (msg) => void,
   ): (() => void) => {
-    const subscriptionId = self.crypto.randomUUID();
+    const subscriptionId = Math.random().toString(36);
     this.subscribers = [
       ...this.subscribers,
       {
