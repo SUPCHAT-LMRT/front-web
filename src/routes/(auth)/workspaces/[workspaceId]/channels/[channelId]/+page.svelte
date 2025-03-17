@@ -4,7 +4,6 @@
   import ws from "$lib/api/ws";
   import { getS3ObjectUrl, S3Bucket } from "$lib/api/s3";
   import { RoomKind } from "$lib/api/room";
-  import * as Avatar from "$lib/components/ui/avatar";
   import {
     type Channel,
     type ChannelMessage,
@@ -13,8 +12,7 @@
   } from "$lib/api/workspaces/channels";
   import { format } from "date-fns";
   import { fr } from "date-fns/locale";
-  import { Tooltip, TooltipTrigger, TooltipContent } from "$lib/components/ui/tooltip";
-  import * as ContextMenu from "$lib/components/ui/context-menu";
+  import { Tooltip, TooltipContent, TooltipTrigger } from "$lib/components/ui/tooltip";
   import { formatDate } from "$lib/utils/formatDate";
   import { Pen, Trash2 } from "lucide-svelte";
   import { fallbackAvatarLetters } from "$lib/utils/fallbackAvatarLetters.js";
@@ -23,7 +21,8 @@
   import { scrollToBottom } from "$lib/utils/scrollToBottom";
   import NumberFlow from "@number-flow/svelte";
   import HoveredUserProfile from "$lib/components/app/HoveredUserProfile.svelte";
-  import { goto } from "$lib/utils/goto";
+  import * as ContextMenu from "$lib/components/ui/context-menu";
+  import * as Avatar from "$lib/components/ui/avatar";
 
   const { authenticatedUser } = page.data;
 
@@ -73,8 +72,7 @@
         aroundMessageId
       });
       currentRoom.messages = currentRoom.messages.sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
-      const joinedRoom = await ws.asyncJoinRoom(channelId, RoomKind.CHANNEL);
-      currentRoom.id = joinedRoom.id;
+      currentRoom.id = await ws.asyncChannelJoinRoom(channelId, RoomKind.CHANNEL);
 
       await tick();
       if (aroundMessageId) {

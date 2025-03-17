@@ -21,7 +21,13 @@ class Ws {
   }
 
   private initWebSocket = async () => {
-    await refreshAccessToken();
+    try {
+      await refreshAccessToken();
+    } catch (error) {
+      console.error("Failed to refresh access token", error);
+      setTimeout(() => this.initWebSocket(), 1000); // Retry after 1s
+      return;
+    }
     this.ws = new WebSocket(env.PUBLIC_API_WS);
 
     this.ws.onopen = () => {
@@ -81,8 +87,11 @@ class Ws {
     for (let i = 0; i < data.length; i++) {
       const msg = JSON.parse(data[i]);
       switch (msg.action) {
-        case "room-joined":
-          this.handleRoomJoined(msg);
+        case "channel-room-joined":
+          this.handleChannelRoomJoined(msg);
+          break;
+        case "direct-room-joined":
+          this.handleDirectRoomJoined(msg);
           break;
         default:
           break;
@@ -94,12 +103,17 @@ class Ws {
     }
   };
 
-  private handleRoomJoined = ({
-    room,
+  private handleChannelRoomJoined = ({ roomId }: { roomId: string }) => {
+    setCurrentOpenedRoom(roomId, RoomKind.CHANNEL);
+  };
+
+  private handleDirectRoomJoined = ({
+    otherUserId,
   }: {
-    room: { id: string; kind: RoomKind };
+    roomId: string;
+    otherUserId: string;
   }) => {
-    setCurrentOpenedRoom(room.id, this.mapRoomKind(room.kind));
+    setCurrentOpenedRoom(otherUserId, RoomKind.DIRECT);
   };
 
   public sendChannelMessage = (roomId, message) => {
@@ -150,13 +164,27 @@ class Ws {
     }
   };
 
-  public asyncJoinRoom = async (
+  public asyncChannelJoinRoom = async (
     roomId: string,
     roomKind: RoomKind,
-  ): Promise<{ id: string; kind: RoomKind }> => {
-    return new Promise<{ id: string; kind: RoomKind }>((resolve) => {
-      const unsubscribe = this.subscribe("room-joined", (msg) => {
-        resolve(msg.room);
+  ): Promise<string> => {
+    return new Promise<string>((resolve) => {
+      const unsubscribe = this.subscribe("channel-room-joined", (msg) => {
+        resolve(msg.roomId);
+        unsubscribe();
+      });
+
+      this.joinRoom(roomId, roomKind);
+    });
+  };
+
+  public asyncDirectJoinRoom = async (
+    roomId: string,
+    roomKind: RoomKind,
+  ): Promise<{ roomId: string; otherUserId: string }> => {
+    return new Promise<{ roomId: string; otherUserId: string }>((resolve) => {
+      const unsubscribe = this.subscribe("direct-room-joined", (msg) => {
+        resolve({ roomId: msg.roomId, otherUserId: msg.otherUserId });
         unsubscribe();
       });
 

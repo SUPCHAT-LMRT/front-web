@@ -71,8 +71,8 @@
         aroundMessageId
       });
       currentRoom.messages = currentRoom.messages.sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
-      const joinedRoom = await ws.asyncJoinRoom(otherUserId, RoomKind.DIRECT);
-      currentRoom.id = joinedRoom.id;
+      const joinedRoom = await ws.asyncDirectJoinRoom(otherUserId, RoomKind.DIRECT);
+      currentRoom.id = joinedRoom.roomId;
 
       await tick();
       if (aroundMessageId) {
