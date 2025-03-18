@@ -20,9 +20,6 @@
         case "/(auth)/settings/voice":
             activeTab = {displayName: "Voix & Vidéo", label: "voiceAndVideo"};
             break;
-        case "/(auth)/settings/language":
-            activeTab = {displayName: "Langues", label: "languages"};
-            break;
     }
 
     function handleTabChange(tab: Tab, url: string) {
@@ -55,9 +52,6 @@
                             </Tabs.Trigger>
                             <Tabs.Trigger value="voiceAndVideo" class="text-gray-600 dark:text-gray-200" onclick={() => handleTabChange({displayName: "Voix & Vidéo", label: "voiceAndVideo"}, "/settings/voice")}>
                                 Voix & Vidéo
-                            </Tabs.Trigger>
-                            <Tabs.Trigger value="languages" class="text-gray-600 dark:text-gray-200" onclick={() => handleTabChange({displayName: "Langues", label: "languages"}, "/settings/language")}>
-                                Langues
                             </Tabs.Trigger>
                         </Tabs.List>
                     </Tabs.Root>

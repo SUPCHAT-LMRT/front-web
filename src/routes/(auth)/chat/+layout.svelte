@@ -1,6 +1,6 @@
 <script lang="ts">
     import {Skeleton} from "$lib/components/ui/skeleton/index.js";
-    import {BellIcon, CogIcon, UserIcon, XIcon} from "lucide-svelte";
+    import {BellIcon, CogIcon, UserIcon} from "lucide-svelte";
     import {page} from "$app/state";
     import recentChatsStore from "$lib/stores/recentChatsStore";
     import {StoreResultState} from "$lib/stores/store.svelte";
@@ -90,11 +90,6 @@
                     <span class="ml-4 text-sm text-gray-700 dark:text-inherit">{chat.name}</span>
                   </a>
                 </div>
-                <button
-                        class="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300 dark:text-gray-300"
-                >
-                  <XIcon class="h-4 w-4"/>
-                </button>
               </div>
             </Sidebar.MenuItem>
           {:else}
