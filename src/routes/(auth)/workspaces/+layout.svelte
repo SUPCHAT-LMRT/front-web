@@ -14,8 +14,9 @@
     import {WorkspaceType} from "$lib/api/workspaces/workspace";
     import {Button} from "$lib/components/ui/button";
     import {page} from "$app/state";
+    import {fallbackAvatarLetters} from "$lib/utils/fallbackAvatarLetters.js";
 
-    const currentWorkspaceId = $derived(page.url.pathname.split("/").pop());
+    const currentWorkspaceId = $derived(page.url.pathname.split("/")?.[2]);
 
     const workspaces = $state(workspacesStore.get());
     let showInput = $state(false);
@@ -56,9 +57,9 @@
 </script>
 
 <div class="flex w-full h-full">
-    <Sidebar.Root class="border-l-2 border-r-2 border-gray-200">
-        <Sidebar.Content>
-            <Sidebar.Group class="p-0">
+    <Sidebar.Root class="h-full border-l-2 border-r-2 border-gray-200 dark:border-gray-700">
+        <Sidebar.Content class="dark:bg-gray-800">
+            <Sidebar.Group class="p-0 ">
                 <Sidebar.GroupContent>
                     <Sidebar.Menu class="flex mx-auto flex-col items-center">
                         {#if isLoading}
@@ -89,8 +90,9 @@
                                                                 />
                                                             {/key}
 
-                                                            <Avatar.Fallback class="rounded-3xl transition-all hover:rounded-2xl hover:scale-105">
-                                                                {workspace.name[0].toUpperCase()}
+                                                            <Avatar.Fallback
+                                                                    class="rounded-3xl transition-all hover:rounded-2xl hover:scale-105">
+                                                                {fallbackAvatarLetters(workspace.name)}
                                                             </Avatar.Fallback>
                                                         </Avatar.Root>
                                                     </a>
@@ -105,10 +107,10 @@
                             {/each}
                         {/if}
 
-                        <Sidebar.MenuItem class="mt-4 w-full flex justify-center">
+                        <Sidebar.MenuItem class="mt-4 w-full flex justify-center px-4">
                             <Dialog.Root bind:open={dialogOpen}>
                                 <Dialog.Trigger>
-                                    <div class="flex items-center justify-center p-2 h-12 w-12 rounded-3xl transition-all hover:rounded-2xl hover:scale-105 bg-gray-200 hover:bg-gray-300">
+                                    <div class="flex items-center justify-center p-2 h-12 w-12 rounded-3xl transition-all hover:rounded-2xl hover:scale-105 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600">
                                         <Plus class="h-4 w-4"/>
                                     </div>
                                 </Dialog.Trigger>
@@ -148,7 +150,7 @@
                                                     <Input onchange={({currentTarget}) => {
                                                         workspaceIconImage = currentTarget.files?.[0];
                                                     }} id="picture" type="file"
-                                                           accept="image/png, image/jpeg, image/webp" />
+                                                           accept="image/png, image/jpeg, image/webp"/>
                                                 </div>
                                                 <RadioGroup.Root bind:value={type} class="pt-4">
                                                     <div class="flex items-center space-x-2">
@@ -199,5 +201,5 @@
         </Sidebar.Content>
     </Sidebar.Root>
 
-    {@render children()}
+    {@render children?.()}
 </div>

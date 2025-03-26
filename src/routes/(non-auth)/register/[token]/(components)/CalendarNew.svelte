@@ -5,8 +5,8 @@
         type WithoutChildrenOrChild
     } from "bits-ui";
     import { DateFormatter, getLocalTimeZone } from "@internationalized/date";
-    import * as Calendar from "$lib/components/ui/calendar/index.js";
-    import * as Select from "$lib/components/ui/select/index.js";
+    import * as Calendar from "$lib/components/ui/calendar";
+    import * as Select from "$lib/components/ui/select";
     import { cn } from "$lib/utils.js";
 
     let {

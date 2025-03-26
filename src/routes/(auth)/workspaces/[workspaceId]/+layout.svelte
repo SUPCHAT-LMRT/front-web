@@ -2,15 +2,15 @@
     import workspaceChannelsStore from "$lib/stores/workspaceChannelsStore";
     import {page} from "$app/state";
     import * as Sidebar from "$lib/components/ui/sidebar";
-    import * as Dialog from "$lib/components/ui/dialog";
     import * as ContextMenu from "$lib/components/ui/context-menu";
-    import {Textarea} from "$lib/components/ui/textarea";
-    import {Input} from "$lib/components/ui/input";
-    import {Button} from "$lib/components/ui/button";
+    import * as Dialog from "$lib/components/ui/dialog/index.js";
     import type {Channel} from "$lib/api/workspaces/channels";
     import ws from "$lib/api/ws";
+    import CreateChannelDialog from "$lib/components/app/workspaces/CreateChannelDialog.svelte";
+    import {Separator} from "$lib/components/ui/separator";
+    import {goto} from "$app/navigation";
 
-    let currentWorkspaceId = $state(null);
+    let currentWorkspaceId = $derived(page.params.workspaceId);
     let channels = $state(workspaceChannelsStore.get());
     let createChannelData = $state({
         dialogOpen: false,
@@ -20,15 +20,24 @@
 
     // $effect to allow the store to fetch the data when changing workspace
     $effect(() => {
-        currentWorkspaceId = page.params.workspaceId;
-
         workspaceChannelsStore.clearData();
         workspaceChannelsStore.fetch(currentWorkspaceId);
     })
 
+    // $effect to send the selectWorkspace message to the server when the workspace changes
+    $effect(() => {
+        ws.selectWorkspace(currentWorkspaceId);
+
+        return () => {
+            ws.unselectWorkspace();
+        }
+    })
+
     $effect(() => {
         const unsubscribeChannelCreated = ws.subscribe("channel-created", msg => {
-            workspaceChannelsStore.put(msg.payload as Channel);
+            const channelCreated = msg.channel as Channel;
+            if (channelCreated.workspaceId !== currentWorkspaceId) return; // This is not supposed to happen but just in case (because it's handled by the server)
+            workspaceChannelsStore.put(channelCreated);
         })
 
         return () => {
@@ -50,28 +59,39 @@
     }
 
     const {children} = $props();
+
+    let dialogOpen = $state({
+        createChannel: false
+    })
 </script>
 
-<div class="flex w-full justify-between">
-    {@render children()}
+<div class="flex w-full justify-between dark:bg-gray-900">
+    <div class="h-full w-full">
+        {@render children?.()}
+    </div>
 
-    <Sidebar.Root class="h-full border-l-2 border-r-2 border-gray-200">
+    <Sidebar.Root class="h-full border-l-2 border-r-2 border-gray-200 dark:border-gray-700">
         <ContextMenu.Root>
             <ContextMenu.Trigger class="h-full">
-                <Sidebar.Content class="h-full flex justify-between">
-
+                <Sidebar.Content class="h-full flex justify-between dark:bg-gray-800">
                     <Sidebar.Group class="p-0">
+                        <Sidebar.MenuButton class="flex mx-auto flex-col items-center mb-2"
+                                            onclick={() => goto("/workspaces")}>Vue d'ensemble
+                        </Sidebar.MenuButton>
+                        <Separator class="dark:bg-gray-700"/>
+                        <Sidebar.GroupLabel>Canaux</Sidebar.GroupLabel>
                         <Sidebar.GroupContent>
                             <Sidebar.Menu class="flex mx-auto flex-col items-center min-w-64">
 
                                 {#each channels.data.channels as channel (channel.id)}
-                                    <Sidebar.MenuItem class="mb-[2px] w-full flex justify-center px-4">
-                                        <Sidebar.MenuButton>
-                                            <a href="/workspaces/{currentWorkspaceId}/channels/{channel.id}">
+                                    <a href="/workspaces/{currentWorkspaceId}/channels/{channel.id}"
+                                       class="mb-[2px] w-full flex justify-center px-4">
+                                        <Sidebar.MenuItem>
+                                            <Sidebar.MenuButton>
                                                 {channel.name}
-                                            </a>
-                                        </Sidebar.MenuButton>
-                                    </Sidebar.MenuItem>
+                                            </Sidebar.MenuButton>
+                                        </Sidebar.MenuItem>
+                                    </a>
                                 {/each}
 
                             </Sidebar.Menu>
@@ -84,42 +104,7 @@
 
                                 <Sidebar.MenuItem class="mb-[2px] w-full flex justify-center px-4">
                                     <Sidebar.MenuButton>
-                                        <Dialog.Root bind:open={createChannelData.dialogOpen}>
-                                            <Dialog.Trigger class="mx-auto text-xl underline">
-                                                Créer un canal
-                                            </Dialog.Trigger>
-                                            <Dialog.Content class="sm:max-w-[425px]">
-                                                <Dialog.Header
-                                                        class="flex flex-col items-center justify-center text-center relative h-full">
-                                                    <div class="text-center">
-                                                        <Dialog.Title class="text-2xl font-bold">
-                                                            Crée ton serveur
-                                                        </Dialog.Title>
-                                                        <p class="text-sm mt-2 text-gray-700">
-                                                            Ton serveur est l&apos;endroit où tu retrouves tes amis.
-                                                            Crée le tien et
-                                                            lance une discussion.
-                                                        </p>
-                                                    </div>
-                                                </Dialog.Header>
-
-                                                <div class="w-full">
-                                                    <Input bind:value={createChannelData.name} type="text"
-                                                           placeholder="Nom du canal"
-                                                           class="w-full p-2 border rounded-md mb-4"/>
-                                                    <Textarea bind:value={createChannelData.topic}
-                                                              placeholder="Topic du canal"
-                                                              class="w-full p-2 border rounded-md mb-4"/>
-                                                </div>
-
-                                                <div class="float-end">
-                                                    <Button onclick={createChannel}
-                                                            class="justify-center w-full h-10 px-6 bg-primary text-white">
-                                                        Créer un canal
-                                                    </Button>
-                                                </div>
-                                            </Dialog.Content>
-                                        </Dialog.Root>
+                                        <CreateChannelDialog {createChannelData} {createChannel}/>
                                     </Sidebar.MenuButton>
                                 </Sidebar.MenuItem>
 
@@ -130,7 +115,7 @@
                 </Sidebar.Content>
             </ContextMenu.Trigger>
             <ContextMenu.Content>
-                <ContextMenu.Item>Créer un canal</ContextMenu.Item>
+                <ContextMenu.Item onclick={() => dialogOpen.createChannel = true}>Créer un canal</ContextMenu.Item>
                 <ContextMenu.Item>Billing</ContextMenu.Item>
                 <ContextMenu.Item>Team</ContextMenu.Item>
                 <ContextMenu.Item>Subscription</ContextMenu.Item>
@@ -138,3 +123,16 @@
         </ContextMenu.Root>
     </Sidebar.Root>
 </div>
+
+<!-- Example dialog in context menu -->
+<Dialog.Root bind:open={dialogOpen.createChannel}>
+    <Dialog.Content>
+        <Dialog.Header>
+            <Dialog.Title>Are you sure absolutely sure?</Dialog.Title>
+            <Dialog.Description>
+                This action cannot be undone. This will permanently delete your account
+                and remove your data from our servers.
+            </Dialog.Description>
+        </Dialog.Header>
+    </Dialog.Content>
+</Dialog.Root>

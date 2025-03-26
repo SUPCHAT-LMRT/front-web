@@ -1,8 +1,11 @@
 <script lang="ts">
     import UserAuthForm from "./(components)/user-auth-form.svelte";
+    import {toggleMode} from "mode-watcher";
+    import {Button} from "$lib/components/ui/button";
+    import { Sun, Moon } from "lucide-svelte";
 </script>
 
-<div class="container flex min-h-screen items-center justify-center bg-white z-10">
+<div class="container flex flex-col min-h-screen items-center justify-center bg-white z-10 dark:bg-gray-900">
     <div class="pl-32">
         <div class="mx-auto flex w-full flex-col justifier-center space-y-6 sm:w-[350px]">
             <div class="flex flex-col space-y-2 text-center">
@@ -22,4 +25,14 @@
             </p>
         </div>
     </div>
+
+    <Button onclick={toggleMode} variant="outline" size="icon" class="absolute bottom-4 right-4">
+        <Sun
+                class="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0"
+        />
+        <Moon
+                class="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100"
+        />
+        <span class="sr-only">Toggle theme</span>
+    </Button>
 </div>

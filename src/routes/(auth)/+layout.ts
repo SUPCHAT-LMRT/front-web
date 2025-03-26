@@ -3,20 +3,21 @@ import { goto } from "$lib/utils/goto";
 import type { LayoutLoad } from "./$types";
 
 export const load = (async () => {
-    let isAuthenticated = false;
+  import("$lib/api/ws"); // Connect to the WebSocket server
 
-    try {
-        const user = await getLoginUser();
-        isAuthenticated = !!user;
-    } catch (error) {
-        console.error("Erreur lors de la vérification de l'utilisateur :", error);
-    }
+  let authenticatedUser = null;
 
-    if (!isAuthenticated) {
-        goto("/login");
-    }
+  try {
+    authenticatedUser = await getLoginUser();
+  } catch (error) {
+    console.error("Erreur lors de la vérification de l'utilisateur :", error);
+  }
 
-    return {
-        isAuthenticated
-    };
+  if (!authenticatedUser) {
+    goto("/login");
+  }
+
+  return {
+    authenticatedUser,
+  };
 }) as LayoutLoad;

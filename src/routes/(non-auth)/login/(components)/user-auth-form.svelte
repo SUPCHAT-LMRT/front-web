@@ -7,7 +7,8 @@
     import { Checkbox } from "$lib/components/ui/checkbox/index.js";
     import { Label } from "$lib/components/ui/label/index.js";
     import {goto} from "$lib/utils/goto";
-
+    import {notifyByLevel, success} from "$lib/toast/toast";
+    import preventDefault from "$lib/utils/preventDefault";
 
     let className: string | undefined | null = undefined;
     export { className as class };
@@ -20,12 +21,17 @@
     async function onSubmit() {
         isSubmitting = true;
         try {
-            console.log(email, password, rememberMe);
             const response = await loginUser(email, password, rememberMe);
             console.log("User logged in successfully:", response);
+            success("Connexion réussie !", "Vous êtes maintenant connecté.");
             goto("/");
         } catch (error) {
             console.error("Error logging in user:", error);
+            const errorData = error.response?.data || {};
+            const title = "Erreur lors de la connexion";
+            const level: 'warning' | 'error' = errorData.level || 'error';
+            const message = errorData.messageDisplay || "Une erreur est survenue";
+            notifyByLevel({ title, level, message });
         } finally {
             isSubmitting = false;
         }
@@ -33,14 +39,7 @@
 </script>
 
 <div class={cn("grid gap-6", className)}>
-    <Button
-            href="/register"
-            variant="ghost"
-            class="absolute right-2 top-2"
-    >
-        S'enregistrer
-    </Button>
-    <form on:submit|preventDefault={onSubmit}>
+    <form onsubmit={preventDefault(onSubmit)}>
         <div class="grid gap-2">
             <div class="grid gap-1">
                 <Label class="sr-only" for="email">Email</Label>
@@ -82,7 +81,7 @@
                     Mot de passe oublié ?
                 </Button>
             </div>
-            <Button class="bg-[#61A0AF]" type="submit" disabled={isSubmitting}
+            <Button class="bg-[#61A0AF] dark:text-white" type="submit" disabled={isSubmitting}
             >
                 {#if isSubmitting}
                     <Loader class="mr-2 h-4 w-4 animate-spin" />
@@ -96,7 +95,7 @@
             <span class="w-full border-t"></span>
         </div>
         <div class="relative flex justify-center text-xs uppercase">
-            <span class="bg-background text-muted-foreground px-2"> Ou continuer avec </span>
+            <span class="bg-background dark:bg-gray-900 text-muted-foreground px-2 dark:text-white"> Ou continuer avec </span>
         </div>
     </div>
     <div class="flex gap-1">

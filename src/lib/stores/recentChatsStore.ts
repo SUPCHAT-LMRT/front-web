@@ -1,20 +1,18 @@
-import {Store, StoreResultState, type StoreResult} from "./store.svelte"
+import {Store, StoreResultState, type StoreResult} from "./store.svelte";
 import {getRecentChats, type RecentChat} from "../api/recentChats";
-
 
 export type RecentChatsStoreResult = {
     recentChats: RecentChat[];
-}
+};
 
 class RecentChatsStore extends Store<RecentChatsStoreResult> {
-
     public getDefaultState(): StoreResult<RecentChatsStoreResult> {
         return {
             state: StoreResultState.IDLE,
             data: {
                 recentChats: [],
-            }
-        }
+            },
+        };
     }
 
     public fetch(): Promise<RecentChatsStoreResult> {
@@ -24,7 +22,7 @@ class RecentChatsStore extends Store<RecentChatsStoreResult> {
                 this.changeState(StoreResultState.LOADING);
                 const recentChats = await getRecentChats();
                 this.changeStateAndData(StoreResultState.LOADED, {
-                    recentChats
+                    recentChats,
                 });
 
                 resolve(this.getData());
@@ -32,7 +30,13 @@ class RecentChatsStore extends Store<RecentChatsStoreResult> {
                 // this.triggerError(e as Error, unableToFetchWorkspaces);
                 reject(e);
             }
-        })
+        });
+    }
+
+    public async add(chat: RecentChat): Promise<void> {
+        this.changeData({
+          recentChats: [...this.getData().recentChats, chat]
+        });
     }
 }
 

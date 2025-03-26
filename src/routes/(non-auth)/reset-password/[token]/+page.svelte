@@ -3,8 +3,10 @@
     import {cn} from "$lib/utils";
     import {Input} from "$lib/components/ui/input";
     import {Label} from "$lib/components/ui/label";
-    import {forgotPassword, resetPassword} from "$lib/api/user";
+    import {resetPassword} from "$lib/api/user";
     import {page} from "$app/state";
+    import {error, success} from "$lib/toast/toast";
+    import {goto} from "$lib/utils/goto";
 
     let className = "";
     let newPassword = "";
@@ -21,8 +23,11 @@
         try {
             const response = await resetPassword(token, newPassword, confirmPassword);
             console.log("Mot de passe réinitialisé avec succès:", response);
-        } catch (error) {
-            console.error("Erreur lors de la réinitialisation du mot de passe:", error);
+            success("Compte validé", "Votre compte a été validé avec succès. Vous pouvez maintenant vous connecter.");
+            goto("/settings/account");
+        } catch (e) {
+            console.error("Erreur lors de la réinitialisation du mot de passe:", e);
+            error("Erreur", "Une erreur est survenue lors de la réinitialisation du mot de passe.");
         }
     }
 </script>

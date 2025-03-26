@@ -2,11 +2,20 @@
     import { Button } from "$lib/components/ui/button";
     import {validateAccount} from "$lib/api/user";
     import {page} from "$app/state";
+    import {error, success} from "$lib/toast/toast";
+    import {goto} from "$lib/utils/goto";
 
     const { token } = page.params;
 
     async function handleValidation() {
-        const response = await validateAccount(token);
+        try {
+            await validateAccount(token);
+            success("Compte validé", "Votre compte a été validé avec succès. Vous pouvez maintenant vous connecter.");
+            goto("/login");
+        } catch(e) {
+            console.error(e);
+            error("Erreur", "Erreur lors de la validation de votre compte.");
+        }
     }
 </script>
 
