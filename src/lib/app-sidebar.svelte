@@ -169,8 +169,8 @@
                 {...props}
                 class="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground py-6"
               >
-                <div class="mx-auto relative size-12">
-                  <Avatar.Root class="rounded-lg">
+                <div class="mx-auto relative size-12 flex items-center">
+                  <Avatar.Root class="rounded-full">
                     <Avatar.Image
                       src={getS3ObjectUrl(
                         S3Bucket.USERS_AVATARS,
@@ -188,7 +188,7 @@
                   </Avatar.Root>
 
                   <span
-                    class={cn("rounded-full absolute bottom-1 right-0 size-3", {
+                    class={cn("rounded-full absolute bottom-1 right-2 size-3", {
                       "bg-green-500":
                         authenticatedUser.status === PrivateStatus.ONLINE,
                       "bg-yellow-500":

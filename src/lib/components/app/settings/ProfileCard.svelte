@@ -19,7 +19,7 @@
         class="absolute bottom-0 left-6 transform translate-y-1/2 flex items-end"
       >
         <div class="relative">
-          <Avatar.Root class="w-24 h-24 rounded-full border-4 border-gray-200">
+          <Avatar.Root class="size-24 rounded-full border-4 border-gray-200">
             <Avatar.Image
               src={getS3ObjectUrl(S3Bucket.USERS_AVATARS, authenticatedUser.id)}
             />
