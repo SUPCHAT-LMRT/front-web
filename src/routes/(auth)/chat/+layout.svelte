@@ -67,13 +67,19 @@
   $effect(() =>
     ws.subscribe(
       "recent-direct-chat-added",
-      (msg: { otherUserId: string; chatName: string }) => {
-        recentChatsStore.add({
+      async (msg: { otherUserId: string; chatName: string }) => {
+        const recentChatStore = {
           id: msg.otherUserId,
           name: msg.chatName,
-          kind: RecentChatKind.DIRECT,
           avatarUrl: "",
-        });
+          kind: RecentChatKind.DIRECT,
+        } as RecentChantStore;
+        recentChatsStore.add(recentChatStore);
+
+        recentChats.data = [
+          await convertRecentChat(recentChatStore),
+          ...recentChats.data,
+        ];
       },
     ),
   );
