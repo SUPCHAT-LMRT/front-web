@@ -1,5 +1,5 @@
-import {Store, StoreResultState, type StoreResult} from "./store.svelte";
-import {getRecentChats, type RecentChat} from "../api/recentChats";
+import { getRecentChats, type RecentChat } from "../api/recentChats";
+import { Store, StoreResultState, type StoreResult } from "./store.svelte";
 
 export type RecentChatsStoreResult = {
     recentChats: RecentChat[];
@@ -34,8 +34,9 @@ class RecentChatsStore extends Store<RecentChatsStoreResult> {
     }
 
     public async add(chat: RecentChat): Promise<void> {
+        // Add the chat to the recent chats list (first position)
         this.changeData({
-          recentChats: [...this.getData().recentChats, chat]
+            recentChats: [chat, ...this.getData().recentChats]
         });
     }
 }
