@@ -1,35 +1,41 @@
 import { baseClient } from "$lib/api/client";
 
+export enum PublicStatus {
+  UNKNOWN = "unknown",
+  ONLINE = "online",
+  DO_NOT_DISTURB = "do-not-disturb",
+  AWAY = "away",
+  OFFLINE = "offline",
+}
+
+export enum PrivateStatus {
+  UNKNOWN = "unknown",
+  ONLINE = "online",
+  DO_NOT_DISTURB = "do-not-disturb",
+  AWAY = "away",
+  INVISIBLE = "invisible",
+  OFFLINE = "offline",
+}
+
 export type User = {
   id: string;
   email: string;
   firstName: string;
   lastName: string;
-  pseudo: string;
-  birthDate: Date;
-  password: string;
-  passwordConfirm: string;
-  verified: boolean;
-  createdAt: Date;
-};
-
-export type AuthResponse = {
-  user: User;
-  token: string;
+  status: PrivateStatus;
 };
 
 export const registerUser = async (
   token: string,
   password: string,
   passwordConfirmation: string,
-): Promise<AuthResponse> => {
+): Promise<void> => {
   try {
-    const { data } = await baseClient.post("/api/account/auth/register", {
+    await baseClient.post("/api/account/auth/register", {
       token,
       password,
       passwordConfirmation,
     });
-    return data;
   } catch (e) {
     console.error(e);
     console.log(e);
@@ -41,7 +47,7 @@ export const loginUser = async (
   email: string,
   password: string,
   rememberMe: boolean,
-): Promise<AuthResponse> => {
+): Promise<User> => {
   try {
     const { data } = await baseClient.post("/api/account/auth/login", {
       email,
@@ -156,6 +162,7 @@ export type UserProfile = {
   email: string;
   firstName: string;
   lastName: string;
+  status: PublicStatus;
 };
 
 export const getUserProfile = async (userId: string): Promise<UserProfile> => {
@@ -167,3 +174,15 @@ export const getUserProfile = async (userId: string): Promise<UserProfile> => {
     throw e;
   }
 };
+
+
+export const changeUserStatus = async (
+  status: PrivateStatus,
+): Promise<void> => {
+  try {
+    await baseClient.patch("/api/account/status", { status });
+  } catch (e) {
+    console.error(e);
+    throw e;
+  }
+}

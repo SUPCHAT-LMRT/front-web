@@ -17,6 +17,7 @@
     "@eslint/js": "^9.22.0",
     "@fontsource/fira-mono": "^5.2.5",
     "@internationalized/date": "^3.7.0",
+    "@lucide/svelte": "^0.487.0",
     "@neoconfetti/svelte": "^2.2.2",
     "@sveltejs/adapter-auto": "^3.3.1",
     "@sveltejs/adapter-node": "^5.2.12",
@@ -35,7 +36,7 @@
     "prettier-plugin-svelte": "^3.3.3",
     "prettier-plugin-tailwindcss": "^0.6.11",
     "sass-embedded": "^1.85.1",
-    "svelte": "^5.22.6",
+    "svelte": "^5.26.1",
     "svelte-check": "^4.1.5",
     "svelte-infinite": "^0.4.0",
     "svelte-sonner": "^0.3.28",
@@ -62,7 +63,7 @@
     "svelte-toolbelt": "^0.7.1",
     "tailwindcss-safe-area": "^0.6.0"
   },
-  "packageManager": "pnpm@10.6.3",
+  "packageManager": "pnpm@10.8.0+sha512.0e82714d1b5b43c74610193cb20734897c1d00de89d0e18420aebc5977fa13d780a9cb05734624e81ebd81cc876cd464794850641c48b9544326b5622ca29971",
   "pnpm": {
     "onlyBuiltDependencies": [
       "@sveltejs/kit",

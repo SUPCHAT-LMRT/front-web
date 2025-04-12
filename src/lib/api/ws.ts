@@ -1,14 +1,14 @@
-import {
-  getCurrentOpenedRoom,
-  setCurrentOpenedRoom,
-} from "./currentOpenedRoom.js";
-import { RoomKind } from "./room";
 import { env } from "$env/dynamic/public";
 import {
   getCurrentSelectedWorkspace,
   setCurrentSelectedWorkspace,
 } from "$lib/api/currentSelectedWorkspace";
 import { refreshAccessToken } from "$lib/api/user";
+import {
+  getCurrentOpenedRoom,
+  setCurrentOpenedRoom,
+} from "./currentOpenedRoom.js";
+import { RoomKind } from "./room";
 
 class Ws {
   private subscribers = [];
