@@ -16,11 +16,7 @@ class Ws {
   private messageQueue = [];
   private connectionCrashed = false;
 
-  constructor() {
-    this.initWebSocket();
-  }
-
-  private initWebSocket = async () => {
+  public initWebSocket = async () => {
     try {
       await refreshAccessToken();
     } catch (error) {
@@ -68,11 +64,11 @@ class Ws {
   };
 
   public send = (message) => {
-    if (this.ws.readyState === WebSocket.OPEN) {
+    if (this.ws?.readyState === WebSocket.OPEN) {
       this.ws.send(message);
     } else if (this.ws.readyState === WebSocket.CONNECTING) {
       console.log(
-        `WebSocket still connecting, queuing message ${message.action}...`,
+        `WebSocket still connecting, queuing message ${message}...`,
       );
       this.messageQueue.push(message);
     } else {

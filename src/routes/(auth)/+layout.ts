@@ -1,11 +1,10 @@
-import { getLoginUser } from "$lib/api/user";
+import { getLoginUser, PrivateStatus } from "$lib/api/user";
+import ws from "$lib/api/ws";
 import { goto } from "$lib/utils/goto";
 import type { LayoutLoad } from "./$types";
 import { authenticatedUserState, type AuthenticatedUserState } from "./authenticatedUser.svelte";
 
 export const load: LayoutLoad = async (): Promise<{ authenticatedUserState: AuthenticatedUserState }> => {
-  import("$lib/api/ws"); // Connect to the WebSocket server
-
   try {
     authenticatedUserState.user = await getLoginUser();
   } catch (error) {
@@ -15,6 +14,17 @@ export const load: LayoutLoad = async (): Promise<{ authenticatedUserState: Auth
   if (!authenticatedUserState.user) {
     goto("/login");
   }
+
+  ws.subscribe(
+    "self-status-updated",
+    (msg: { status: PrivateStatus }) => {
+      // Update the status of the authenticated user in the store
+      authenticatedUserState.user.status = msg.status;
+    },
+  );
+
+
+  ws.initWebSocket(); // Connect to the WebSocket server
 
   return {
     authenticatedUserState,
