@@ -6,7 +6,7 @@
   import * as Sidebar from "$lib/components/ui/sidebar";
   import { Toaster } from "$lib/components/ui/sonner/index.js";
   import { ModeWatcher } from "mode-watcher";
-  import type { Snippet } from "svelte";
+  import { type Snippet } from "svelte";
   import type { LayoutProps } from "./$types";
 
   type Props = { children: Snippet } & LayoutProps;

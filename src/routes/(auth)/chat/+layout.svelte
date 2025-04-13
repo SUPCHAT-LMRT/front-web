@@ -15,7 +15,7 @@
   import { cn } from "$lib/utils";
   import { fallbackAvatarLetters } from "$lib/utils/fallbackAvatarLetters.js";
   import { BellIcon, CogIcon, UserIcon } from "lucide-svelte";
-  import { onMount } from "svelte";
+  import { onMount, type Snippet } from "svelte";
 
   const currentChatId = $derived(page.url.pathname.split("/").pop());
 
@@ -120,7 +120,45 @@
     );
   });
 
-  let { children } = $props();
+  $effect(() => {
+    const unsubscribeSendMessage = ws.subscribe(
+      "send-direct-message",
+      async (msg) => {
+        await moveChatToTop(msg.otherUserId);
+      },
+    );
+
+    const unsubscribeMessageReactionAdded = ws.subscribe(
+      "direct-message-reaction-added",
+      async (msg) => {
+        await moveChatToTop(msg.otherUserId);
+      },
+    );
+
+    const unsubscribeMessageReactionRemoved = ws.subscribe(
+      "direct-message-reaction-removed",
+      async (msg) => {
+        await moveChatToTop(msg.otherUserId);
+      },
+    );
+
+    return () => {
+      unsubscribeSendMessage();
+      unsubscribeMessageReactionAdded();
+      unsubscribeMessageReactionRemoved();
+    };
+  });
+
+  const moveChatToTop = (chatId: string) => {
+    const chatIndex = recentChats.data.findIndex((chat) => chat.id === chatId);
+    if (chatIndex !== -1) {
+      const chat = recentChats.data[chatIndex];
+      recentChats.data.splice(chatIndex, 1);
+      recentChats.data.unshift(chat);
+    }
+  };
+
+  let { children }: { children: Snippet } = $props();
 </script>
 
 <div class="flex w-full h-full">
