@@ -59,6 +59,7 @@
     "date-fns": "^4.1.0",
     "pnpm": "^10.6.2",
     "runed": "^0.23.4",
+    "svelte-dnd-action": "^0.9.60",
     "svelte-easy-crop": "^4.0.0",
     "svelte-toolbelt": "^0.7.1",
     "tailwindcss-safe-area": "^0.6.0"

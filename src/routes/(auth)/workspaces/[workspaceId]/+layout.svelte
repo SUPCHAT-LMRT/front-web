@@ -4,11 +4,15 @@
     import * as Sidebar from "$lib/components/ui/sidebar";
     import * as ContextMenu from "$lib/components/ui/context-menu";
     import * as Dialog from "$lib/components/ui/dialog/index.js";
-    import type {Channel} from "$lib/api/workspaces/channels";
+    import {type Channel, reorderWorkspaceChannel} from "$lib/api/workspaces/channels";
     import ws from "$lib/api/ws";
     import CreateChannelDialog from "$lib/components/app/workspaces/CreateChannelDialog.svelte";
     import {Separator} from "$lib/components/ui/separator";
     import {goto} from "$app/navigation";
+    import {dndzone} from "svelte-dnd-action";
+    import {flip} from "svelte/animate";
+    import {PublicStatus} from "$lib/api/user";
+    import {RecentChatKind} from "$lib/api/recentChats";
 
     let currentWorkspaceId = $derived(page.params.workspaceId);
     let channels = $state(workspaceChannelsStore.get());
@@ -45,6 +49,25 @@
         }
     })
 
+    type ChannelReorderMessage = {
+        channelId: string;
+        newIndex: number;
+    }
+
+    $effect(() => {
+        return ws.subscribe(
+            "channels-reordered",
+            (msg: { channelReorders: ChannelReorderMessage[] }) => {
+                channels.data.channels = msg.channelReorders
+                  .sort((a, b) => a.newIndex - b.newIndex)
+                  .map((msgChannel) => {
+                    const channel = channels.data.channels.find((c) => c.id === msgChannel.channelId);
+                    return { ...channel, order: msgChannel.newIndex };
+                  });
+            },
+        );
+    });
+
     const createChannel = async () => {
         try {
             await workspaceChannelsStore.create(currentWorkspaceId, createChannelData.name, createChannelData.topic);
@@ -63,6 +86,35 @@
     let dialogOpen = $state({
         createChannel: false
     })
+
+    const handleReorder = async () => {
+        const reorderedChannels = channels.data.channels.map((channel) => {
+            return {
+                id: channel.id,
+                newIndex: channel.order,
+            }
+        });
+
+        try {
+            await reorderWorkspaceChannel(currentWorkspaceId, reorderedChannels);
+        } catch (e) {
+            console.error(e);
+        }
+    };
+
+    const flipDurationMs = 300;
+    function handleDndConsider(e) {
+        channels.data.channels = e.detail.items;
+    }
+    function handleDndFinalize(e) {
+        channels.data.channels = e.detail.items.map((channel, index) => {
+            return {
+                ...channel,
+                order: index
+            }
+        });
+        handleReorder();
+    }
 </script>
 
 <div class="flex w-full justify-between dark:bg-gray-900">
@@ -76,23 +128,36 @@
                 <Sidebar.Content class="h-full flex justify-between dark:bg-gray-800">
                     <Sidebar.Group class="p-0">
                         <Sidebar.MenuButton class="flex mx-auto flex-col items-center mb-2"
-                                            onclick={() => goto("/workspaces")}>Vue d'ensemble
+                                            onclick={() => goto("/workspaces")}>Vue d'ensembles
                         </Sidebar.MenuButton>
                         <Separator class="dark:bg-gray-700"/>
                         <Sidebar.GroupLabel>Canaux</Sidebar.GroupLabel>
                         <Sidebar.GroupContent>
-                            <Sidebar.Menu class="flex mx-auto flex-col items-center min-w-64">
+                            <Sidebar.Menu class="flex mx-auto flex-col items-start pl-6 min-w-64">
 
-                                {#each channels.data.channels as channel (channel.id)}
-                                    <a href="/workspaces/{currentWorkspaceId}/channels/{channel.id}"
-                                       class="mb-[2px] w-full flex justify-center px-4">
-                                        <Sidebar.MenuItem>
-                                            <Sidebar.MenuButton>
-                                                {channel.name}
-                                            </Sidebar.MenuButton>
-                                        </Sidebar.MenuItem>
-                                    </a>
-                                {/each}
+                                <section use:dndzone={{items:channels.data.channels, flipDurationMs, dropTargetClasses: [
+                                    '!outline-none',
+                                ]}} onconsider="{handleDndConsider}" onfinalize="{handleDndFinalize}">
+                                    {#each channels.data.channels as channel (channel.id)}
+                                        <div animate:flip={{duration: flipDurationMs}} class="mt-4">
+                                            <a href="/workspaces/{currentWorkspaceId}/channels/{channel.id}" class="w-full">
+                                                <Sidebar.MenuItem class="flex items-start gap-2 w-full">
+                                                    <div class="flex items-center h-6 pt-[2px]">
+                                                        <span class="text-[#61A0AF] font-bold text-base group-hover:scale-105 transition-transform">#</span>
+                                                    </div>
+                                                    <div class="flex flex-col overflow-hidden w-full">
+                                                        <div
+                                                                class=" w-full text-base font-semibold text-left text-gray-900 dark:text-white p-0 h-6 leading-tight">
+                                                            {channel.name}
+                                                        </div>
+                                                    </div>
+                                                </Sidebar.MenuItem>
+                                            </a>
+                                        </div>
+
+                                    {/each}
+                                </section>
+
 
                             </Sidebar.Menu>
                         </Sidebar.GroupContent>
@@ -103,7 +168,8 @@
                             <Sidebar.Menu class="flex mx-auto flex-col items-center min-w-64">
 
                                 <Sidebar.MenuItem class="mb-[2px] w-full flex justify-center px-4">
-                                    <Sidebar.MenuButton>
+                                    <Sidebar.MenuButton
+                                            class="w-full text-sm bg-bl mb-5 bg-[#61A0AF] hover:bg-[#4B7986] text-white py-1.5 rounded transition">
                                         <CreateChannelDialog {createChannelData} {createChannel}/>
                                     </Sidebar.MenuButton>
                                 </Sidebar.MenuItem>

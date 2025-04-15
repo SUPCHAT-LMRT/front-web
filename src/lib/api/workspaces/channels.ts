@@ -5,6 +5,7 @@ export type Channel = {
   name: string;
   topic: string;
   workspaceId: string;
+  order: number;
 };
 
 export const getWorkspaceChannels = async (
@@ -96,3 +97,18 @@ export const getWorkspaceChannelMessages = async (
     throw e;
   }
 };
+
+export const reorderWorkspaceChannel = async (
+    workspaceId: string,
+    channels: { id: string; newIndex: number }[],
+    ): Promise<void> => {
+    try {
+        await baseClient.post(
+        `/api/workspaces/${workspaceId}/channels/reorder`, channels,
+        );
+    } catch (e) {
+        console.error(e);
+        throw e;
+    }
+    }
+
