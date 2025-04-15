@@ -28,9 +28,16 @@
         } catch (error) {
             console.error("Error logging in user:", error);
             const errorData = error.response?.data || {};
-            const title = "Erreur lors de la connexion";
-            const level: 'warning' | 'error' = errorData.level || 'error';
-            const message = errorData.messageDisplay || "Une erreur est survenue";
+            const status = error.response?.status;
+
+            let title = "Erreur lors de la connexion";
+            let level: 'warning' | 'error' = errorData.level || 'error';
+            let message = errorData.messageDisplay || "Une erreur est survenue";
+
+            if (status === 400) {
+                message = "Requête invalide. Vérifiez vos identifiants et réessayez.";
+            }
+
             notifyByLevel({ title, level, message });
         } finally {
             isSubmitting = false;

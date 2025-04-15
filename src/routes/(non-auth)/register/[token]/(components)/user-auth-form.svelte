@@ -19,6 +19,8 @@
 
     const {token} = page.params;
 
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+
     onMount(async () => {
         try {
             const inviteData = await getInviteLinkData(token);
@@ -32,6 +34,17 @@
 
     async function onSubmit() {
         isLoading = true;
+
+        if (!passwordRegex.test(password)) {
+            notifyByLevel({
+                title: "Mot de passe invalide",
+                level: 'error',
+                message: "Le mot de passe doit contenir au moins 8 caractères, une majuscule, une minuscule et un chiffre.",
+            });
+            isLoading = false;
+            return;
+        }
+
         try {
             const response = await registerUser(
                 token,
@@ -45,9 +58,10 @@
             console.error("Error registering user:", error);
             const errorData = error.response?.data || {};
             const title = "Erreur lors de l'inscription";
-            const level: 'warning' | 'error' = errorData.level || 'error';
-            const message = errorData.messageDisplay || "Une erreur est survenue";
-            notifyByLevel({title, level, message});
+            const level: "warning" | "error" = errorData.level || "error";
+            const message =
+                errorData.messageDisplay || "Une erreur est survenue";
+            notifyByLevel({ title, level, message });
         } finally {
             isLoading = false;
         }
