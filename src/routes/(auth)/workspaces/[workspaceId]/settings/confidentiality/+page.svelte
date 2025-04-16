@@ -20,8 +20,8 @@
 
   <Card>
     <CardHeader>
-      <CardTitle>Confidentialité du Workspace</CardTitle>
-      <CardDescription>Définissez qui peut accéder à votre workspace</CardDescription>
+      <CardTitle>Confidentialité de l'espace de travail</CardTitle>
+      <CardDescription>Définissez qui peut accéder à votre espace de travail</CardDescription>
     </CardHeader>
     <CardContent class="space-y-6">
       <div class="flex items-center justify-between">
@@ -29,9 +29,9 @@
           <Label for="public-mode">Mode Public</Label>
           <p class="text-sm text-muted-foreground">
             {#if isPublic}
-              Votre workspace est visible par tous
+              Votre espace de travail est visible par tous
             {:else}
-              Votre workspace est privé et accessible sur invitation uniquement
+              Votre espace de travail est privé et accessible sur invitation uniquement
             {/if}
           </p>
         </div>
@@ -45,7 +45,7 @@
             <h3 class="text-sm font-medium text-yellow-800 dark:text-yellow-500">Attention</h3>
             <div class="mt-2 text-sm text-yellow-700 dark:text-yellow-400">
               <p>
-                En mode public, n'importe qui peut trouver et rejoindre votre workspace. Assurez-vous que c'est
+                En mode public, n'importe qui peut trouver et rejoindre votre espace de travail. Assurez-vous que c'est
                 bien ce que vous souhaitez.
               </p>
             </div>

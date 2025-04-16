@@ -12,7 +12,7 @@
       id: "general",
       name: "Général",
       permissions: [
-        { id: "view_channels", name: "Voir les canaux", description: "Permet de voir les canaux du serveur" },
+        { id: "view_channels", name: "Voir les canaux", description: "Permet de voir les canaux de l'espace de travail" },
         { id: "manage_channels", name: "Gérer les canaux", description: "Permet de créer, modifier et supprimer des canaux" },
         { id: "manage_roles", name: "Gérer les rôles", description: "Permet de créer, modifier et supprimer des rôles" },
       ],
@@ -24,17 +24,17 @@
         { id: "send_messages", name: "Envoyer des messages", description: "Permet d'envoyer des messages dans les canaux" },
         { id: "embed_links", name: "Intégrer des liens", description: "Permet d'intégrer des liens dans les messages" },
         { id: "attach_files", name: "Joindre des fichiers", description: "Permet de joindre des fichiers aux messages" },
-        { id: "mention_everyone", name: "Mentionner @everyone", description: "Permet de mentionner tous les membres du serveur" },
+        { id: "mention_everyone", name: "Mentionner @everyone", description: "Permet de mentionner tous les membres de l'espace de travail" },
       ],
     },
     {
       id: "moderation",
       name: "Modération",
       permissions: [
-        { id: "kick_members", name: "Expulser des membres", description: "Permet d'expulser des membres du serveur" },
-        { id: "ban_members", name: "Bannir des membres", description: "Permet de bannir des membres du serveur" },
+        { id: "kick_members", name: "Expulser des membres", description: "Permet d'expulser des membres de l'espace de travail" },
+        { id: "ban_members", name: "Bannir des membres", description: "Permet de bannir des membres de l'espace de travail" },
         { id: "manage_messages", name: "Gérer les messages", description: "Permet de supprimer ou d'épingler des messages" },
-        { id: "view_audit_log", name: "Voir les logs d'audit", description: "Permet de voir l'historique des actions sur le serveur" },
+        { id: "view_audit_log", name: "Voir les logs d'audit", description: "Permet de voir l'historique des actions sur l'espace de travail" },
       ],
     },
   ];

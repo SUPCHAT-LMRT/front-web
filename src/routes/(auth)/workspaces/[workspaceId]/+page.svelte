@@ -130,8 +130,7 @@
 
     $effect(() => {
         return ws.subscribe("workspace-updated", (msg) => {
-            if (msg.workspaceId === currentWorkspaceId) {
-                currentWorkspaceDetails = {
+            if (msg.workspaceId === currentWorkspaceId) {serveurcurrentWorkspaceDetails = {
                     ...currentWorkspaceDetails,
                     name: msg.name
                 };

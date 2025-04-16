@@ -160,10 +160,10 @@
                   >
                     <div class="text-center">
                       <Dialog.Title class="text-2xl font-bold">
-                        Crée ton serveur
+                        Crée ton espace de travail
                       </Dialog.Title>
                       <p class="text-sm mt-2 text-gray-700">
-                        Ton serveur est l&apos;endroit où tu retrouves tes amis.
+                        Ton espace de travail est l&apos;endroit où tu retrouves tes amis.
                         Crée le tien et lance une discussion.
                       </p>
                     </div>
@@ -227,7 +227,7 @@
                             onclick={createNewWorkspace}
                             class="justify-center w-full h-10 px-6 bg-primary text-white"
                           >
-                            Créer un serveur
+                            Créer un espace de travail
                           </Button>
                         </div>
                       {:else}
@@ -236,7 +236,7 @@
                             Tu as déjà une invitation ?
                           </p>
                           <Button class="w-full justify-center h-10">
-                            Rejoindre un serveur
+                            Rejoindre un espace de travail
                           </Button>
                         </div>
                       {/if}
