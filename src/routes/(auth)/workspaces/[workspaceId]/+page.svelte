@@ -3,7 +3,6 @@
     import CreateChannelDialog from "$lib/components/app/workspaces/CreateChannelDialog.svelte";
     import workspaceChannelsStore from "$lib/stores/workspaceChannelsStore";
     import InviteMemberDialog from "$lib/components/app/workspaces/InviteMemberDialog.svelte";
-    import EditWorkspaceDialog from "$lib/components/app/workspaces/EditWorkspaceDialog.svelte";
     import {
         getWorkspaceDetails,
         getWorkspaceTimeSeries, updateWorkspaceBanner, type WorkspaceDetails,
@@ -21,6 +20,7 @@
     import type {ApexOptions} from "apexcharts";
     import * as ImageCropper from '$lib/components/extra/ui/image-cropper';
     import {getFileFromUrl} from '$lib/components/extra/ui/image-cropper';
+    import {Button} from "$lib/components/ui/button";
 
     let currentWorkspaceId = $derived(page.params.workspaceId);
     let createChannelData = $state({
@@ -128,6 +128,17 @@
         });
     });
 
+    $effect(() => {
+        return ws.subscribe("workspace-updated", (msg) => {
+            if (msg.workspaceId === currentWorkspaceId) {
+                currentWorkspaceDetails = {
+                    ...currentWorkspaceDetails,
+                    name: msg.name
+                };
+            }
+        });
+    });
+
     onMount(() => {
         return ws.subscribe("channel-created", msg => {
             const channelCreated = msg.channel as Channel;
@@ -217,15 +228,17 @@
 
                 <div class="flex justify-between items-center mb-6">
                     <div class="flex gap-4 mb-6">
-                        <button class="bg-primary dark:bg-primary text-white px-4 py-2 rounded-lg shadow-md hover:bg-[#4B7986] duration-300">
+                        <Button class="bg-primary dark:bg-primary text-white px-4 py-2 rounded-lg shadow-md hover:bg-[#4B7986] duration-300">
                             <InviteMemberDialog workspaceId={currentWorkspaceId}/>
-                        </button>
-                        <button class="bg-primary dark:bg-primary text-white px-4 py-2 rounded-lg shadow-md hover:bg-[#4B7986] duration-300">
+                        </Button>
+                        <Button class="bg-primary dark:bg-primary text-white px-4 py-2 rounded-lg shadow-md hover:bg-[#4B7986] duration-300">
                             <CreateChannelDialog {createChannelData} {createChannel}/>
-                        </button>
-                        <button class="bg-primary dark:bg-primary text-white px-4 py-2 rounded-lg shadow-md hover:bg-[#4B7986] duration-300">
-                            <EditWorkspaceDialog/>
-                        </button>
+                        </Button>
+                    </div>
+                    <div>
+                        <Button href="/workspaces/{currentWorkspaceId}/settings/general" class="bg-primary dark:bg-primary text-white px-4 py-2 rounded-lg shadow-md hover:bg-[#4B7986] duration-300">
+                            Paramètres
+                        </Button>
                     </div>
                 </div>
 

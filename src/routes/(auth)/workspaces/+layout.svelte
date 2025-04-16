@@ -20,6 +20,7 @@
   import { fallbackAvatarLetters } from "$lib/utils/fallbackAvatarLetters";
   import { Globe, Plus } from "lucide-svelte";
   import { onMount } from "svelte";
+  import ws from "$lib/api/ws";
 
   const currentWorkspaceId = $derived(page.url.pathname.split("/")?.[2]);
 
@@ -40,9 +41,23 @@
     }
   });
 
-  function handleCreateMineClick() {
-    showInput = true;
-  }
+  $effect(() => {
+    return ws.subscribe("workspace-updated", (msg) => {
+      const workspaceIndex = workspaces.findIndex(w => w.id === msg.workspaceId);
+
+      if (workspaceIndex !== -1) {
+        workspaces[workspaceIndex] = {
+          ...workspaces[workspaceIndex],
+          name: msg.name,
+          topic: msg.topic,
+        };
+      }
+    });
+  });
+
+    function handleCreateMineClick() {
+        showInput = true;
+    }
 
   async function createNewWorkspace() {
     try {
@@ -171,7 +186,6 @@
                     {:else}
                       <div class="w-full">
                         <Input
-                          bind:value={workspaceName}data
                           class="w-full p-2 border rounded-md mb-4"
                         />
                         <div class="grid w-full max-w-sm items-center gap-1.5">
