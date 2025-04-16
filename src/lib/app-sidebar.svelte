@@ -8,7 +8,6 @@
     MessageSquareMore,
     Moon,
     Settings,
-    ShoppingCart,
     Sun,
   } from "lucide-svelte";
 
@@ -68,7 +67,7 @@
                 />
               </div>
             </Sidebar.MenuButton>
-            <span class="mt-2 text-xs text-center">Chat</span>
+            <span class="mt-2 text-xs text-center">Messages privés</span>
           </Sidebar.MenuItem>
 
           <Sidebar.MenuItem class="mb-4 flex flex-col items-center">
@@ -86,7 +85,7 @@
                 />
               </div>
             </Sidebar.MenuButton>
-            <span class="mt-2 text-xs text-center">Server</span>
+            <span class="mt-2 text-xs text-center">Espace de travail</span>
           </Sidebar.MenuItem>
 
           <Sidebar.MenuItem class="mb-4 flex flex-col items-center">
@@ -104,7 +103,7 @@
                 />
               </div>
             </Sidebar.MenuButton>
-            <span class="mt-2 text-xs text-center">Settings</span>
+            <span class="mt-2 text-xs text-center">Paramètres</span>
           </Sidebar.MenuItem>
 
           <Sidebar.MenuItem class="mb-4 flex flex-col items-center">
@@ -122,25 +121,7 @@
                 />
               </div>
             </Sidebar.MenuButton>
-            <span class="mt-2 text-xs text-center">Discover</span>
-          </Sidebar.MenuItem>
-
-          <Sidebar.MenuItem class="mb-4 flex flex-col items-center">
-            <Sidebar.MenuButton
-              class={`hover:bg-primary/70 flex items-center justify-center h-12 w-12 transition-all duration-300 ${
-                selected === "store"
-                  ? "bg-primary shadow-md"
-                  : "bg-gray-200 dark:bg-gray-800"
-              }`}
-              onclick={() => select("store")}
-            >
-              <div class="h-12 w-12 flex justify-center items-center">
-                <ShoppingCart
-                  class={`${selected === "store" ? "text-white" : "text-gray-600 dark:text-gray-400"}`}
-                />
-              </div>
-            </Sidebar.MenuButton>
-            <span class="mt-2 text-xs text-center">Boutique</span>
+            <span class="mt-2 text-xs text-center">Espaces publics</span>
           </Sidebar.MenuItem>
 
           <Sidebar.MenuItem>

@@ -1,8 +1,8 @@
 import {baseClient} from "../client";
 
 export enum WorkspaceType {
-    PUBLIC = "PUBLIC",
-    PRIVATE = "PRIVATE",
+    PUBLIC = "public",
+    PRIVATE = "private",
 }
 
 export type Workspace = {
@@ -222,3 +222,19 @@ export const updateWorkspace = async (
         throw e;
     }
 };
+
+export const updateTypeWorkspace = async (
+    workspaceId: string,
+    type: WorkspaceType,
+): Promise<Workspace> => {
+    try {
+        const {data} = await baseClient.put(
+            `/api/workspaces/${workspaceId}/type`,
+            {type},
+        );
+        return data;
+    } catch (e) {
+        console.error(e);
+        throw e;
+    }
+}

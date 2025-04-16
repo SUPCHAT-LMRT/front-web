@@ -66,7 +66,6 @@
       if (workspaceIconImage) {
         await updateWorkspaceIcon(workspace.id, workspaceIconImage);
       }
-      console.log("Workspace créé : ", workspace);
       workspaceIconImage = null;
       workspaceName = "";
       type = WorkspaceType.PRIVATE;
@@ -116,12 +115,12 @@
                             <Avatar.Root
                               class="h-12 w-12 rounded-3xl transition-all hover:rounded-2xl hover:scale-105"
                             >
-                              {#key workspace.id}
+                              {#key workspace}
                                 <Avatar.Image
-                                  src={getS3ObjectUrl(
+                                  src="{getS3ObjectUrl(
                                     S3Bucket.WORKSPACES_ICONS,
                                     workspace.id,
-                                  )}
+                                  )}?v={Date.now()}"
                                   alt={workspace.name}
                                   class="h-full w-full object-cover"
                                 />
@@ -187,6 +186,7 @@
                       <div class="w-full">
                         <Input
                           class="w-full p-2 border rounded-md mb-4"
+                          bind:value={workspaceName}
                         />
                         <div class="grid w-full max-w-sm items-center gap-1.5">
                           <Input

@@ -11,8 +11,6 @@
     import {goto} from "$app/navigation";
     import {dndzone} from "svelte-dnd-action";
     import {flip} from "svelte/animate";
-    import {PublicStatus} from "$lib/api/user";
-    import {RecentChatKind} from "$lib/api/recentChats";
 
     let currentWorkspaceId = $derived(page.params.workspaceId);
     let channels = $state(workspaceChannelsStore.get());
