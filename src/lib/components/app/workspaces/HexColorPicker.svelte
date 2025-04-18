@@ -4,28 +4,21 @@
   export let color: string;
   export let onChange: (color: string) => void;
 
+  let open = false; // contrôle l'état du popover
+
   const presetColors = [
-    "#ef4444", // red
-    "#f97316", // orange
-    "#f59e0b", // amber
-    "#eab308", // yellow
-    "#84cc16", // lime
-    "#22c55e", // green
-    "#10b981", // emerald
-    "#14b8a6", // teal
-    "#06b6d4", // cyan
-    "#0ea5e9", // sky
-    "#3b82f6", // blue
-    "#6366f1", // indigo
-    "#8b5cf6", // violet
-    "#a855f7", // purple
-    "#d946ef", // fuchsia
-    "#ec4899", // pink
-    "#f43f5e", // rose
+    "#ef4444", "#f97316", "#f59e0b", "#eab308", "#84cc16", "#22c55e",
+    "#10b981", "#14b8a6", "#06b6d4", "#0ea5e9", "#3b82f6", "#6366f1",
+    "#8b5cf6", "#a855f7", "#d946ef", "#ec4899", "#f43f5e",
   ];
+
+  const handleColorClick = (presetColor: string) => {
+    onChange(presetColor);
+    open = false; // ferme le popover
+  };
 </script>
 
-<Popover>
+<Popover bind:open={open}>
   <PopoverTrigger asChild>
     <button class="h-8 w-8 rounded-md border" style="background-color: {color}" />
   </PopoverTrigger>
@@ -33,9 +26,9 @@
     <div class="grid grid-cols-5 gap-2">
       {#each presetColors as presetColor}
         <button
-          class="h-6 w-6 rounded-md border"
-          style="background-color: {presetColor}"
-          on:click={() => onChange(presetColor)}
+                class="h-6 w-6 rounded-md border"
+                style="background-color: {presetColor}"
+                onclick={() => handleColorClick(presetColor)}
         />
       {/each}
     </div>

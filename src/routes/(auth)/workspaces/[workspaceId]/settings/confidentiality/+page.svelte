@@ -16,7 +16,6 @@
         const workspace = await getWorkspace(currentWorkspaceId);
         if (workspace) {
             workspaceType = workspace.type;
-            console.log("Workspace type:", workspaceType);
         } else {
             console.error("Workspace not found");
         }
