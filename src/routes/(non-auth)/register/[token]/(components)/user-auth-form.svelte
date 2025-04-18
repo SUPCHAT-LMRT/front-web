@@ -156,7 +156,7 @@
   <div class="flex gap-1">
     <Button
       class="w-full"
-      href={PUBLIC_API_OAUTH_GOOGLE_URL}
+      href="{PUBLIC_API_OAUTH_GOOGLE_URL}?token={token}"
       variant="outline"
       type="button"
       disabled={isSubmitting}
@@ -190,7 +190,7 @@
     </Button>
     <Button
       class="w-full"
-      href={PUBLIC_API_OAUTH_FACEBOOK_URL}
+      href="{PUBLIC_API_OAUTH_FACEBOOK_URL}?token={token}"
       variant="outline"
       type="button"
       disabled={isSubmitting}
