@@ -1,8 +1,8 @@
-import type { PageLoad } from "./$types";
 import { logout } from "$lib/api/user";
 import { goto } from "$lib/utils/goto";
+import type { PageLoad } from "./$types";
 
 export const load = (async () => {
   await logout();
-  goto("/");
+  goto("/login");
 }) as PageLoad;

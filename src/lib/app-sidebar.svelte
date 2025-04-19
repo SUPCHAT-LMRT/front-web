@@ -5,6 +5,7 @@
   import {
     Briefcase,
     Compass,
+    LogOut,
     MessageSquareMore,
     Moon,
     Settings,
@@ -222,6 +223,24 @@
               >
                 <span class="w-3 h-3 bg-gray-500 rounded-full"></span>
                 Invisible
+              </DropdownMenu.Item>
+            </DropdownMenu.Group>
+            <DropdownMenu.Separator class="my-1" />
+            <DropdownMenu.Group>
+              <DropdownMenu.GroupHeading>Autres</DropdownMenu.GroupHeading>
+              <DropdownMenu.Item
+                class="cursor-pointer flex items-center gap-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800"
+                onclick={() => select("settings")}
+              >
+                <Settings class="w-4 h-4" />
+                Paramètres
+              </DropdownMenu.Item>
+              <DropdownMenu.Item
+                class="cursor-pointer flex items-center gap-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:!bg-red-500 hover:!text-destructive-foreground"
+                onclick={() => goto("/logout")}
+              >
+                <LogOut class="w-4 h-4" />
+                Déconnexion
               </DropdownMenu.Item>
             </DropdownMenu.Group>
           </DropdownMenu.Content>
