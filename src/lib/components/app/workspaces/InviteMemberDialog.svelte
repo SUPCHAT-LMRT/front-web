@@ -1,10 +1,10 @@
 <script lang="ts">
     import * as Dialog from "$lib/components/ui/dialog";
-    import { Input } from "$lib/components/ui/input";
     import { Button } from "$lib/components/ui/button";
     import { writable } from "svelte/store";
     import { ClipboardCopy } from "lucide-svelte";
     import { createWorkspaceInviteLink } from "$lib/api/workspaces/workspace";
+    import { success } from "$lib/toast/toast";
 
     const { workspaceId } = $props();
 
@@ -31,54 +31,48 @@
         } finally {
             loading.set(false);
         }
-
     }
 
     const copyInviteLink = () => {
         navigator.clipboard.writeText($inviteLink).then(() => {
-            alert("Lien copié dans le presse-papier !");
+            success("Lien copié", "Le lien d'invitation a été copié dans le presse-papiers.");
         }).catch(err => console.error("Erreur lors de la copie :", err));
     };
 
+    function shortenLink(link: string): string {
+        const maxLength = 40;
+        return link.length > maxLength
+            ? link.slice(0, 40) + "..." + link.slice(-5)
+            : link;
+    }
 </script>
 
 <Dialog.Root bind:open={$inviteMemberData.dialogOpen} onOpenChange={fetchInviteLink}>
     <Dialog.Trigger class="mx-auto">
         Inviter un membre
     </Dialog.Trigger>
-    <Dialog.Content class="sm:max-w-[425px]">
-        <Dialog.Header class="flex flex-col items-center justify-center text-center relative h-full">
-            <div class="text-center">
-                <Dialog.Title class="text-2xl font-bold">
-                    Inviter un membre
-                </Dialog.Title>
-                <p class="text-sm mt-2 text-gray-700">
-                    Ajoute un membre à ton espace de travail en lui envoyant une invitation.
-                </p>
-            </div>
+    <Dialog.Content class="max-w-md mx-auto p-6 rounded-2xl bg-white dark:bg-gray-800 shadow-xl">
+        <Dialog.Header class="flex flex-col items-center justify-center text-center">
+            <Dialog.Title class="text-2xl font-bold">Inviter un membre</Dialog.Title>
+            <p class="text-sm text-center mt-2 text-gray-700 dark:text-gray-300">
+                Ajoute un membre à ton espace de travail en lui envoyant une invitation.
+            </p>
         </Dialog.Header>
 
-        <div class="w-full">
-            <Input bind:value={$inviteMemberData.email} type="email"
-                   placeholder="Adresse e-mail"
-                   class="w-full p-2 border rounded-md mb-4"/>
-        </div>
-
         {#if $loading}
-            <p class="text-sm text-gray-600">Chargement du lien...</p>
+            <p class="text-sm text-gray-600 dark:text-gray-400 mt-4">Chargement du lien...</p>
         {:else if $error}
-            <p class="text-sm text-red-500">{$error}</p>
+            <p class="text-sm text-red-500 mt-4">{$error}</p>
         {:else}
-            <div class="flex flex-col gap-4">
-                <div class="flex items-center justify-between p-2 border rounded-md bg-gray-100 dark:bg-gray-700">
-                    <span class="text-sm truncate dark:text-gray-300">{$inviteLink}</span>
-                    <Button onclick={copyInviteLink} class="p-2 bg-[#61A0AF] text-white flex items-center gap-2 rounded-md hover:bg-[#4B7986]">
-                        <ClipboardCopy size={16} />
-                    </Button>
+            <div class="mt-2 flex flex-col gap-3">
+                <div class="flex items-center justify-between gap-2 p-3 border rounded-md bg-gray-100 dark:bg-gray-700">
+                    <span class="text-sm truncate dark:text-gray-300">{shortenLink($inviteLink)}</span>
+                    <div class="flex items-center gap-2">
+                        <Button onclick={copyInviteLink} class="p-2 bg-[#61A0AF] text-white rounded-md hover:bg-[#4B7986]" aria-label="Copier le lien">
+                            <ClipboardCopy size={16} />
+                        </Button>
+                    </div>
                 </div>
-                <Button class="justify-center w-full h-10 px-6 bg-primary text-white">
-                    Envoyer l'invitation par e-mail
-                </Button>
             </div>
         {/if}
     </Dialog.Content>
