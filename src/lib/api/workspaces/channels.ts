@@ -110,5 +110,18 @@ export const reorderWorkspaceChannel = async (
         console.error(e);
         throw e;
     }
-    }
+}
 
+export const deleteWorkspaceChannel = async (
+  workspaceId: string,
+  channelId: string,
+): Promise<void> => {
+  try {
+    await baseClient.delete(
+      `/api/workspaces/${workspaceId}/channels/${channelId}`,
+    );
+  } catch (e) {
+    console.error(e);
+    throw e;
+  }
+};

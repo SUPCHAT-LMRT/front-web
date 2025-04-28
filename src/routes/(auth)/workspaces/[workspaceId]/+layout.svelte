@@ -4,7 +4,7 @@
     import * as Sidebar from "$lib/components/ui/sidebar";
     import * as ContextMenu from "$lib/components/ui/context-menu";
     import * as Dialog from "$lib/components/ui/dialog/index.js";
-    import {type Channel, reorderWorkspaceChannel} from "$lib/api/workspaces/channels";
+    import {type Channel, deleteWorkspaceChannel, reorderWorkspaceChannel} from "$lib/api/workspaces/channels";
     import ws from "$lib/api/ws";
     import CreateChannelDialog from "$lib/components/app/workspaces/CreateChannelDialog.svelte";
     import {Separator} from "$lib/components/ui/separator";
@@ -66,6 +66,12 @@
         );
     });
 
+    $effect(() => {
+        return ws.subscribe("channels-deleted", msg => {
+            channels.data.channels = channels.data.channels.filter(channel => channel.id !== msg.channelId);
+        })
+    })
+
     const createChannel = async () => {
         try {
             await workspaceChannelsStore.create(currentWorkspaceId, createChannelData.name, createChannelData.topic);
@@ -113,6 +119,15 @@
         });
         handleReorder();
     }
+
+    const handleDeleteChannel = async (channelId: string) => {
+        try {
+            await deleteWorkspaceChannel(currentWorkspaceId, channelId);
+        } catch (e) {
+            console.error(e);
+        }
+    };
+
 </script>
 
 <div class="flex w-full justify-between dark:bg-gray-900">
@@ -138,22 +153,30 @@
                                 ]}} onconsider="{handleDndConsider}" onfinalize="{handleDndFinalize}">
                                     {#each channels.data.channels as channel (channel.id)}
                                         <div animate:flip={{duration: flipDurationMs}} class="mt-4">
-                                            <a href="/workspaces/{currentWorkspaceId}/channels/{channel.id}" class="w-full">
-                                                <Sidebar.MenuItem class="flex items-start gap-2 w-full">
-                                                    <div class="flex items-center h-6 pt-[2px]">
-                                                        <span class="text-[#61A0AF] font-bold text-base group-hover:scale-105 transition-transform">#</span>
-                                                    </div>
-                                                    <div class="flex flex-col overflow-hidden w-full">
-                                                        <div
-                                                                class=" w-full text-base font-semibold text-left text-gray-900 dark:text-white p-0 h-6 leading-tight">
-                                                            {channel.name}
+                                        <ContextMenu.Root>
+                                            <ContextMenu.Trigger>
+                                                <a href="/workspaces/{currentWorkspaceId}/channels/{channel.id}" class="w-full">
+                                                    <Sidebar.MenuItem class="flex items-start gap-2 w-full">
+                                                        <div class="flex items-center h-6 pt-[2px]">
+                                                            <span class="text-[#61A0AF] font-bold text-base group-hover:scale-105 transition-transform">#</span>
                                                         </div>
-                                                    </div>
-                                                </Sidebar.MenuItem>
-                                            </a>
+                                                        <div class="flex flex-col overflow-hidden w-full">
+                                                            <div class="w-full text-base font-semibold text-left text-gray-900 dark:text-white p-0 h-6 leading-tight">
+                                                                {channel.name}
+                                                            </div>
+                                                        </div>
+                                                    </Sidebar.MenuItem>
+                                                </a>
+                                            </ContextMenu.Trigger>
+
+                                            <ContextMenu.Content>
+                                                <ContextMenu.Item onclick={() => handleDeleteChannel(channel.id)}>Supprimer</ContextMenu.Item>
+                                            </ContextMenu.Content>
+                                        </ContextMenu.Root>
                                         </div>
 
                                     {/each}
+
                                 </section>
 
 
@@ -178,12 +201,6 @@
 
                 </Sidebar.Content>
             </ContextMenu.Trigger>
-            <ContextMenu.Content>
-                <ContextMenu.Item onclick={() => dialogOpen.createChannel = true}>Créer un canal</ContextMenu.Item>
-                <ContextMenu.Item>Billing</ContextMenu.Item>
-                <ContextMenu.Item>Team</ContextMenu.Item>
-                <ContextMenu.Item>Subscription</ContextMenu.Item>
-            </ContextMenu.Content>
         </ContextMenu.Root>
     </Sidebar.Root>
 </div>
