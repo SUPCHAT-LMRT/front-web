@@ -1,13 +1,15 @@
 <script lang="ts">
     import { onMount } from "svelte";
-    import workspacesStore from "$lib/stores/workspacesStore";
+    import {listWorkspaceDiscover} from "$lib/api/workspaces/workspace";
     import { getS3ObjectUrl, S3Bucket } from "$lib/api/s3";
 
     let workspaces = $state([]);
 
     onMount(async () => {
-        const result = await workspacesStore.fetchDiscover();
-        workspaces = result.workspaces;
+        const result = await listWorkspaceDiscover();
+        if (result) {
+            workspaces = result;
+        }
     });
 </script>
 

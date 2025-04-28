@@ -3,7 +3,7 @@
   import { getS3ObjectUrl, S3Bucket } from "$lib/api/s3";
   import {
     createWorkspace,
-    listWorkspaces,
+    listUserWorkspaces,
     updateWorkspaceIcon,
     WorkspaceType,
     type Workspace,
@@ -34,7 +34,7 @@
 
   onMount(async () => {
     try {
-      workspaces = await listWorkspaces();
+      workspaces = await listUserWorkspaces();
       isLoading = false;
     } catch (error) {
       console.error("Erreur lors de la récupération des workspaces :", error);
