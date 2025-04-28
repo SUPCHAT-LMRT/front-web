@@ -38,7 +38,14 @@ export const getWorkspace = async (workspaceId: string): Promise<Workspace> => {
     }
 }
 
-export const listWorkspaces = async (): Promise<Workspace[]> => {
+export type WorkspaceDiscover = {
+    id: string;
+    name: string;
+    ownerName: string;
+    membersCount: number;
+}
+
+export const listUserWorkspaces = async (): Promise<Workspace[]> => {
     try {
         const {data} = await baseClient.get("/api/workspaces");
         return data;
@@ -47,6 +54,16 @@ export const listWorkspaces = async (): Promise<Workspace[]> => {
         throw e;
     }
 };
+
+export const listWorkspaceDiscover = async (): Promise<WorkspaceDiscover[]> => {
+    try {
+        const {data} = await baseClient.get("/api/workspaces/discover");
+        return data;
+    } catch (e) {
+        console.error(e);
+        throw e;
+    }
+}
 
 export const getWorkspaceDetails = async (
     workspaceId: string,

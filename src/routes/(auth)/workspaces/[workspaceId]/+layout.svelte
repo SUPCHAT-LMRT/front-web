@@ -1,6 +1,6 @@
 <script lang="ts">
     import workspaceChannelsStore from "$lib/stores/workspaceChannelsStore";
-    import {page} from "$app/state";
+    import { page } from "$app/state";
     import * as Sidebar from "$lib/components/ui/sidebar";
     import * as ContextMenu from "$lib/components/ui/context-menu";
     import * as Dialog from "$lib/components/ui/dialog/index.js";
