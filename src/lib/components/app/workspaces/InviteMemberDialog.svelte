@@ -1,12 +1,13 @@
 <script lang="ts">
     import * as Dialog from "$lib/components/ui/dialog";
-    import { Button } from "$lib/components/ui/button";
-    import { writable } from "svelte/store";
-    import { ClipboardCopy } from "lucide-svelte";
-    import { createWorkspaceInviteLink } from "$lib/api/workspaces/workspace";
-    import { success } from "$lib/toast/toast";
+    import {Button} from "$lib/components/ui/button";
+    import {writable} from "svelte/store";
+    import {ClipboardCopy} from "lucide-svelte";
+    import {createWorkspaceInviteLink} from "$lib/api/workspaces/workspace";
+    import {success} from "$lib/toast/toast";
+    import {AxiosError} from "axios";
 
-    const { workspaceId } = $props();
+    const {workspaceId} = $props();
 
     let inviteMemberData = writable({
         dialogOpen: false,
@@ -28,6 +29,17 @@
         } catch (e) {
             console.error(e);
             error.set("Erreur lors de la création du lien d'invitation.");
+            if (e instanceof AxiosError) {
+                if (e.response?.status === 403) {
+                    error.set("Vous n'avez pas la permission de créer un lien d'invitation.");
+                } else if (e.response?.status === 404) {
+                    error.set("Espace de travail introuvable.");
+                } else {
+                    error.set("Erreur inconnue lors de la création du lien d'invitation.");
+                }
+            } else {
+                error.set("Erreur inconnue lors de la création du lien d'invitation.");
+            }
         } finally {
             loading.set(false);
         }
@@ -68,8 +80,10 @@
                 <div class="flex items-center justify-between gap-2 p-3 border rounded-md bg-gray-100 dark:bg-gray-700">
                     <span class="text-sm truncate dark:text-gray-300">{shortenLink($inviteLink)}</span>
                     <div class="flex items-center gap-2">
-                        <Button onclick={copyInviteLink} class="p-2 bg-[#61A0AF] text-white rounded-md hover:bg-[#4B7986]" aria-label="Copier le lien">
-                            <ClipboardCopy size={16} />
+                        <Button onclick={copyInviteLink}
+                                class="p-2 bg-[#61A0AF] text-white rounded-md hover:bg-[#4B7986]"
+                                aria-label="Copier le lien">
+                            <ClipboardCopy size={16}/>
                         </Button>
                     </div>
                 </div>

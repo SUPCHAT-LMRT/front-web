@@ -4,6 +4,7 @@ import {
   createWorkspaceChannel,
   getWorkspaceChannels,
 } from "$lib/api/workspaces/channels";
+import {Axios, AxiosError} from "axios";
 
 export type WorkspaceChannelsStoreResult = {
   channels: Channel[];
@@ -36,7 +37,7 @@ class WorkspaceChannelsStore extends Store<WorkspaceChannelsStoreResult> {
     name: string,
     topic: string,
   ): Promise<void> {
-    await createWorkspaceChannel(workspaceId, name, topic);
+      return createWorkspaceChannel(workspaceId, name, topic);
   }
 
   public put(channel: Channel): void {

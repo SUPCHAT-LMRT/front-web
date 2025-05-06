@@ -2,7 +2,6 @@
   import { Popover, PopoverContent, PopoverTrigger } from "$lib/components/ui/popover";
 
   export let color: string;
-  export let onChange: (color: string) => void;
 
   let open = false; // contrôle l'état du popover
 
@@ -13,13 +12,13 @@
   ];
 
   const handleColorClick = (presetColor: string) => {
-    onChange(presetColor);
+    color = presetColor;
     open = false; // ferme le popover
   };
 </script>
 
 <Popover bind:open={open}>
-  <PopoverTrigger asChild>
+  <PopoverTrigger>
     <button class="h-8 w-8 rounded-md border" style="background-color: {color}" />
   </PopoverTrigger>
   <PopoverContent class="w-64">

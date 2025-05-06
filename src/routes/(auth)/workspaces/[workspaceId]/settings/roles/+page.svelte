@@ -8,6 +8,7 @@
     import {createWorkspaceRole, updateWorkspaceRole, type WorkspaceRole} from "$lib/api/workspaces/roles";
     import {page} from "$app/state";
     import {roleList} from "./state.svelte";
+    import WorkspaceMembers from "./WorkspaceMembers.svelte";
 
     let selectedRole: WorkspaceRole | null = $state(null);
     let showModal = $state(false);
@@ -17,7 +18,7 @@
     const handleSave = async () => {
         if (selectedRole) {
             try {
-                console.log("selectedRoleId", selectedRole.id);
+                console.log(workspaceId, selectedRole.id, selectedRole.name, selectedRole.permissions, selectedRole.color);
                 await updateWorkspaceRole(workspaceId, selectedRole.id, selectedRole.name, selectedRole.permissions, selectedRole.color);
             } catch (error) {
                 console.error("Erreur lors de la mise à jour des permissions :", error);
@@ -53,7 +54,7 @@
     </div>
 
     <div class="space-y-4">
-        <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
+        <div class="grid grid-cols-1 gap-4 md:grid-cols-4">
             <div class="md:col-span-1">
                 <Card class="h-full flex flex-col">
                     <CardHeader>
@@ -83,6 +84,13 @@
                                 Sélectionnez un rôle pour voir ses permissions
                             </div>
                         {/if}
+                    </CardContent>
+                </Card>
+            </div>
+            <div class="md:col-span-1">
+                <Card class="h-full flex flex-col">
+                    <CardContent class="flex-grow">
+                        <WorkspaceMembers/>
                     </CardContent>
                 </Card>
             </div>

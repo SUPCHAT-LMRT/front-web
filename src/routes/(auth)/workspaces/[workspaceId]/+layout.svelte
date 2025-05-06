@@ -1,6 +1,6 @@
 <script lang="ts">
     import workspaceChannelsStore from "$lib/stores/workspaceChannelsStore";
-    import { page } from "$app/state";
+    import {page} from "$app/state";
     import * as Sidebar from "$lib/components/ui/sidebar";
     import * as ContextMenu from "$lib/components/ui/context-menu";
     import * as Dialog from "$lib/components/ui/dialog/index.js";
@@ -11,6 +11,8 @@
     import {goto} from "$app/navigation";
     import {dndzone} from "svelte-dnd-action";
     import {flip} from "svelte/animate";
+    import {AxiosError} from "axios";
+    import {error, notifyByLevel} from "$lib/toast/toast";
 
     let currentWorkspaceId = $derived(page.params.workspaceId);
     let channels = $state(workspaceChannelsStore.get());
@@ -57,11 +59,11 @@
             "channels-reordered",
             (msg: { channelReorders: ChannelReorderMessage[] }) => {
                 channels.data.channels = msg.channelReorders
-                  .sort((a, b) => a.newIndex - b.newIndex)
-                  .map((msgChannel) => {
-                    const channel = channels.data.channels.find((c) => c.id === msgChannel.channelId);
-                    return { ...channel, order: msgChannel.newIndex };
-                  });
+                    .sort((a, b) => a.newIndex - b.newIndex)
+                    .map((msgChannel) => {
+                        const channel = channels.data.channels.find((c) => c.id === msgChannel.channelId);
+                        return {...channel, order: msgChannel.newIndex};
+                    });
             },
         );
     });
@@ -81,7 +83,13 @@
                 topic: ""
             }
         } catch (e) {
-            console.error(e);
+            if (e instanceof AxiosError) {
+                notifyByLevel({
+                    title: "Erreur",
+                    level: "error",
+                    message: e.response?.data?.displayError,
+                });
+            }
         }
     }
 
@@ -102,14 +110,22 @@
         try {
             await reorderWorkspaceChannel(currentWorkspaceId, reorderedChannels);
         } catch (e) {
-            console.error(e);
+            if (e instanceof AxiosError) {
+                notifyByLevel({
+                    title: "Erreur",
+                    level: "error",
+                    message: e.response?.data?.displayError,
+                });
+            }
         }
     };
 
     const flipDurationMs = 300;
+
     function handleDndConsider(e) {
         channels.data.channels = e.detail.items;
     }
+
     function handleDndFinalize(e) {
         channels.data.channels = e.detail.items.map((channel, index) => {
             return {
@@ -124,7 +140,12 @@
         try {
             await deleteWorkspaceChannel(currentWorkspaceId, channelId);
         } catch (e) {
-            console.error(e);
+            if (e instanceof AxiosError) {
+                error(
+                    "Erreur",
+                    e.response?.data?.displayError,
+                )
+            }
         }
     };
 
@@ -153,26 +174,29 @@
                                 ]}} onconsider="{handleDndConsider}" onfinalize="{handleDndFinalize}">
                                     {#each channels.data.channels as channel (channel.id)}
                                         <div animate:flip={{duration: flipDurationMs}} class="mt-4">
-                                        <ContextMenu.Root>
-                                            <ContextMenu.Trigger>
-                                                <a href="/workspaces/{currentWorkspaceId}/channels/{channel.id}" class="w-full">
-                                                    <Sidebar.MenuItem class="flex items-start gap-2 w-full">
-                                                        <div class="flex items-center h-6 pt-[2px]">
-                                                            <span class="text-[#61A0AF] font-bold text-base group-hover:scale-105 transition-transform">#</span>
-                                                        </div>
-                                                        <div class="flex flex-col overflow-hidden w-full">
-                                                            <div class="w-full text-base font-semibold text-left text-gray-900 dark:text-white p-0 h-6 leading-tight">
-                                                                {channel.name}
+                                            <ContextMenu.Root>
+                                                <ContextMenu.Trigger>
+                                                    <a href="/workspaces/{currentWorkspaceId}/channels/{channel.id}"
+                                                       class="w-full">
+                                                        <Sidebar.MenuItem class="flex items-start gap-2 w-full">
+                                                            <div class="flex items-center h-6 pt-[2px]">
+                                                                <span class="text-[#61A0AF] font-bold text-base group-hover:scale-105 transition-transform">#</span>
                                                             </div>
-                                                        </div>
-                                                    </Sidebar.MenuItem>
-                                                </a>
-                                            </ContextMenu.Trigger>
+                                                            <div class="flex flex-col overflow-hidden w-full">
+                                                                <div class="w-full text-base font-semibold text-left text-gray-900 dark:text-white p-0 h-6 leading-tight">
+                                                                    {channel.name}
+                                                                </div>
+                                                            </div>
+                                                        </Sidebar.MenuItem>
+                                                    </a>
+                                                </ContextMenu.Trigger>
 
-                                            <ContextMenu.Content>
-                                                <ContextMenu.Item onclick={() => handleDeleteChannel(channel.id)}>Supprimer</ContextMenu.Item>
-                                            </ContextMenu.Content>
-                                        </ContextMenu.Root>
+                                                <ContextMenu.Content>
+                                                    <ContextMenu.Item onclick={() => handleDeleteChannel(channel.id)}>
+                                                        Supprimer
+                                                    </ContextMenu.Item>
+                                                </ContextMenu.Content>
+                                            </ContextMenu.Root>
                                         </div>
 
                                     {/each}

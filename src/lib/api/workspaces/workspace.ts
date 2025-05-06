@@ -1,4 +1,5 @@
 import {baseClient} from "../client";
+import type {WorkspaceRole} from "$lib/api/workspaces/roles";
 
 export enum WorkspaceType {
     PUBLIC = "public",
@@ -16,6 +17,7 @@ export type WorkspaceMember = {
     id: string;
     userId: string;
     pseudo: string;
+    roles: WorkspaceRole[];
 };
 
 export type WorkspaceDetails = {
@@ -204,7 +206,7 @@ export const createWorkspaceInviteLink = async (
     workspaceId: string,
 ): Promise<string> => {
     try {
-        const {data} = await baseClient.post(`/api/workspace-invite-link`, {
+        const {data} = await baseClient.post(`/api/workspace-invite-link/create/${workspaceId}`, {
             workspaceId,
         });
         return data;

@@ -1,5 +1,4 @@
 <script lang="ts">
-    import { writable } from "svelte/store";
     import { Checkbox } from "$lib/components/ui/checkbox";
     import { Label } from "$lib/components/ui/label";
     import { Separator } from "$lib/components/ui/separator";
@@ -8,9 +7,6 @@
     import HexColorPicker from "$lib/components/app/workspaces/HexColorPicker.svelte";
 
     const { role = $bindable() }: { role: WorkspaceRole | null } = $props();
-
-    let roleName = $derived(role.name);
-    let roleColor = $derived(role.color || "#3b82f6");
 
     const permissionCategories = [
         {
@@ -43,7 +39,6 @@
             ]
         },
     ];
-
 </script>
 
 <div class="space-y-4 mb-6">
@@ -52,13 +47,13 @@
             <Label class="block text-sm font-medium">Nom du rôle</Label>
             <input
                     type="text"
-                    bind:value={roleName}
+                    bind:value={role.name}
                     class="w-full px-3 py-2 border rounded-md bg-background text-foreground mt-2"
                     placeholder="Nom du rôle"
             />
         </div>
         <div class="flex-shrink-0">
-            <HexColorPicker bind:color={roleColor} onChange={(color) => (roleColor = color)}/>
+            <HexColorPicker bind:color={role.color} />
         </div>
     </div>
 </div>

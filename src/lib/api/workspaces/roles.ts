@@ -5,6 +5,7 @@ export type WorkspaceRole = {
     name: string;
     permissions: number;
     color: string;
+    isAssigned: boolean;
 };
 
 
@@ -100,3 +101,74 @@ export const deleteWorkspaceRole = async (
         throw e;
     }
 }
+
+export const assignRoleToMember = async (
+    workspaceId: string,
+    userId: string,
+    roleId: string
+): Promise<void> => {
+    try {
+        await baseClient.post(
+            `/api/workspaces/${workspaceId}/roles/assign`,
+            {
+                user_id: userId,
+                role_id: roleId,
+                workspace_id: workspaceId,
+            }
+        );
+        console.log(`Role ${roleId} assigné à ${userId} dans le workspace ${workspaceId}`);
+    } catch (e) {
+        console.error("Erreur lors de l'assignation du rôle :", e);
+        throw e;
+    }
+};
+
+export const dessasignRoleToMember = async (
+    workspaceId: string,
+    userId: string,
+    roleId: string
+): Promise<void> => {
+    try {
+        await baseClient.post(
+            `/api/workspaces/${workspaceId}/roles/dessassign`,
+            {
+                user_id: userId,
+                role_id: roleId,
+                workspace_id: workspaceId,
+            }
+        );
+        console.log(`Rôle ${roleId} retiré de ${userId} dans le workspace ${workspaceId}`);
+    } catch (e) {
+        console.error("Erreur lors du retrait du rôle :", e);
+        throw e;
+    }
+}
+
+export const getRolesForMember = async (
+    workspaceId: string,
+    userId: string
+): Promise<(WorkspaceRole & { isAssigned: boolean })[]> => {
+    try {
+        const { data } = await baseClient.get(
+            `/api/workspaces/${workspaceId}/roles/members/${userId}`
+        );
+
+        const rolesArray = Array.isArray(data) ? data : data.roles;
+
+        if (!Array.isArray(rolesArray)) {
+            throw new Error("Le format des rôles est invalide : pas un tableau");
+        }
+
+        return rolesArray.map(role => ({
+            id: role.Id ?? role.id,
+            name: role.Name ?? role.name,
+            permissions: role.Permissions ?? role.permissions,
+            color: role.Color ?? role.color,
+            isAssigned: role.IsAssigned ?? role.isAssigned
+        }));
+    } catch (e) {
+        console.error("Erreur lors du chargement des rôles du membre :", e);
+        throw e;
+    }
+};
+

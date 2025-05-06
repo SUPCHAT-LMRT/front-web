@@ -80,7 +80,11 @@
                         onclick={() => handleRoleSelect(role)}
                 >
                     <div class="flex items-center gap-2">
-                        <Badge style="background-color: {role.color}" class="text-white">
+                        <Badge
+                                style="background-color: {role.color}"
+                                class="text-white max-w-[180px] truncate"
+                                title={role.name}
+                        >
                             {role.name}
                         </Badge>
                     </div>
