@@ -13,9 +13,9 @@
             id: "general",
             name: "Général",
             permissions: [
+                RolePermission.MANAGE_WORKSPACE_SETTINGS,
                 RolePermission.MANAGE_ROLES,
                 RolePermission.MANAGE_CHANNELS,
-                RolePermission.MANAGE_MESSAGES,
                 RolePermission.MANAGE_INVITES
             ]
         },

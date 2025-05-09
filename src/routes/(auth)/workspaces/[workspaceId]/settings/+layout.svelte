@@ -2,6 +2,7 @@
     import * as Tabs from "$lib/components/ui/tabs";
     import {goto} from "$lib/utils/goto";
     import {page} from "$app/state";
+    import {ArrowLeft} from "lucide-svelte";
 
     let currentWorkspaceId = $derived(page.params.workspaceId);
 
@@ -37,6 +38,11 @@
 
 <section class="ml-15 border-l-2 border-gray-200 dark:border-gray-800 dark:bg-gray-900 w-full">
     <div class="flex flex-col px-4 py-2">
+        <a href="/workspaces/{currentWorkspaceId}"
+           class="flex items-center gap-2 text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200 mb-4">
+            <ArrowLeft size={20}/>
+            <span>Retour à l'espace de travail</span>
+        </a>
         <section>
             <div class="flex items-end mb-4">
                 <h1 class="text-3xl font-bold text-gray-700 dark:text-gray-200">Paramètres</h1>
@@ -81,6 +87,17 @@
                 )
             }>
                             Rôles
+                        </Tabs.Trigger>
+                        <Tabs.Trigger
+                                value="member-management"
+                                class="text-gray-600 dark:text-gray-200"
+                                onclick={() =>
+                handleTabChange(
+                    { displayName: "Gestion des Membres", label: "member-management" },
+                    `/workspaces/${currentWorkspaceId}/settings/member-management`
+                )
+            }>
+                            Gestion des Membres
                         </Tabs.Trigger>
                     </Tabs.List>
                 </Tabs.Root>

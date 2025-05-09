@@ -5,9 +5,15 @@
     import {Button} from "$lib/components/ui/button";
     import {onMount} from "svelte";
     import {page} from "$app/state";
-    import {getListWorkspaceRoles, deleteWorkspaceRole, type WorkspaceRole} from "$lib/api/workspaces/roles";
+    import {
+        getListWorkspaceRoles,
+        deleteWorkspaceRole,
+        type WorkspaceRole,
+    } from "$lib/api/workspaces/roles";
     import * as Dialog from "$lib/components/ui/dialog";
     import {roleList} from "./state.svelte";
+    import {writable} from "svelte/store";
+    import {AxiosError} from "axios";
 
     let loading = $state(true);
     let showDeleteConfirmation = $state(false);
@@ -15,6 +21,7 @@
 
     const {workspaceId} = page.params;
     let {selectedRole = $bindable()}: { selectedRole: WorkspaceRole | null } = $props();
+    let error = writable("");
 
     const handleRoleSelect = (role: WorkspaceRole) => {
         selectedRole = role;
@@ -26,8 +33,20 @@
             if (roleList.roles.length > 0) {
                 selectedRole = roleList.roles[0];
             }
-        } catch (error) {
-            console.error("Erreur lors de la récupération des rôles :", error);
+        } catch (e) {
+            console.error(e);
+            error.set("Erreur lors du chargement des rôles.");
+            if (e instanceof AxiosError) {
+                if (e.response?.status === 403) {
+                    error.set("Vous n'avez pas la permission de voir les rôles.");
+                } else if (e.response?.status === 404) {
+                    error.set("Espace de travail introuvable.");
+                } else {
+                    error.set("Erreur inconnue lors du chargement des rôles.");
+                }
+            } else {
+                error.set("Erreur inconnue lors du chargement des rôles.");
+            }
         } finally {
             loading = false;
         }

@@ -20,12 +20,16 @@ export class RolePermission {
     public static KICK_MEMBERS = new RolePermission(1 << 7, "Expulser des membres", "Permet d'expulser des membres du serveur.");
     public static MENTION_EVERYONE = new RolePermission(1 << 8, "Mentionner @everyone", "Permet de mentionner @everyone dans le serveur.");
     public static INVITE_MEMBERS = new RolePermission(1 << 9, "Inviter des membres", "Permet d'inviter des membres dans le serveur.");
+    public static MANAGE_WORKSPACE_SETTINGS = new RolePermission(1 << 10, "Gérer les paramètres du serveur", "Permet de gérer les paramètres du serveur.");
 
-    public constructor(private readonly bit: number, private readonly name: string, private readonly description: string) { }
+
+    public constructor(private readonly bit: number, private readonly name: string, private readonly description: string) {
+    }
 
     public get permissionBit(): number {
         return this.bit;
     }
+
 
     public get permissionName(): string {
         return this.name;
@@ -149,7 +153,7 @@ export const getRolesForMember = async (
     userId: string
 ): Promise<(WorkspaceRole & { isAssigned: boolean })[]> => {
     try {
-        const { data } = await baseClient.get(
+        const {data} = await baseClient.get(
             `/api/workspaces/${workspaceId}/roles/members/${userId}`
         );
 
@@ -172,3 +176,14 @@ export const getRolesForMember = async (
     }
 };
 
+export const checkRolePermission = (
+    workspaceId: string,
+    permissions: number
+): Promise<{ hasPermission: boolean }> => {
+    return baseClient.post(
+        `/api/workspaces/${workspaceId}/permissions/check`,
+        {
+            permissions,
+        }
+    ).then(({data}) => data);
+}

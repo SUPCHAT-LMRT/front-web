@@ -257,3 +257,20 @@ export const updateTypeWorkspace = async (
         throw e;
     }
 }
+
+// kick
+// http://localhost:3000/api/workspaces/681e0b708864d86e1198681d/members/681e0b798864d86e11986822
+
+export const kickWorkspaceMember = async (
+    workspaceId: string,
+    userId: string,
+): Promise<void> => {
+    try {
+        await baseClient.delete(
+            `/api/workspaces/${workspaceId}/members/${userId}`,
+        );
+    } catch (e) {
+        console.error(e);
+        throw e;
+    }
+};

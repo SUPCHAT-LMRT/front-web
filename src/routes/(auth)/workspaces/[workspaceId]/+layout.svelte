@@ -214,11 +214,12 @@
 
                                 <Sidebar.MenuItem class="mb-[2px] w-full flex justify-center px-4">
                                     <Sidebar.MenuButton
-                                            class="w-full text-sm bg-bl mb-5 bg-[#61A0AF] hover:bg-[#4B7986] text-white py-1.5 rounded transition">
+                                            class="w-full text-sm bg-bl mb-5 bg-[#61A0AF] hover:bg-[#4B7986] text-white py-1.5 rounded transition flex justify-center items-center text-center"
+                                            onclick={() => createChannelData.dialogOpen = true}
+                                    >
                                         <CreateChannelDialog {createChannelData} {createChannel}/>
                                     </Sidebar.MenuButton>
                                 </Sidebar.MenuItem>
-
                             </Sidebar.Menu>
                         </Sidebar.GroupContent>
                     </Sidebar.Group>
