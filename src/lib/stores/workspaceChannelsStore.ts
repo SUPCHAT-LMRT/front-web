@@ -1,51 +1,68 @@
-import { Store, StoreResultState, type StoreResult } from "./store.svelte";
+import {Store, StoreResultState, type StoreResult} from "./store.svelte";
 import {
-  type Channel,
-  createWorkspaceChannel,
-  getWorkspaceChannels,
+    type Channel,
+    createWorkspaceChannel, getPrivateChannels,
+    getWorkspaceChannels,
 } from "$lib/api/workspaces/channels";
 
 export type WorkspaceChannelsStoreResult = {
-  channels: Channel[];
+    channels: Channel[];
+    privateChannels: Channel[];
 };
 
 class WorkspaceChannelsStore extends Store<WorkspaceChannelsStoreResult> {
-  public getDefaultState(): StoreResult<WorkspaceChannelsStoreResult> {
-    return {
-      state: StoreResultState.IDLE,
-      data: {
-        channels: [],
-      },
-    };
-  }
+    public getDefaultState(): StoreResult<WorkspaceChannelsStoreResult> {
+        return {
+            state: StoreResultState.IDLE,
+            data: {
+                channels: [],
+                privateChannels: [],
+            },
+        };
+    }
 
-  public async fetch(
-    workspaceId: string,
-  ): Promise<WorkspaceChannelsStoreResult> {
-    this.changeState(StoreResultState.LOADING);
-    const channels = await getWorkspaceChannels(workspaceId);
-    this.changeStateAndData(StoreResultState.LOADED, {
-      channels,
-    });
+    public async fetch(
+        workspaceId: string,
+        userId: string,
+    ): Promise<WorkspaceChannelsStoreResult> {
+        this.changeState(StoreResultState.LOADING);
+        const [channels, privateChannels] = await Promise.all([
+            getWorkspaceChannels(workspaceId),
+            getPrivateChannels(workspaceId, userId),
+        ]);
 
-    return this.getData();
-  }
+        this.changeStateAndData(StoreResultState.LOADED, {
+            channels,
+            privateChannels,
+        });
 
-  public async create(
-    workspaceId: string,
-    name: string,
-    topic: string,
-    isPrivate: boolean,
-    members: string[],
-  ): Promise<Channel> {
-      return createWorkspaceChannel(workspaceId, name, topic, isPrivate, members)
-  }
+        return this.getData();
+    }
 
-  public put(channel: Channel): void {
-    this.changeData({
-      channels: [...this.getData().channels, channel],
-    });
-  }
+
+    public async create(
+        workspaceId: string,
+        name: string,
+        topic: string,
+        isPrivate: boolean,
+        members: string[],
+    ): Promise<Channel> {
+        return createWorkspaceChannel(workspaceId, name, topic, isPrivate, members)
+    }
+
+    public put(channel: Channel): void {
+        if (channel.isPrivate) {
+            this.changeData({
+                channels: this.getData().channels,
+                privateChannels: [...this.getData().privateChannels, channel],
+            });
+        } else {
+            this.changeData({
+                channels: [...this.getData().channels, channel],
+                privateChannels: this.getData().privateChannels,
+            });
+        }
+    }
 }
 
 export default new WorkspaceChannelsStore();

@@ -15,6 +15,7 @@
     import {error, notifyByLevel} from "$lib/toast/toast";
 
     let currentWorkspaceId = $derived(page.params.workspaceId);
+    let currentMemberId = $derived(page.data.member?.memberId?.member_id);
     let channels = $state(workspaceChannelsStore.get());
     let createChannelData = $state({
         dialogOpen: false,
@@ -24,11 +25,12 @@
         members: [] as string[]
     });
 
-    // $effect to allow the store to fetch the data when changing workspace
     $effect(() => {
         workspaceChannelsStore.clearData();
-        workspaceChannelsStore.fetch(currentWorkspaceId);
-    })
+        if (currentMemberId) {
+            workspaceChannelsStore.fetch(currentWorkspaceId, currentMemberId);
+        }
+    });
 
     // $effect to send the selectWorkspace message to the server when the workspace changes
     $effect(() => {
@@ -219,7 +221,7 @@
                         <Sidebar.GroupLabel>Canaux privés</Sidebar.GroupLabel>
                         <Sidebar.GroupContent>
                             <Sidebar.Menu class="flex mx-auto flex-col items-start pl-6 min-w-64">
-                                {#each channels.data.channels.filter(channel => channel.isPrivate) as privateChannel (privateChannel.id)}
+                                {#each channels.data.privateChannels as privateChannel (privateChannel.id)}
                                     <div class="mt-4">
                                         <ContextMenu.Root>
                                             <ContextMenu.Trigger>

@@ -1,6 +1,5 @@
 <script lang="ts">
     import {page} from "$app/state";
-    import CreateChannelDialog from "$lib/components/app/workspaces/CreateChannelDialog.svelte";
     import workspaceChannelsStore from "$lib/stores/workspaceChannelsStore";
     import InviteMemberDialog from "$lib/components/app/workspaces/InviteMemberDialog.svelte";
     import {
@@ -21,6 +20,9 @@
     import * as ImageCropper from '$lib/components/extra/ui/image-cropper';
     import {getFileFromUrl} from '$lib/components/extra/ui/image-cropper';
     import {Button} from "$lib/components/ui/button";
+    import {AxiosError} from "axios";
+    import {error} from "$lib/toast/toast";
+
 
     let currentWorkspaceId = $derived(page.params.workspaceId);
     let createChannelData = $state({
@@ -130,7 +132,8 @@
 
     $effect(() => {
         return ws.subscribe("workspace-updated", (msg) => {
-            if (msg.workspaceId === currentWorkspaceId) {serveurcurrentWorkspaceDetails = {
+            if (msg.workspaceId === currentWorkspaceId) {
+                serveurcurrentWorkspaceDetails = {
                     ...currentWorkspaceDetails,
                     name: msg.name
                 };
@@ -159,6 +162,25 @@
             forceRenderBanner = Date.now();
         } catch (e) {
             console.error(e);
+            if (e instanceof AxiosError) {
+                if (e.response?.status === 403) {
+                    console.log("403 error");
+                    error(
+                        "Erreur",
+                        "Vous n'avez pas la permission de modifier la bannière.",
+                    );
+                } else {
+                    error(
+                        "Erreur",
+                        "Une erreur est survenue lors de la mise à jour de la bannière.",
+                    );
+                }
+            } else {
+                error(
+                    "Erreur",
+                    "Une erreur est survenue lors de la mise à jour de la bannière.",
+                );
+            }
         }
     }
 
@@ -220,7 +242,8 @@
                         </Button>
                     </div>
                     <div>
-                        <Button href="/workspaces/{currentWorkspaceId}/settings/general" class="bg-primary dark:bg-primary text-white px-4 py-2 rounded-lg shadow-md hover:bg-[#4B7986] duration-300">
+                        <Button href="/workspaces/{currentWorkspaceId}/settings/general"
+                                class="bg-primary dark:bg-primary text-white px-4 py-2 rounded-lg shadow-md hover:bg-[#4B7986] duration-300">
                             Paramètres
                         </Button>
                     </div>

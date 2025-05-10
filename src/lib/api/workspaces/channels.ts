@@ -24,6 +24,21 @@ export const getWorkspaceChannels = async (
     }
 };
 
+export const getPrivateChannels = async (
+    workspaceId: string,
+    userId: string,
+): Promise<Channel[]> => {
+    try {
+        const { data } = await baseClient.get(
+            `/api/workspaces/${workspaceId}/channels/private/${userId}`,
+        );
+        return data;
+    } catch (e) {
+        console.error(e);
+        throw e;
+    }
+};
+
 export const createWorkspaceChannel = async (
     workspaceId: string,
     name: string,
