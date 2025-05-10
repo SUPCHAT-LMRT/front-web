@@ -152,18 +152,6 @@
         {user: "Charlie", action: "a modifié les permissions"}
     ];
 
-    const createChannel = async () => {
-        try {
-            await workspaceChannelsStore.create(currentWorkspaceId, createChannelData.name, createChannelData.topic);
-            createChannelData = {
-                dialogOpen: false,
-                name: "",
-                topic: ""
-            }
-        } catch (e) {
-            console.error(e);
-        }
-    }
 
     const updateBanner = async (file: File) => {
         try {
@@ -229,9 +217,6 @@
                     <div class="flex gap-4 mb-6">
                         <Button class="bg-primary dark:bg-primary text-white px-4 py-2 rounded-lg shadow-md hover:bg-[#4B7986] duration-300">
                             <InviteMemberDialog workspaceId={currentWorkspaceId}/>
-                        </Button>
-                        <Button class="bg-primary dark:bg-primary text-white px-4 py-2 rounded-lg shadow-md hover:bg-[#4B7986] duration-300">
-                            <CreateChannelDialog {createChannelData} {createChannel}/>
                         </Button>
                     </div>
                     <div>

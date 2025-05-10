@@ -19,8 +19,10 @@
     let createChannelData = $state({
         dialogOpen: false,
         name: "",
-        topic: ""
-    })
+        topic: "",
+        isPrivate: false,
+        members: [] as string[]
+    });
 
     // $effect to allow the store to fetch the data when changing workspace
     $effect(() => {
@@ -76,12 +78,20 @@
 
     const createChannel = async () => {
         try {
-            await workspaceChannelsStore.create(currentWorkspaceId, createChannelData.name, createChannelData.topic);
+            await workspaceChannelsStore.create(
+                currentWorkspaceId,
+                createChannelData.name,
+                createChannelData.topic,
+                createChannelData.isPrivate,
+                createChannelData.members
+            );
             createChannelData = {
                 dialogOpen: false,
                 name: "",
-                topic: ""
-            }
+                topic: "",
+                isPrivate: false,
+                members: []
+            };
         } catch (e) {
             if (e instanceof AxiosError) {
                 notifyByLevel({
@@ -206,6 +216,39 @@
 
                             </Sidebar.Menu>
                         </Sidebar.GroupContent>
+                        <Sidebar.GroupLabel>Canaux privés</Sidebar.GroupLabel>
+                        <Sidebar.GroupContent>
+                            <Sidebar.Menu class="flex mx-auto flex-col items-start pl-6 min-w-64">
+                                {#each channels.data.channels.filter(channel => channel.isPrivate) as privateChannel (privateChannel.id)}
+                                    <div class="mt-4">
+                                        <ContextMenu.Root>
+                                            <ContextMenu.Trigger>
+                                                <a href="/workspaces/{currentWorkspaceId}/channels/{privateChannel.id}"
+                                                   class="w-full">
+                                                    <Sidebar.MenuItem class="flex items-start gap-2 w-full">
+                                                        <div class="flex items-center h-6 pt-[2px]">
+                                                            <span class="text-[#61A0AF] font-bold text-base group-hover:scale-105 transition-transform">#</span>
+                                                        </div>
+                                                        <div class="flex flex-col overflow-hidden w-full">
+                                                            <div class="w-full text-base font-semibold text-left text-gray-900 dark:text-white p-0 h-6 leading-tight">
+                                                                {privateChannel.name}
+                                                            </div>
+                                                        </div>
+                                                    </Sidebar.MenuItem>
+                                                </a>
+                                            </ContextMenu.Trigger>
+
+                                            <ContextMenu.Content>
+                                                <ContextMenu.Item onclick={() => handleDeleteChannel(privateChannel.id)}>
+                                                    Supprimer
+                                                </ContextMenu.Item>
+                                            </ContextMenu.Content>
+                                        </ContextMenu.Root>
+                                    </div>
+                                {/each}
+                            </Sidebar.Menu>
+                        </Sidebar.GroupContent>
+
                     </Sidebar.Group>
 
                     <Sidebar.Group class="p-0">
@@ -217,7 +260,12 @@
                                             class="w-full text-sm bg-bl mb-5 bg-[#61A0AF] hover:bg-[#4B7986] text-white py-1.5 rounded transition flex justify-center items-center text-center"
                                             onclick={() => createChannelData.dialogOpen = true}
                                     >
-                                        <CreateChannelDialog {createChannelData} {createChannel}/>
+                                        <span class="text-sm font-semibold">Créer un canal</span>
+                                        <CreateChannelDialog
+                                                {createChannelData}
+                                                {createChannel}
+                                                workspaceId={currentWorkspaceId}
+                                        />
                                     </Sidebar.MenuButton>
                                 </Sidebar.MenuItem>
                             </Sidebar.Menu>
