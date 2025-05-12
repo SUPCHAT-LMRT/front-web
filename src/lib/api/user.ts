@@ -186,3 +186,13 @@ export const changeUserStatus = async (
     throw e;
   }
 }
+
+export const listAllUsers = async (): Promise<User[]> => {
+    try {
+        const { data } = await baseClient.get("/api/account");
+        return data;
+    } catch (e) {
+        console.error(e);
+        throw e;
+    }
+}

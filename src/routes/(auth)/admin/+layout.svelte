@@ -61,7 +61,7 @@
             </div>
         </section>
     </div>
-    <div class="flex mt-5">
+    <div class="flex mt-5 ml-5">
         <div class="w-full max-w-5xl">
             {@render children?.()}
         </div>
