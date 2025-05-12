@@ -8,6 +8,7 @@
     WorkspaceType,
     type Workspace,
   } from "$lib/api/workspaces/workspace";
+  import ws from "$lib/api/ws";
   import * as Avatar from "$lib/components/ui/avatar";
   import { Button } from "$lib/components/ui/button";
   import * as Dialog from "$lib/components/ui/dialog";
@@ -20,7 +21,6 @@
   import { fallbackAvatarLetters } from "$lib/utils/fallbackAvatarLetters";
   import { Globe, Plus } from "lucide-svelte";
   import { onMount } from "svelte";
-  import ws from "$lib/api/ws";
 
   const currentWorkspaceId = $derived(page.url.pathname.split("/")?.[2]);
 
@@ -43,7 +43,9 @@
 
   $effect(() => {
     return ws.subscribe("workspace-updated", (msg) => {
-      const workspaceIndex = workspaces.findIndex(w => w.id === msg.workspaceId);
+      const workspaceIndex = workspaces.findIndex(
+        (w) => w.id === msg.workspaceId,
+      );
 
       if (workspaceIndex !== -1) {
         workspaces[workspaceIndex] = {
@@ -55,17 +57,17 @@
     });
   });
 
-    function handleCreateMineClick() {
-        showInput = true;
-    }
+  function handleCreateMineClick() {
+    showInput = true;
+  }
 
   async function createNewWorkspace() {
     try {
       const workspace = await createWorkspace(workspaceName, type);
-
       if (workspaceIconImage) {
         await updateWorkspaceIcon(workspace.id, workspaceIconImage);
       }
+      workspaces.push(workspace);
       workspaceIconImage = null;
       workspaceName = "";
       type = WorkspaceType.PRIVATE;
@@ -162,8 +164,8 @@
                         Crée ton espace de travail
                       </Dialog.Title>
                       <p class="text-sm mt-2 text-gray-700">
-                        Ton espace de travail est l&apos;endroit où tu retrouves tes amis.
-                        Crée le tien et lance une discussion.
+                        Ton espace de travail est l&apos;endroit où tu retrouves
+                        tes amis. Crée le tien et lance une discussion.
                       </p>
                     </div>
                   </Dialog.Header>

@@ -1,16 +1,18 @@
 <script lang="ts">
-  import { Button } from "$lib/components/ui/button/index.js";
-  import { Input } from "$lib/components/ui/input/index.js";
-  import { cn } from "$lib/utils.js";
-  import { Loader } from "lucide-svelte";
+  import {
+    PUBLIC_API_OAUTH_FACEBOOK_URL,
+    PUBLIC_API_OAUTH_GOOGLE_URL,
+  } from "$env/static/public";
   import { loginUser } from "$lib/api/user";
+  import { Button } from "$lib/components/ui/button/index.js";
   import { Checkbox } from "$lib/components/ui/checkbox/index.js";
+  import { Input } from "$lib/components/ui/input/index.js";
   import { Label } from "$lib/components/ui/label/index.js";
-  import { goto } from "$lib/utils/goto";
   import { notifyByLevel, success } from "$lib/toast/toast";
+  import { cn } from "$lib/utils.js";
+  import { goto } from "$lib/utils/goto";
   import preventDefault from "$lib/utils/preventDefault";
-  import { PUBLIC_API_OAUTH_GOOGLE_URL } from "$env/static/public";
-  import { PUBLIC_API_OAUTH_FACEBOOK_URL } from "$env/static/public";
+  import { Loader } from "lucide-svelte";
 
   let className: string | undefined | null = undefined;
   export { className as class };
@@ -158,6 +160,7 @@
       variant="outline"
       type="button"
       disabled={isSubmitting}
+      href={PUBLIC_API_OAUTH_FACEBOOK_URL}
     >
       {#if isSubmitting}
         <Loader class="mr-2 h-4 w-4 animate-spin" />
