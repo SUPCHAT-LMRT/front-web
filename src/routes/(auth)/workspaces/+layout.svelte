@@ -186,6 +186,7 @@
                       <div class="w-full">
                         <Input
                           class="w-full p-2 border rounded-md mb-4"
+                          placeholder="Nom de l'espace de travail"
                           bind:value={workspaceName}
                         />
                         <div class="grid w-full max-w-sm items-center gap-1.5">

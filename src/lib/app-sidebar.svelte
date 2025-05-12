@@ -11,6 +11,8 @@
     Settings,
     Sun,
   } from "lucide-svelte";
+  import { ShieldPlus } from 'lucide-svelte';
+
 
   import * as Avatar from "$lib/components/ui/avatar";
   import { Button } from "$lib/components/ui/button";
@@ -39,6 +41,7 @@
     if (id === "store") goto("/store");
     if (id === "settings") goto("/settings");
     if (id === "discover") goto("/discover");
+      if (id === "admin") goto("/admin");
   }
 
   const selectStatus = (s: PrivateStatus) => {
@@ -123,6 +126,24 @@
               </div>
             </Sidebar.MenuButton>
             <span class="mt-2 text-xs text-center">Espaces publics</span>
+          </Sidebar.MenuItem>
+
+          <Sidebar.MenuItem class="mb-4 flex flex-col items-center">
+            <Sidebar.MenuButton
+                    class={`hover:bg-primary/70 flex items-center justify-center h-12 w-12 transition-all duration-300 ${
+                selected === "admin"
+                  ? "bg-primary shadow-md"
+                  : "bg-gray-200 dark:bg-gray-800"
+              }`}
+                    onclick={() => select("admin")}
+            >
+              <div class="h-12 w-12 flex justify-center items-center">
+                <ShieldPlus
+                        class={`${selected === "admin" ? "text-white" : "text-gray-600 dark:text-gray-400"}`}
+                />
+              </div>
+            </Sidebar.MenuButton>
+            <span class="mt-2 text-xs text-center">Admin</span>
           </Sidebar.MenuItem>
 
           <Sidebar.MenuItem>

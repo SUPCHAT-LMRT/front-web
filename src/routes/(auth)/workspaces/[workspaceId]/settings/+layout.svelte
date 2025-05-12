@@ -23,7 +23,7 @@
         case "/(auth)/workspaces/[workspaceId]/settings/confidentiality":
             activeTab = {displayName: "Confidentialité", label: "confidentiality"};
             break;
-        case "/(auth)/workspaces/[workspaceId]/settings/roles":
+        case "/(auth)/workspaces/[workspaceId]/settings/postes":
             activeTab = {displayName: "Rôles", label: "roles"};
             break;
     }

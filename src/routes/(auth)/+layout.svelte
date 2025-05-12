@@ -13,7 +13,7 @@
 
   const { children, data }: Props = $props();
 
-  let authenticatedUser = data.authenticatedUserState;
+  let authenticatedUser = $state(data.authenticatedUserState);
 </script>
 
 <ModeWatcher />
