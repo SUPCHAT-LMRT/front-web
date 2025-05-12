@@ -5,12 +5,14 @@
   import {
     Briefcase,
     Compass,
+    LogOut,
     MessageSquareMore,
     Moon,
     Settings,
-    ShoppingCart,
     Sun,
   } from "lucide-svelte";
+  import { ShieldPlus } from 'lucide-svelte';
+
 
   import * as Avatar from "$lib/components/ui/avatar";
   import { Button } from "$lib/components/ui/button";
@@ -39,6 +41,7 @@
     if (id === "store") goto("/store");
     if (id === "settings") goto("/settings");
     if (id === "discover") goto("/discover");
+      if (id === "admin") goto("/admin");
   }
 
   const selectStatus = (s: PrivateStatus) => {
@@ -68,7 +71,7 @@
                 />
               </div>
             </Sidebar.MenuButton>
-            <span class="mt-2 text-xs text-center">Chat</span>
+            <span class="mt-2 text-xs text-center">Messages privés</span>
           </Sidebar.MenuItem>
 
           <Sidebar.MenuItem class="mb-4 flex flex-col items-center">
@@ -86,7 +89,7 @@
                 />
               </div>
             </Sidebar.MenuButton>
-            <span class="mt-2 text-xs text-center">Server</span>
+            <span class="mt-2 text-xs text-center">Espace de travail</span>
           </Sidebar.MenuItem>
 
           <Sidebar.MenuItem class="mb-4 flex flex-col items-center">
@@ -104,7 +107,7 @@
                 />
               </div>
             </Sidebar.MenuButton>
-            <span class="mt-2 text-xs text-center">Settings</span>
+            <span class="mt-2 text-xs text-center">Paramètres</span>
           </Sidebar.MenuItem>
 
           <Sidebar.MenuItem class="mb-4 flex flex-col items-center">
@@ -122,25 +125,25 @@
                 />
               </div>
             </Sidebar.MenuButton>
-            <span class="mt-2 text-xs text-center">Discover</span>
+            <span class="mt-2 text-xs text-center">Espaces publics</span>
           </Sidebar.MenuItem>
 
           <Sidebar.MenuItem class="mb-4 flex flex-col items-center">
             <Sidebar.MenuButton
-              class={`hover:bg-primary/70 flex items-center justify-center h-12 w-12 transition-all duration-300 ${
-                selected === "store"
+                    class={`hover:bg-primary/70 flex items-center justify-center h-12 w-12 transition-all duration-300 ${
+                selected === "admin"
                   ? "bg-primary shadow-md"
                   : "bg-gray-200 dark:bg-gray-800"
               }`}
-              onclick={() => select("store")}
+                    onclick={() => select("admin")}
             >
               <div class="h-12 w-12 flex justify-center items-center">
-                <ShoppingCart
-                  class={`${selected === "store" ? "text-white" : "text-gray-600 dark:text-gray-400"}`}
+                <ShieldPlus
+                        class={`${selected === "admin" ? "text-white" : "text-gray-600 dark:text-gray-400"}`}
                 />
               </div>
             </Sidebar.MenuButton>
-            <span class="mt-2 text-xs text-center">Boutique</span>
+            <span class="mt-2 text-xs text-center">Admin</span>
           </Sidebar.MenuItem>
 
           <Sidebar.MenuItem>
@@ -241,6 +244,24 @@
               >
                 <span class="w-3 h-3 bg-gray-500 rounded-full"></span>
                 Invisible
+              </DropdownMenu.Item>
+            </DropdownMenu.Group>
+            <DropdownMenu.Separator class="my-1" />
+            <DropdownMenu.Group>
+              <DropdownMenu.GroupHeading>Autres</DropdownMenu.GroupHeading>
+              <DropdownMenu.Item
+                class="cursor-pointer flex items-center gap-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800"
+                onclick={() => select("settings")}
+              >
+                <Settings class="w-4 h-4" />
+                Paramètres
+              </DropdownMenu.Item>
+              <DropdownMenu.Item
+                class="cursor-pointer flex items-center gap-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:!bg-red-500 hover:!text-destructive-foreground"
+                onclick={() => goto("/logout")}
+              >
+                <LogOut class="w-4 h-4" />
+                Déconnexion
               </DropdownMenu.Item>
             </DropdownMenu.Group>
           </DropdownMenu.Content>

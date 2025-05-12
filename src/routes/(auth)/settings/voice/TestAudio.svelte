@@ -58,7 +58,7 @@
 <div class="mt-10">
     <h2 class="text-gray-700 text-xs font-bold uppercase mb-2">Test du micro</h2>
     <p class="text-gray-700 text-sm mt-3">Des problèmes de micro ? Fait un test pour qu'on puisse entendre ta douce voix !</p>
-    <Button onclick={toggleMicrophoneTest} class="bg-[#61A0AF] hover:bg-[#96C9DC] text-white rounded">
+    <Button onclick={toggleMicrophoneTest} class="bg-[#61A0AF] hover:bg-[#4B7986] text-white rounded">
         {isTesting ? 'Arrêter le test' : 'Tester le micro'}
     </Button>
     <div class="mt-4">
