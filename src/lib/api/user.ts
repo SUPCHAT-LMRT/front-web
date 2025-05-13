@@ -1,4 +1,5 @@
 import {baseClient} from "$lib/api/client";
+import type {Job} from "$lib/api/admin";
 
 export enum PublicStatus {
     UNKNOWN = "unknown",
@@ -23,6 +24,7 @@ export type User = {
     firstName: string;
     lastName: string;
     status: PrivateStatus;
+    jobs: Job[];
 };
 
 export const registerUser = async (

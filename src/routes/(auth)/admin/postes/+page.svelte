@@ -2,7 +2,6 @@
     import {Button} from "$lib/components/ui/button";
     import {Card, CardContent, CardDescription, CardHeader, CardTitle} from "$lib/components/ui/card";
     import RoleCreator from "./RoleCreator.svelte";
-    import RolesList from "./RoleList.svelte";
     import {Dialog, DialogContent, DialogHeader, DialogTitle} from "$lib/components/ui/dialog";
     import {
         createWorkspaceRole,
@@ -10,10 +9,10 @@
         type WorkspaceRole
     } from "$lib/api/workspaces/roles";
     import {page} from "$app/state";
-    import {roleList} from "./state.svelte";
-    import WorkspaceMembers from "./WorkspaceMembers.svelte";
     import {AxiosError} from "axios";
     import {writable} from "svelte/store";
+    import AppMembers from "./AppMembers.svelte";
+    import {roleList} from "../../workspaces/[workspaceId]/settings/roles/state.svelte";
 
     let selectedRole: WorkspaceRole | null = $state(null);
     let showModal = $state(false);
@@ -90,7 +89,7 @@
                             <CardDescription>Sélectionnez un rôle pour modifier ses permissions</CardDescription>
                         </CardHeader>
                         <CardContent class="flex-grow">
-                            <RolesList bind:selectedRole={selectedRole}/>
+<!--                            <RolesList bind:selectedRole={selectedRole}/>-->
                         </CardContent>
                         <div class="p-4 flex justify-center items-center flex-grow-0">
                             <Button class="text-white w-full" onclick={() => (showModal = true)}>Créer un rôle</Button>
@@ -101,7 +100,7 @@
                 <div class="md:col-span-1">
                     <Card class="h-full flex flex-col">
                         <CardContent class="flex-grow">
-                            <WorkspaceMembers/>
+                            <AppMembers/>
                         </CardContent>
                     </Card>
                 </div>
