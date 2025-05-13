@@ -188,11 +188,11 @@ export const changeUserStatus = async (
 }
 
 export const listAllUsers = async (): Promise<User[]> => {
-    try {
-        const { data } = await baseClient.get("/api/account");
-        return data;
-    } catch (e) {
-        console.error(e);
-        throw e;
-    }
+  try {
+    const { data } = await baseClient.get("/api/account/users");
+    return data;
+  } catch (e) {
+    console.error(e);
+    throw e;
+  }
 }
