@@ -2,12 +2,10 @@
     import {Button} from "$lib/components/ui/button";
     import {Card, CardContent, CardDescription, CardHeader, CardTitle} from "$lib/components/ui/card";
     import RoleCreator from "./RoleCreator.svelte";
-    import RolePermissions from "./RolePermissions.svelte";
     import RolesList from "./RoleList.svelte";
     import {Dialog, DialogContent, DialogHeader, DialogTitle} from "$lib/components/ui/dialog";
     import {
-        checkRolePermission,
-        createWorkspaceRole, RolePermission,
+        createWorkspaceRole,
         updateWorkspaceRole,
         type WorkspaceRole
     } from "$lib/api/workspaces/roles";
@@ -16,25 +14,12 @@
     import WorkspaceMembers from "./WorkspaceMembers.svelte";
     import {AxiosError} from "axios";
     import {writable} from "svelte/store";
-    import {onMount} from "svelte";
 
     let selectedRole: WorkspaceRole | null = $state(null);
     let showModal = $state(false);
     const {workspaceId} = page.params;
     let error = writable("");
 
-    onMount(async () => {
-        try {
-            const {hasPermission: canManageSettings} = await checkRolePermission(
-                workspaceId,
-                RolePermission.MANAGE_ROLES.permissionBit
-            );
-            hasPermission = canManageSettings;
-        } catch (err) {
-            console.error("Erreur lors de la vérification des permissions :", err);
-            hasPermission = false;
-        }
-    });
 
     const handleSave = async () => {
         if (selectedRole) {
@@ -113,23 +98,6 @@
                     </Card>
                 </div>
 
-                <div class="md:col-span-2">
-                    <Card class="h-full">
-                        <CardHeader>
-                            <CardTitle>Permissions des rôles</CardTitle>
-                            <CardDescription>Configurez les permissions pour le rôle sélectionné</CardDescription>
-                        </CardHeader>
-                        <CardContent>
-                            {#if selectedRole}
-                                <RolePermissions bind:role={selectedRole}/>
-                            {:else}
-                                <div class="text-center py-8 text-muted-foreground">
-                                    Sélectionnez un rôle pour voir ses permissions
-                                </div>
-                            {/if}
-                        </CardContent>
-                    </Card>
-                </div>
                 <div class="md:col-span-1">
                     <Card class="h-full flex flex-col">
                         <CardContent class="flex-grow">

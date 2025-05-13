@@ -36,7 +36,7 @@
     let {children} = $props();
 </script>
 
-<section class="ml-15 border-l-2 border-gray-200 dark:border-gray-800 dark:bg-gray-900 w-full">
+<section class="ml-15 border-gray-200 dark:border-gray-800 dark:bg-gray-900 w-full">
     <div class="flex flex-col px-4 py-2">
         <a href="/workspaces/{currentWorkspaceId}"
            class="flex items-center gap-2 text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200 mb-4">

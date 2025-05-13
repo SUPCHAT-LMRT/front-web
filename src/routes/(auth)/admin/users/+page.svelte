@@ -21,10 +21,9 @@
         try {
             const data = await listAllUsers();
             users = data.map(user => ({
-                id: user.id,
-                pseudo: user.pseudo,
-                email: user.email,
-                role: user.role
+                id: user.id, // Correspond au champ "Id" renvoyé par l'API
+                name: `${user.firstName} ${user.lastName}`, // Correction de la casse
+                email: user.email, // Correspond au champ "Email"
             }));
         } catch (error) {
             console.error("Erreur lors de la récupération des membres :", error);
@@ -43,14 +42,14 @@
 
 <div class="space-y-6">
     <div class="flex justify-between items-center">
-        <h2 class="text-xl font-semibold">Gestion des utilisateurs</h2>
+        <h2 class="text-xl font-semibold">Gestion des invitations</h2>
         <Button class="text-white">Inviter un utilisateur</Button>
     </div>
 
     <Card>
         <CardHeader>
-            <CardTitle>Liste des utilisateurs</CardTitle>
-            <CardDescription>Gérez les utilisateurs de votre application</CardDescription>
+            <CardTitle>Liste des invitations</CardTitle>
+            <CardDescription>Gérez les invitations de votre application</CardDescription>
         </CardHeader>
         <CardContent>
             <Table>
@@ -62,18 +61,18 @@
                     </TableRow>
                 </TableHeader>
                 <TableBody>
-                    {#each users as member}
+                    {#each users as user}
                         <TableRow>
                             <TableCell class="w-24">
                                 <div class="flex items-center gap-2">
                                     <div class="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center dark:bg-gray-700 dark:text-gray-300">
-                                        {member.pseudo.charAt(0).toUpperCase()}
+                                        {user.name.charAt(0).toUpperCase()}
                                     </div>
                                 </div>
                             </TableCell>
                             <TableCell class="w-24">
                                 <div class="flex items-center gap-2">
-                                    {member.pseudo}
+                                    {user.name}
                                 </div>
                             </TableCell>
                             <TableCell class="w-24 text-right">
@@ -85,7 +84,7 @@
                                     </DropdownMenuTrigger>
                                     <DropdownMenuContent>
                                         <DropdownMenuItem
-                                                onclick={() => handleRemoveMember(member.id)}
+                                                onclick={() => handleRemoveMember(user.id)}
                                                 class="text-red-500 hover:bg-red-500 hover:text-white dark:hover:bg-red-600 dark:hover:text-white"
                                         >
                                             <UserMinus class="mr-2 h-4 w-4"/>
