@@ -37,7 +37,7 @@
 
 <div class="flex flex-col justify-between bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md">
     <div>
-        <h2 class="text-lg font-semibold mb-3">👥 Membres</h2>
+        <h2 class="text-lg font-semibold mb-3">Membres</h2>
         <ul>
             {#each members as member, i (i)}
                 <li class="p-2 dark:border-gray-700" class:border-b={i !== members.length - 1}>

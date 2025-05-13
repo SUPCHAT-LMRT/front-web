@@ -267,7 +267,7 @@
                     <MembersList workspaceId={currentWorkspaceId}/>
 
                     <div class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md">
-                        <h2 class="text-lg font-semibold mb-3">📢 Canaux</h2>
+                        <h2 class="text-lg font-semibold mb-3">Canaux</h2>
                         <ul>
                             {#each channels.data.channels as channel}
                                 <li class="p-2 border-b dark:border-gray-700"># {channel.name}</li>
@@ -276,16 +276,6 @@
                     </div>
                 </div>
 
-                <div class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md mt-6">
-                    <h2 class="text-lg font-semibold mb-3">📝 Activités récentes</h2>
-                    <ul>
-                        {#each recentActivities as activity}
-                            <li class="p-2 border-b">
-                                <span class="font-semibold">{activity.user}</span> {activity.action}
-                            </li>
-                        {/each}
-                    </ul>
-                </div>
             </div>
         </div>
     </div>
