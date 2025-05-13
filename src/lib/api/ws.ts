@@ -17,6 +17,11 @@ class Ws {
   private connectionCrashed = false;
 
   public initWebSocket = async () => {
+    // If the WebSocket is already open, do nothing
+    if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+      return;
+    }
+
     try {
       await refreshAccessToken();
     } catch (error) {
