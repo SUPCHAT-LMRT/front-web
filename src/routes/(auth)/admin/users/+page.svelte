@@ -59,7 +59,6 @@
 <div class="space-y-6">
     <div class="flex justify-between items-center">
         <h2 class="text-xl font-semibold text-gray-700">Gestion des utilisateurs</h2>
-        <Button>Inviter un utilisateur</Button>
     </div>
 
     <Card>
@@ -85,7 +84,7 @@
                                             src={`${getS3ObjectUrl(S3Bucket.USERS_AVATARS, user.id)}?${Date.now()}`}
                                     />
                                     <Avatar.Fallback>
-                                        <div class="flex items-center justify-center w-full h-full bg-gray-200 text-gray-500 text-2xl font-bold rounded-full">
+                                        <div class="flex items-center justify-center w-full h-full bg-gray-200 text-gray-500 font-bold rounded-full">
                                             {fallbackAvatarLetters(user.name)}
                                         </div>
                                     </Avatar.Fallback>

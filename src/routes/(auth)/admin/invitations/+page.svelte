@@ -42,21 +42,23 @@
 
 <div class="space-y-6">
     <div class="flex justify-between items-center">
-        <h2 class="text-xl font-semibold">Gestion des invitations</h2>
-        <Button class="text-white">Inviter un utilisateur</Button>
+        <h2 class="text-xl font-semibold text-gray-700">Gestion des invitations</h2>
     </div>
 
     <Card>
         <CardHeader>
-            <CardTitle>Liste des invitations</CardTitle>
-            <CardDescription>Gérez les invitations de votre application</CardDescription>
+            <CardTitle class="text-gray-700">Liste des invitations en cours</CardTitle>
+            <div class="flex justify-between items-center">
+                <CardDescription>Gérez les invitations de votre application</CardDescription>
+                <Button class="text-white">Inviter un utilisateur</Button>
+            </div>
         </CardHeader>
         <CardContent>
             <Table>
                 <TableHeader>
                     <TableRow>
-                        <TableHead class="w-24">Avatar</TableHead>
-                        <TableHead class="w-24">Nom</TableHead>
+                        <TableHead class="w-24">Adresse mail</TableHead>
+                        <TableHead class="w-24">Statut</TableHead>
                         <TableHead class="w-24 text-right">Actions</TableHead>
                     </TableRow>
                 </TableHeader>
