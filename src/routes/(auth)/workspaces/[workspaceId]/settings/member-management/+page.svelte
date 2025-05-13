@@ -16,12 +16,10 @@
     import {getS3ObjectUrl, S3Bucket} from "$lib/api/s3";
     import {fallbackAvatarLetters} from "$lib/utils/fallbackAvatarLetters.js";
     import * as Avatar from "$lib/components/ui/avatar";
-    import type {User} from "$lib/api/user";
 
     const {workspaceId} = page.params;
     let members = $state([]);
     let hasPermission = $state(false);
-    const {authenticatedUser}: { authenticatedUser: User } = $props();
     let forceRenderAvatar = $state(Date.now());
 
     onMount(async () => {

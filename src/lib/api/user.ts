@@ -213,3 +213,29 @@ export const updateUserAvatar = async (
         throw e;
     }
 }
+export const deleteUser= async (
+    userId: string,
+): Promise<void> => {
+    try {
+        await baseClient.delete(`/api/account/auth/delete/${userId}`);
+    } catch (e) {
+        console.error(e);
+        throw e;
+    }
+}
+
+// export const updateUserProfile = async (
+//     userId: string,
+//     firstName: string,
+//     lastName: string,
+// ): Promise<void> => {
+//     try {
+//         await baseClient.patch(`/TODO`, {
+//             firstName,
+//             lastName,
+//         });
+//     } catch (e) {
+//         console.error(e);
+//         throw e;
+//     }
+// }
