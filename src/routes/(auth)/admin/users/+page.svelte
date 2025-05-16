@@ -5,6 +5,7 @@
     import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "$lib/components/ui/table";
     import * as AlertDialog from "$lib/components/ui/alert-dialog/index.js";
     import * as Avatar from "$lib/components/ui/avatar/index.js";
+    import * as Dialog from "$lib/components/ui/dialog/index.js";
     import {
         DropdownMenu,
         DropdownMenuContent,
@@ -12,16 +13,24 @@
         DropdownMenuTrigger
     } from "$lib/components/ui/dropdown-menu";
     import { MoreHorizontal, UserMinus, UserPen } from "lucide-svelte";
-    import { listAllUsers, deleteUser as apiDeleteUser } from "$lib/api/user";
+    import { listAllUsers, deleteUser as apiDeleteUser, updateUser } from "$lib/api/user";
     import { getS3ObjectUrl, S3Bucket } from "$lib/api/s3";
     import { fallbackAvatarLetters } from "$lib/utils/fallbackAvatarLetters.js";
 
     type UserItem = { id: string; name: string; email: string };
-    let users: UserItem[] = [];
+    let users: UserItem[] = $state([]);
 
-    let openMenuFor: string | null = null;
-    let alertOpen = false;
-    let userToRemove: string | null = null;
+    let openMenuFor = $state(null);
+    let userToModify: string | null = $state(null);
+    let userToRemove: string | null = $state(null);
+    let modifyUserOpen = $state(false);
+    let alertOpen = $state(false);
+    let userName = $state("");
+    let firstName = $state("");
+    let lastName = $state("");
+    let email = $state("");
+    let isSubmitting = $state(false);
+    let errorMessage = $state("");
 
     onMount(async () => {
         try {
@@ -36,10 +45,63 @@
         }
     });
 
+    function onClickModify(user: UserItem) {
+        openMenuFor = null;
+        userToModify = user.id;
+        modifyUserOpen = true;
+        userName = user.name;
+        const [firstN, ...lastN] = user.name.split(" ");
+        firstName = firstN || "";
+        lastName = lastN.join(" ") || "";
+        email = user.email;
+    }
+
     function onClickDelete(id: string) {
         openMenuFor = null;
         userToRemove = id;
         alertOpen = true;
+    }
+
+    async function handleSubmit() {
+        if (!userToModify || !firstName.trim() || !lastName.trim() || !email.trim()) {
+            errorMessage = "Veuillez remplir tous les champs";
+            return;
+        }
+
+        isSubmitting = true;
+        errorMessage = "";
+
+        try {
+            await updateUser(
+                userToModify,
+                firstName.trim(),
+                lastName.trim(),
+                email.trim()
+            );
+
+            // Mise à jour de la liste des utilisateurs
+            users = users.map(u => {
+                if (u.id === userToModify) {
+                    return {
+                        ...u,
+                        name: `${firstName.trim()} ${lastName.trim()}`,
+                        email: email.trim()
+                    };
+                }
+                return u;
+            });
+
+            modifyUserOpen = false;
+            firstName = "";
+            lastName = "";
+            email = "";
+            userToModify = null;
+        } catch (err) {
+            console.error("Erreur lors de la modification :", err);
+            errorMessage = "Une erreur est survenue lors de la modification";
+        } finally {
+            isSubmitting = false;
+        }
     }
 
     async function confirmRemove() {
@@ -72,6 +134,7 @@
                     <TableRow>
                         <TableHead>Avatar</TableHead>
                         <TableHead>Nom</TableHead>
+                        <TableHead>Email</TableHead>
                         <TableHead class="text-right">Actions</TableHead>
                     </TableRow>
                 </TableHeader>
@@ -91,6 +154,7 @@
                                 </Avatar.Root>
                             </TableCell>
                             <TableCell>{user.name}</TableCell>
+                            <TableCell>{user.email}</TableCell>
                             <TableCell class="text-right">
                                 <DropdownMenu
                                         open={openMenuFor === user.id}
@@ -104,7 +168,7 @@
                                         </Button>
                                     </DropdownMenuTrigger>
                                     <DropdownMenuContent>
-                                        <DropdownMenuItem onclick={() => {/* TODO modif */}}>
+                                        <DropdownMenuItem onclick={() => {onClickModify(user)}}>
                                             <UserPen class="mr-2 h-4 w-4"/> Modifier
                                         </DropdownMenuItem>
                                         <DropdownMenuItem
@@ -138,3 +202,75 @@
         </AlertDialog.Footer>
     </AlertDialog.Content>
 </AlertDialog.Root>
+
+<Dialog.Root bind:open={modifyUserOpen}>
+    <Dialog.Content>
+        <Dialog.Header>
+            <Dialog.Title>Modifier l'utilisateur</Dialog.Title>
+            <Dialog.Description>
+                Modifiez les informations de l'utilisateur {userName}
+            </Dialog.Description>
+        </Dialog.Header>
+
+        <form onsubmit={(e) => {
+            e.preventDefault();
+            handleSubmit();
+        }}>
+            <div class="grid gap-4 py-4">
+                {#if errorMessage}
+                    <div class="text-red-500 text-sm mb-2">
+                        {errorMessage}
+                    </div>
+                {/if}
+
+                <div class="grid grid-cols-4 items-center gap-4">
+                    <label for="firstName" class="text-right">
+                        Prénom
+                    </label>
+                    <input
+                            id="firstName"
+                            class="col-span-3 flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background"
+                            bind:value={firstName}
+                            required
+                    />
+                </div>
+                <div class="grid grid-cols-4 items-center gap-4">
+                    <label for="lastName" class="text-right">
+                        Nom
+                    </label>
+                    <input
+                            id="lastName"
+                            class="col-span-3 flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background"
+                            bind:value={lastName}
+                            required
+                    />
+                </div>
+                <div class="grid grid-cols-4 items-center gap-4">
+                    <label for="email" class="text-right">
+                        Email
+                    </label>
+                    <input
+                            id="email"
+                            type="email"
+                            class="col-span-3 flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background"
+                            bind:value={email}
+                            required
+                    />
+                </div>
+            </div>
+
+            <Dialog.Footer>
+                <Dialog.Close>
+                    <Button type="button" variant="outline">Annuler</Button>
+                </Dialog.Close>
+                <Button type="submit" disabled={isSubmitting}>
+                    {#if isSubmitting}
+                        Enregistrement...
+                    {:else}
+                        Enregistrer
+                    {/if}
+                </Button>
+            </Dialog.Footer>
+        </form>
+    </Dialog.Content>
+</Dialog.Root>

@@ -226,18 +226,20 @@ export const deleteUser= async (
     }
 }
 
-// export const updateUserProfile = async (
-//     userId: string,
-//     firstName: string,
-//     lastName: string,
-// ): Promise<void> => {
-//     try {
-//         await baseClient.patch(`/TODO`, {
-//             firstName,
-//             lastName,
-//         });
-//     } catch (e) {
-//         console.error(e);
-//         throw e;
-//     }
-// }
+export const updateUser = async (
+    userId: string,
+    firstName: string,
+    lastName: string,
+    email: string,
+): Promise<void> => {
+    try {
+        await baseClient.put(`/api/account/${userId}`, {
+            firstName,
+            lastName,
+            email,
+        });
+    } catch (e) {
+        console.error(e);
+        throw e;
+    }
+}

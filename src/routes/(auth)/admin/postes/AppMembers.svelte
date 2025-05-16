@@ -4,6 +4,8 @@
     import { listAllUsers, type User } from "$lib/api/user";
     import { getJobForUser, type Job } from "$lib/api/admin";
     import { assignJob, unassignJob } from "$lib/api/admin";
+    import { ScrollArea } from "$lib/components/ui/scroll-area";
+
 
     let users: User[] = [];
     let loading = true;
@@ -117,26 +119,28 @@
             {#if selectedUser.jobs && selectedUser.jobs.length > 0}
                 <div class="mt-4 space-y-2">
                     <h3 class="font-medium text-lg">Postes disponibles</h3>
-                    <ul class="space-y-2">
-                        {#each selectedUser.jobs as job}
-                            <li class="flex items-center justify-between bg-gray-100 dark:bg-gray-700 p-2 rounded-md">
-                                <span>{job.name}</span>
-                                <button
-                                        on:click={() =>
-                                    job.isAssigned
-                                        ? handleUnassignJob(job.id)
-                                        : handleAssignJob(job.id)
-                                }
-                                        class="px-3 py-1 text-sm rounded-md
-                                    {job.isAssigned
-                                        ? 'bg-red-600 text-white hover:bg-red-700'
-                                        : 'bg-primary text-white hover:bg-[#4B7986]'}"
-                                >
-                                    {job.isAssigned ? 'Désassigner' : 'Assigner'}
-                                </button>
-                            </li>
-                        {/each}
-                    </ul>
+                    <ScrollArea class="h-[300px] pr-4">
+                        <ul class="space-y-2">
+                            {#each selectedUser.jobs as job}
+                                <li class="flex items-center justify-between bg-gray-100 dark:bg-gray-700 p-2 rounded-md">
+                                    <span>{job.name}</span>
+                                    <button
+                                            on:click={() =>
+                                        job.isAssigned
+                                            ? handleUnassignJob(job.id)
+                                            : handleAssignJob(job.id)
+                                    }
+                                            class="px-3 py-1 text-sm rounded-md
+                                        {job.isAssigned
+                                            ? 'bg-red-600 text-white hover:bg-red-700'
+                                            : 'bg-primary text-white hover:bg-[#4B7986]'}"
+                                    >
+                                        {job.isAssigned ? 'Désassigner' : 'Assigner'}
+                                    </button>
+                                </li>
+                            {/each}
+                        </ul>
+                    </ScrollArea>
                 </div>
             {/if}
         {/if}

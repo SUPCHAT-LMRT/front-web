@@ -36,7 +36,7 @@ export const updateJob = async (
 ): Promise<void> => {
     try {
         await baseClient.put(
-            `/api/jobs/${jobId}`,
+            `/api/job/${jobId}`,
             {
                 name,
             });
@@ -51,7 +51,7 @@ export const createJob = async (
 ): Promise<Job> => {
     try {
         const response = await baseClient.post(
-            `/api/jobs`,
+            `/api/job`,
             {
                 name,
             });
@@ -106,4 +106,39 @@ export const unassignJob = async (
         throw e;
     }
 }
+export const listJobs = async (): Promise<Job[]> => {
+    try {
+        const { data } = await baseClient.get("/api/job");
+        return data.jobs;
+    } catch (e) {
+        console.error(e);
+        throw e;
+    }
+};
 
+
+export const deleteJob = async (jobId: string): Promise<void> => {
+    try {
+        await baseClient.delete(`/api/job/${jobId}`);
+    } catch (e) {
+        console.error(e);
+        throw e;
+    }
+}
+
+export const checkUserPermission = async (
+    userId: string,
+    permissions: number
+): Promise<boolean> => {
+    try {
+        const {data} = await baseClient.post(
+            `/api/job/check-permissions/${userId}`,
+            {
+                permissions,
+            });
+        return data.hasPermission;
+    } catch (e) {
+        console.error(e);
+        throw e;
+    }
+}
