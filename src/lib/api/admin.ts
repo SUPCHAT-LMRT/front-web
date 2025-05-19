@@ -169,3 +169,22 @@ export const deleteInviteLink = async (token: string): Promise<void> => {
     }
 };
 
+export const createInviteLink = async (
+    firstName: string,
+    lastName: string,
+    email: string
+): Promise<InviteLink> => {
+    try {
+        const {data} = await baseClient.post<InviteLink>(
+            `/api/account/invite-link`,
+            {
+                firstName,
+                lastName,
+                email,
+            });
+        return data;
+    } catch (e) {
+        console.error("Erreur createInviteLink:", e);
+        throw e;
+    }
+}
