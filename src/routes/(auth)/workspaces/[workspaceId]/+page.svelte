@@ -191,94 +191,6 @@
 </script>
 
 {#if currentWorkspaceDetails}
-<<<<<<< HEAD
-    <div class="w-full h-full flex flex-col">
-        <div class="flex-1 overflow-y-auto space-y-4">
-            <div class="relative group">
-                <img
-                        src="{getS3ObjectUrl(S3Bucket.WORKSPACES_BANNERS, currentWorkspaceId)}?{forceRenderBanner}"
-                        alt=""
-                        class="w-full h-64 mb-6 object-cover bg-gray-200 dark:bg-gray-800"
-                />
-
-                <!-- TODO display only if the user has permission to edit the banner -->
-                <div class="absolute bottom-0 right-0 p-4 hidden group-hover:block">
-                    <ImageCropper.Root
-                            onCropped={handleBannerCrop}
-                    >
-                        <ImageCropper.UploadTrigger>
-                            <ImageDown class="w-6 h-6 text-gray-500 dark:text-gray-400 cursor-pointer"/>
-                        </ImageCropper.UploadTrigger>
-                        <ImageCropper.Dialog>
-                            <ImageCropper.Cropper cropShape="rect" aspect={21 / 5}/>
-                            <ImageCropper.Controls>
-                                <ImageCropper.Cancel/>
-                                <ImageCropper.Crop/>
-                            </ImageCropper.Controls>
-                        </ImageCropper.Dialog>
-                    </ImageCropper.Root>
-                </div>
-
-                <Avatar.Root
-                        class="absolute bottom-0 left-6 transform translate-y-1/2 w-20 h-20 rounded-full border-4 border-white shadow-lg overflow-hidden bg-white">
-                    <Avatar.Image
-                            src={getS3ObjectUrl(S3Bucket.WORKSPACES_ICONS, currentWorkspaceId)}
-                            alt={`Workspace ${currentWorkspaceId}`}
-                            class="w-full h-full object-cover"
-                    />
-                    <Avatar.Fallback>
-                        {fallbackAvatarLetters(currentWorkspaceDetails.name)}
-                    </Avatar.Fallback>
-                </Avatar.Root>
-            </div>
-
-
-            <div class="container mx-auto p-6">
-                <h1 class="text-2xl font-bold text-gray-800 dark:text-gray-200 mb-4">{currentWorkspaceDetails.name}</h1>
-
-                <div class="flex justify-between items-center mb-6">
-                    <div class="flex gap-4 mb-6">
-                        <Button class="bg-primary dark:bg-primary text-white px-4 py-2 rounded-lg shadow-md hover:bg-[#4B7986] duration-300">
-                            <InviteMemberDialog workspaceId={currentWorkspaceId}/>
-                        </Button>
-                    </div>
-                    <div>
-                        <Button href="/workspaces/{currentWorkspaceId}/settings/general"
-                                class="bg-primary dark:bg-primary text-white px-4 py-2 rounded-lg shadow-md hover:bg-[#4B7986] duration-300">
-                            Paramètres
-                        </Button>
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-                    {#each stats as stat}
-                        <div class="bg-gray-100 dark:bg-gray-800 shadow-md text-left border-[1px] dark:border-gray-800 rounded-lg">
-                            <p class="font-semibold pl-4 pt-4">{stat.label}</p>
-                            <p class="text-xl pl-4 pt-4">{stat.value}</p>
-                            <div class="flex items-end">
-                                {#if stat.chartOptions}
-                                    <div use:chart={stat.chartOptions} class="w-full"></div>
-                                {/if}
-                            </div>
-                        </div>
-                    {/each}
-                </div>
-
-                <div class="grid grid-cols-2 gap-6">
-                    <MembersList workspaceId={currentWorkspaceId}/>
-
-                    <div class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md">
-                        <h2 class="text-lg font-semibold mb-3">Canaux</h2>
-                        <ul>
-                            {#each channels.data.channels as channel}
-                                <li class="p-2 border-b dark:border-gray-700"># {channel.name}</li>
-                            {/each}
-                        </ul>
-                    </div>
-                </div>
-
-            </div>
-=======
   <div class="w-full h-full flex flex-col">
     <div class="flex-1 overflow-y-auto space-y-4">
       <div class="relative group">
@@ -291,7 +203,6 @@
             alt=""
             class="w-full h-full mb-6 object-cover"
           />
->>>>>>> 5696462 (Refactor workspace API and UI components)
         </div>
 
         <!-- TODO display only if the user has permission to edit the banner -->
