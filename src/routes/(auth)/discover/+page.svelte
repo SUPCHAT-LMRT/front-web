@@ -5,6 +5,7 @@
   import { listWorkspaceDiscover } from "$lib/api/workspaces/workspace";
   import LoadingButton from "$lib/components/ui/loading-button/loading-button.svelte";
   import { error, success } from "$lib/toast/toast";
+  import { AxiosError } from "axios";
   import { onMount } from "svelte";
 
   let workspaces = $state([]);
@@ -24,6 +25,14 @@
       success("Succès", "Vous avez rejoint l'espace de travail avec succès.");
       goto(`/workspaces/${workspaceId}`);
     } catch (e) {
+      if (e instanceof AxiosError) {
+        error(
+          "Erreur",
+          e.response?.data.displayError ?? e.response?.data.error,
+        );
+        return;
+      }
+
       error(
         "Erreur",
         "Une erreur s'est produite lors de la tentative de rejoindre l'espace de travail.",
