@@ -18,7 +18,7 @@
 
 <ModeWatcher />
 
-<div class="min-h-screen-safe lg:min-h-[95svh] h-screen-safe lg:h-[95svh]">
+<div class="min-h-[95svh] h-[95svh]">
   <div
     class="flex justify-center p-2 z-10 bg-gray-200 hover:!bg-gray-200 dark:bg-gray-800 hover:dark:!bg-gray-800 border-b dark:border-gray-700"
   >
