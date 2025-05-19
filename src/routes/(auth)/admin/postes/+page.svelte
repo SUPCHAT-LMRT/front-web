@@ -44,6 +44,46 @@
     </div>
 
     <div class="space-y-4">
+        <Card class="h-full flex flex-col">
+            <CardHeader class="bg-muted/50 rounded-t-xl px-6 py-4">
+                <div class="flex items-center gap-3">
+            <span class="text-primary">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                     stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l3 3-3 3m5-6l3 3-3 3"/>
+                </svg>
+            </span>
+                    <CardTitle class="text-lg font-bold tracking-tight">Rôles et Permissions</CardTitle>
+                </div>
+                <CardDescription class="mt-4 text-sm text-muted-foreground space-y-3">
+                    <div class="flex items-start gap-3">
+                <span class="inline-block shrink-0 bg-primary text-white text-xs font-semibold px-2.5 py-0.5 rounded-full mt-0.5">
+                    Admin
+                </span>
+                        <p class="leading-snug">
+                            Accès complet incluant la création/suppression d'invitations, la gestion des postes,
+                            l'attribution des rôles, et l'accès au panneau d'administration.
+                        </p>
+                    </div>
+                    <div class="flex items-start gap-3">
+                <span class="inline-block shrink-0 bg-primary text-white text-xs font-semibold px-2.5 py-0.5 rounded-full mt-0.5">
+                    Manager
+                </span>
+                        <p class="leading-snug">
+                            Accès limité au panneau d'administration et à la création d'invitations.
+                        </p>
+                    </div>
+                    <div class="flex items-start gap-3">
+                <span class="inline-block shrink-0 bg-primary text-white text-xs font-semibold px-2.5 py-0.5 rounded-full mt-0.5">
+                    Utilisateur
+                </span>
+                        <p class="leading-snug">
+                            Rôle organisationnel de base permettant d'identifier la fonction de la personne.
+                        </p>
+                    </div>
+                </CardDescription>
+            </CardHeader>
+        </Card>
         <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
             <div class="md:col-span-1">
                 <Card class="h-full flex flex-col">

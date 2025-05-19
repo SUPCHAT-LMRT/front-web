@@ -28,7 +28,7 @@
   import NumberFlow from "@number-flow/svelte";
   import { format } from "date-fns";
   import { fr } from "date-fns/locale";
-  import { Pen, Trash2 } from "lucide-svelte";
+  import {Pen, Send, Trash2} from "lucide-svelte";
   import type { AuthenticatedUserState } from "src/routes/(auth)/authenticatedUser.svelte";
   import { onDestroy, tick } from "svelte";
 
@@ -603,14 +603,23 @@
   </div>
 
   {#if otherUserProfile}
-    <div
-      class="absolute bottom-0 p-2 border-none border-t-[2px] bg-gray-100 dark:bg-gray-800 border-t-primary max-h-12 overflow-y-auto w-full break-all cursor-text"
-      contenteditable
-      placeholder="Écrivez un message à {otherUserProfile.firstName} {otherUserProfile.lastName}"
-      bind:this={inputElement}
-      bind:innerText={currentMessage}
-      onkeydown={handleInputKeyDown}
-    ></div>
+    <div class="flex items-center gap-x-2 px-4 py-3 bg-gray-100 dark:bg-gray-800 border-t-[2px] border-t-primary">
+      <div
+              class="flex-1 p-2 rounded-lg bg-white dark:bg-gray-700 min-h-[40px] max-h-32 overflow-y-auto break-all cursor-text"
+              contenteditable
+              placeholder="Écrivez un message à {otherUserProfile.firstName}"
+              bind:this={inputElement}
+              bind:innerText={currentMessage}
+              onkeydown={handleInputKeyDown}
+      ></div>
+
+      <button
+              class="p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+              onclick={sendMessageToWs}
+      >
+        <Send size={20} class="text-primary"/>
+      </button>
+    </div>
   {/if}
 </div>
 
