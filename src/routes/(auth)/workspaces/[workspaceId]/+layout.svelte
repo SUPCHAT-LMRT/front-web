@@ -169,6 +169,11 @@
 
 <div class="flex w-full justify-between dark:bg-gray-900">
   <div class="h-full w-full">
+    <a
+      href="/workspaces/{currentWorkspaceId}/paul"
+      class="bg-red-600 text-white px-2 py-4 w-full text-xl text-center"
+      >Aller chez Paul</a
+    >
     {@render children?.()}
   </div>
 

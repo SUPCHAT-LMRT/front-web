@@ -107,6 +107,14 @@
 	--animate-caret-blink: caret-blink 1.25s ease-out infinite;
 }
 
+@theme chart {
+  --color-chart-1: oklch(64.6% .222 41.116);
+  --color-chart-2: oklch(60% .118 184.704);
+  --color-chart-3: oklch(39.8% .07 227.392);
+  --color-chart-4: oklch(82.8% .189 84.429);
+  --color-chart-5: oklch(76.9% .188 70.08);
+}
+
 /* Mode clair */
 ::-webkit-scrollbar {
   width: 10px;
