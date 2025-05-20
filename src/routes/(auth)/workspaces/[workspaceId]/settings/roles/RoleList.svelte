@@ -5,6 +5,7 @@
     import {Button} from "$lib/components/ui/button";
     import {onMount} from "svelte";
     import {page} from "$app/state";
+    import {success} from "$lib/toast/toast";
     import {
         getListWorkspaceRoles,
         deleteWorkspaceRole,
@@ -63,6 +64,7 @@
 
         try {
             await deleteWorkspaceRole(workspaceId, roleToDelete);
+            success("Rôle supprimé", "Le rôle a été supprimé avec succès.");
             // Mettre à jour la liste après suppression
             roleList.roles = roleList.roles.filter(role => role.id !== roleToDelete);
 

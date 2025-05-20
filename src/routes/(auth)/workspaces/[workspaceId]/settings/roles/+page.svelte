@@ -5,6 +5,7 @@
     import RolePermissions from "./RolePermissions.svelte";
     import RolesList from "./RoleList.svelte";
     import {Dialog, DialogContent, DialogHeader, DialogTitle} from "$lib/components/ui/dialog";
+    import {success, notifyByLevel} from "$lib/toast/toast";
     import {
         checkRolePermission,
         createWorkspaceRole, RolePermission,
@@ -33,6 +34,11 @@
             );
             hasPermission = canManageSettings;
         } catch (err) {
+            notifyByLevel({
+                title: "Erreur",
+                level: "error",
+                message: "Erreur lors de la vérification des permissions :"
+            });
             console.error("Erreur lors de la vérification des permissions :", err);
             hasPermission = false;
         }
@@ -41,21 +47,37 @@
     const handleSave = async () => {
         if (selectedRole) {
             try {
-                console.log(workspaceId, selectedRole.id, selectedRole.name, selectedRole.permissions, selectedRole.color);
                 await updateWorkspaceRole(workspaceId, selectedRole.id, selectedRole.name, selectedRole.permissions, selectedRole.color);
+                success("Rôle mis à jour", "Le rôle a été mis à jour avec succès.");
             } catch (e) {
                 console.error(e);
                 error.set("Erreur lors de la mise à jour du rôle.");
                 if (e instanceof AxiosError) {
                     if (e.response?.status === 403) {
-                        error.set("Vous n'avez pas la permission de modifier ce rôle.");
+                        notifyByLevel({
+                            title: "Erreur",
+                            level: "error",
+                            message: "Vous n'avez pas la permission de modifier ce rôle.\""
+                        });
                     } else if (e.response?.status === 404) {
-                        error.set("Rôle introuvable.");
+                        notifyByLevel({
+                            title: "Erreur",
+                            level: "error",
+                            message: "Rôle introuvable."
+                        });
                     } else {
-                        error.set("Erreur inconnue lors de la mise à jour du rôle.");
+                        notifyByLevel({
+                            title: "Erreur",
+                            level: "error",
+                            message: "Erreur inconnue lors de la mise à jour du rôle."
+                        });
                     }
                 } else {
-                    error.set("Erreur inconnue lors de la mise à jour du rôle.");
+                    notifyByLevel({
+                        title: "Erreur",
+                        level: "error",
+                        message: "Erreur inconnue lors de la mise à jour du rôle."
+                    });
                 }
             }
         }
@@ -64,8 +86,7 @@
     const handleRoleCreated = async (role) => {
         try {
             const createdRole = await createWorkspaceRole(workspaceId, role.name, role.color);
-
-            console.log("Rôle créé:", createdRole);
+            success("Rôle créé", "Le rôle a été créé avec succès.");
 
             roleList.roles = [...roleList.roles, createdRole];
 
@@ -79,14 +100,30 @@
             error.set("Erreur lors de la création du rôle.");
             if (e instanceof AxiosError) {
                 if (e.response?.status === 403) {
-                    error.set("Vous n'avez pas la permission de créer un rôle.");
+                    notifyByLevel({
+                        title: "Erreur",
+                        level: "error",
+                        message: "Vous n'avez pas la permission de créer un rôle."
+                    });
                 } else if (e.response?.status === 404) {
-                    error.set("Espace de travail introuvable.");
+                    notifyByLevel({
+                        title: "Erreur",
+                        level: "error",
+                        message: "Espace de travail introuvable."
+                    });
                 } else {
-                    error.set("Erreur inconnue lors de la création du rôle.");
+                    notifyByLevel({
+                        title: "Erreur",
+                        level: "error",
+                        message: "Erreur inconnue lors de la création du rôle."
+                    });
                 }
             } else {
-                error.set("Erreur inconnue lors de la création du rôle.");
+                notifyByLevel({
+                    title: "Erreur",
+                    level: "error",
+                    message: "Erreur inconnue lors de la création du rôle."
+                });
             }
         }
     };

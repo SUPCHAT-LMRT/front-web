@@ -7,6 +7,13 @@ export type Job = {
     isAssigned: boolean;
 }
 
+export type InviteLink = {
+    token:     string;
+    firstName: string;
+    lastName:  string;
+    email:     string;
+    expiresAt: string;
+};
 
 export class JobPermission {
     public static CREATE_INVITATION = new JobPermission(1 << 0, "Créer une invitation", "Créer une invitation pour le serveur.");
@@ -139,6 +146,45 @@ export const checkUserPermission = async (
         return data.hasPermission;
     } catch (e) {
         console.error(e);
+        throw e;
+    }
+}
+
+export const getInviteLink = async (): Promise<InviteLink[]> => {
+    try {
+        const { data } = await baseClient.get<InviteLink[]>("/api/account/invite-link");
+        return data;
+    } catch (e) {
+        console.error("Erreur getInviteLink:", e);
+        throw e;
+    }
+};
+
+export const deleteInviteLink = async (token: string): Promise<void> => {
+    try {
+        await baseClient.delete(`/api/account/invite-link/${token}`);
+    } catch (e) {
+        console.error("Erreur deleteInviteLink:", e);
+        throw e;
+    }
+};
+
+export const createInviteLink = async (
+    firstName: string,
+    lastName: string,
+    email: string
+): Promise<InviteLink> => {
+    try {
+        const {data} = await baseClient.post<InviteLink>(
+            `/api/account/invite-link`,
+            {
+                firstName,
+                lastName,
+                email,
+            });
+        return data;
+    } catch (e) {
+        console.error("Erreur createInviteLink:", e);
         throw e;
     }
 }

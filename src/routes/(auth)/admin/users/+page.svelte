@@ -175,7 +175,7 @@
                                                 class="text-red-500"
                                                 onclick={() => onClickDelete(user.id)}
                                         >
-                                            <UserMinus class="mr-2 h-4 w-4"/> Supprimer
+                                            <UserMinus class="mr-2 h-4 w-4 text-red-500"/> Supprimer
                                         </DropdownMenuItem>
                                     </DropdownMenuContent>
                                 </DropdownMenu>
@@ -198,7 +198,9 @@
         </AlertDialog.Header>
         <AlertDialog.Footer>
             <AlertDialog.Cancel>Annuler</AlertDialog.Cancel>
-            <AlertDialog.Action onclick={confirmRemove}>Confirmer</AlertDialog.Action>
+            <AlertDialog.Action onclick={confirmRemove} class="text-red-500 bg-white border border-gray-200 hover:bg-red-500 hover:text-white dark:hover:bg-red-600 dark:hover:text-white">
+                Supprimer
+            </AlertDialog.Action>
         </AlertDialog.Footer>
     </AlertDialog.Content>
 </AlertDialog.Root>
