@@ -148,21 +148,18 @@
       unsubscribeSendMessage = ws.subscribe(
         "send-channel-message",
         async (msg) => {
-          currentRoom.messages = [
-            ...currentRoom.messages,
-            {
-              id: msg.messageId,
-              content: msg.content,
-              author: {
-                userId: msg.sender.userId,
-                pseudo: msg.sender.pseudo,
-                workspaceMemberId: msg.sender.workspaceMemberId,
-                workspacePseudo: msg.sender.workspacePseudo,
-              },
-              createdAt: new Date(msg.createdAt),
-              reactions: [],
+          currentRoom.messages.push({
+            id: msg.messageId,
+            content: msg.content,
+            author: {
+              userId: msg.sender.userId,
+              pseudo: msg.sender.pseudo,
+              workspaceMemberId: msg.sender.workspaceMemberId,
+              workspacePseudo: msg.sender.workspacePseudo,
             },
-          ];
+            createdAt: new Date(msg.createdAt),
+            reactions: [],
+          });
 
           await tick();
           await scrollToBottomSafe(elementsList);

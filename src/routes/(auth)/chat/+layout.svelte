@@ -162,7 +162,7 @@
 </script>
 
 <div class="flex w-full h-full">
-  <Sidebar.Provider>
+  <Sidebar.Provider class="!min-h-full h-full w-full flex-1">
     <Sidebar.Root
       class="h-full border-l-2 border-r-2 border-gray-200 dark:border-gray-700 relative"
     >
