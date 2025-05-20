@@ -162,98 +162,104 @@
 </script>
 
 <div class="flex w-full h-full">
-  <Sidebar.Root
-    class="h-full border-l-2 border-r-2 border-gray-200 dark:border-gray-700"
-  >
-    <Sidebar.Content class="p-4 containerTest z-0 dark:bg-gray-800">
-      <Sidebar.Menu class="flex flex-col">
-        {#each mainItems as item (item.name)}
-          <Sidebar.MenuItem class="mb-2 rounded w-full">
-            <Sidebar.MenuButton
-              class="flex items-center p-2 rounded transition-all duration-300 hover:bg-gray-100 dark:hover:bg-gray-700"
-            >
-              <a href={item.url} class="flex items-center w-full">
-                <item.icon class="h-6 w-6 text-gray-600 dark:text-gray-300" />
-                <span class="ml-4 text-gray-700 dark:text-gray-300"
-                  >{item.name}</span
-                >
-              </a>
-            </Sidebar.MenuButton>
-          </Sidebar.MenuItem>
-        {/each}
-
-        <div class="my-4 border-t border-gray-200 dark:border-gray-700" />
-        <p
-          class="text-xs font-bold p-2 uppercase text-gray-600 dark:text-gray-300"
-        >
-          Messages privés
-        </p>
-
-        {#if recentChats.state === StoreResultState.LOADING}
-          {#each Array(13) as _}
-            <Skeleton class="h-8 w-full mb-4" />
-          {/each}
-        {:else}
-          {#each recentChats.data as chat (chat.id)}
-            <Sidebar.MenuItem
-              class="mb-2 rounded w-full {currentChatId === chat.id
-                ? 'bg-gray-200 dark:bg-gray-700'
-                : ''}"
-            >
-              <div class="relative group">
-                <div
-                  class="flex items-center p-2 rounded transition-all duration-300 hover:bg-gray-200 dark:hover:bg-gray-700"
-                >
-                  <a
-                    href="/chat/{chat.kind.toLowerCase()}/{chat.id}"
-                    class="flex items-center w-full"
+  <Sidebar.Provider>
+    <Sidebar.Root
+      class="h-full border-l-2 border-r-2 border-gray-200 dark:border-gray-700 relative"
+    >
+      <Sidebar.Content class="p-4 containerTest z-0 dark:bg-gray-800">
+        <Sidebar.Menu class="flex flex-col">
+          {#each mainItems as item (item.name)}
+            <Sidebar.MenuItem class="mb-2 rounded w-full">
+              <Sidebar.MenuButton
+                class="flex items-center p-2 rounded transition-all duration-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+              >
+                <a href={item.url} class="flex items-center w-full">
+                  <item.icon class="h-6 w-6 text-gray-600 dark:text-gray-300" />
+                  <span class="ml-4 text-gray-700 dark:text-gray-300"
+                    >{item.name}</span
                   >
-                    <div class="relative size-7 flex items-center">
-                      <Avatar.Root>
-                        <Avatar.Image
-                          src={getS3ObjectUrl(S3Bucket.USERS_AVATARS, chat.id)}
-                          alt={chat.id}
-                          class="h-full w-full rounded-full object-cover"
-                        />
-                        <Avatar.Fallback
-                          class="flex items-center justify-center rounded-full h-full w-full"
-                        >
-                          {fallbackAvatarLetters(chat.name)}
-                        </Avatar.Fallback>
-                      </Avatar.Root>
-                      {#if chat.kind === RecentChatKind.DIRECT}
-                        <span
-                          class={cn(
-                            "rounded-full absolute -bottom-2 -right-3 size-3",
-                            {
-                              "bg-green-500":
-                                chat.userStatus === PublicStatus.ONLINE,
-                              "bg-yellow-500":
-                                chat.userStatus === PublicStatus.AWAY,
-                              "bg-red-500":
-                                chat.userStatus === PublicStatus.DO_NOT_DISTURB,
-                              "bg-gray-500":
-                                chat.userStatus === PublicStatus.OFFLINE,
-                            },
-                          )}
-                        >
-                        </span>
-                      {/if}
-                    </div>
-                    <span class="ml-4 text-sm text-gray-700 dark:text-inherit"
-                      >{chat.name}</span
-                    >
-                  </a>
-                </div>
-              </div>
+                </a>
+              </Sidebar.MenuButton>
             </Sidebar.MenuItem>
-          {:else}
-            <span class="text-gray-500 text-md">Aucun chat récent</span>
           {/each}
-        {/if}
-      </Sidebar.Menu>
-    </Sidebar.Content>
-  </Sidebar.Root>
+
+          <div class="my-4 border-t border-gray-200 dark:border-gray-700" />
+          <p
+            class="text-xs font-bold p-2 uppercase text-gray-600 dark:text-gray-300"
+          >
+            Messages privés
+          </p>
+
+          {#if recentChats.state === StoreResultState.LOADING}
+            {#each Array(13) as _}
+              <Skeleton class="h-8 w-full mb-4" />
+            {/each}
+          {:else}
+            {#each recentChats.data as chat (chat.id)}
+              <Sidebar.MenuItem
+                class="mb-2 rounded w-full {currentChatId === chat.id
+                  ? 'bg-gray-200 dark:bg-gray-700'
+                  : ''}"
+              >
+                <div class="relative group">
+                  <div
+                    class="flex items-center p-2 rounded transition-all duration-300 hover:bg-gray-200 dark:hover:bg-gray-700"
+                  >
+                    <a
+                      href="/chat/{chat.kind.toLowerCase()}/{chat.id}"
+                      class="flex items-center w-full"
+                    >
+                      <div class="relative size-7 flex items-center">
+                        <Avatar.Root>
+                          <Avatar.Image
+                            src={getS3ObjectUrl(
+                              S3Bucket.USERS_AVATARS,
+                              chat.id,
+                            )}
+                            alt={chat.id}
+                            class="h-full w-full rounded-full object-cover"
+                          />
+                          <Avatar.Fallback
+                            class="flex items-center justify-center rounded-full h-full w-full"
+                          >
+                            {fallbackAvatarLetters(chat.name)}
+                          </Avatar.Fallback>
+                        </Avatar.Root>
+                        {#if chat.kind === RecentChatKind.DIRECT}
+                          <span
+                            class={cn(
+                              "rounded-full absolute -bottom-2 -right-3 size-3",
+                              {
+                                "bg-green-500":
+                                  chat.userStatus === PublicStatus.ONLINE,
+                                "bg-yellow-500":
+                                  chat.userStatus === PublicStatus.AWAY,
+                                "bg-red-500":
+                                  chat.userStatus ===
+                                  PublicStatus.DO_NOT_DISTURB,
+                                "bg-gray-500":
+                                  chat.userStatus === PublicStatus.OFFLINE,
+                              },
+                            )}
+                          >
+                          </span>
+                        {/if}
+                      </div>
+                      <span class="ml-4 text-sm text-gray-700 dark:text-inherit"
+                        >{chat.name}</span
+                      >
+                    </a>
+                  </div>
+                </div>
+              </Sidebar.MenuItem>
+            {:else}
+              <span class="text-gray-500 text-md">Aucun chat récent</span>
+            {/each}
+          {/if}
+        </Sidebar.Menu>
+      </Sidebar.Content>
+    </Sidebar.Root>
+  </Sidebar.Provider>
 
   <div class="h-full w-full">
     {@render children()}
