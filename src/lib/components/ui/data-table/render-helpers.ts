@@ -11,7 +11,7 @@ import type { Component, ComponentProps, Snippet } from "svelte";
  * ```svelte
  * {@const result = content(context as any)}
  * {#if result instanceof RenderComponentConfig}
- *   {@const { Page: Component, props } = result}
+ *   {@const { component: Component, props } = result}
  *   <Component {...props} />
  * {/if}
  * ```
@@ -57,12 +57,12 @@ export class RenderSnippetConfig<TProps> {
  *
  * This is only to be used with Svelte Components - use `renderSnippet` for Svelte Snippets.
  *
- * @param component A Svelte Page
- * @param props The props to pass to `Page`
- * @returns A `RenderComponentConfig` object that helps svelte-table know how to render the header/cell Page.
+ * @param component A Svelte component
+ * @param props The props to pass to `component`
+ * @returns A `RenderComponentConfig` object that helps svelte-table know how to render the header/cell component.
  * @example
  * ```ts
- * // +layout.svelte
+ * // +page.svelte
  * const defaultColumns = [
  *   columnHelper.accessor('name', {
  *     header: header => renderComponent(SortHeader, { label: 'Name', header }),
@@ -78,7 +78,7 @@ export function renderComponent<
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	T extends Component<any>,
 	Props extends ComponentProps<T>,
->(component: T, props: Props) {
+>(component: T, props: Props = {} as Props) {
 	return new RenderComponentConfig(component, props);
 }
 
@@ -94,7 +94,7 @@ export function renderComponent<
  * @returns - A `RenderSnippetConfig` object that helps svelte-table know how to render the header/cell snippet.
  * @example
  * ```ts
- * // +layout.svelte
+ * // +page.svelte
  * const defaultColumns = [
  *   columnHelper.accessor('name', {
  *     cell: cell => renderSnippet(nameSnippet, { name: cell.row.name }),
@@ -106,6 +106,6 @@ export function renderComponent<
  * ```
  * @see {@link https://tanstack.com/table/latest/docs/guide/column-defs}
  */
-export function renderSnippet<TProps>(snippet: Snippet<[TProps]>, params: TProps) {
+export function renderSnippet<TProps>(snippet: Snippet<[TProps]>, params: TProps = {} as TProps) {
 	return new RenderSnippetConfig(snippet, params);
 }

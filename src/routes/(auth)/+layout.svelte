@@ -25,7 +25,7 @@
     <SearchBar />
   </div>
 
-  <Sidebar.Provider class="!min-h-full h-full">
+  <Sidebar.Provider class="!min-h-full h-full" style="--sidebar-width: 6rem">
     <AppSidebar bind:authenticatedUserState={authenticatedUser} />
     {@render children?.()}
   </Sidebar.Provider>
@@ -37,6 +37,7 @@
 </div>
 
 <style>
+  @reference "$lib/assets/styles/app.css";
   /* Optional: Add some hover effects for results */
   .p-2:hover {
     @apply bg-gray-100 dark:bg-gray-700;
@@ -45,7 +46,7 @@
   /* :global is used to prevent purging of these classes */
   :global {
     em {
-      @apply bg-yellow-200/20;
+      @apply bg-yellow-200/80;
     }
   }
 </style>

@@ -120,7 +120,7 @@
       </span>
     </div>
   </div>
-  <div class="flex gap-1">
+  <div class="flex gap-1 w-full">
     <Button
       class="w-full"
       variant="outline"
