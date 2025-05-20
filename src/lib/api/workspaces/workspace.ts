@@ -1,5 +1,5 @@
-import {baseClient} from "../client";
-import type {WorkspaceRole} from "$lib/api/workspaces/roles";
+import type { WorkspaceRole } from "$lib/api/workspaces/roles";
+import { baseClient } from "../client";
 
 export enum WorkspaceType {
     PUBLIC = "public",
@@ -32,7 +32,7 @@ export type WorkspaceDetails = {
 
 export const getWorkspace = async (workspaceId: string): Promise<Workspace> => {
     try {
-        const {data} = await baseClient.get(`/api/workspaces/${workspaceId}`);
+        const { data } = await baseClient.get(`/api/workspaces/${workspaceId}`);
         return data;
     } catch (e) {
         console.error(e);
@@ -49,7 +49,7 @@ export type WorkspaceDiscover = {
 
 export const listUserWorkspaces = async (): Promise<Workspace[]> => {
     try {
-        const {data} = await baseClient.get("/api/workspaces");
+        const { data } = await baseClient.get("/api/workspaces");
         return data;
     } catch (e) {
         console.error(e);
@@ -59,7 +59,7 @@ export const listUserWorkspaces = async (): Promise<Workspace[]> => {
 
 export const listWorkspaceDiscover = async (): Promise<WorkspaceDiscover[]> => {
     try {
-        const {data} = await baseClient.get("/api/workspaces/discover");
+        const { data } = await baseClient.get("/api/workspaces/discover");
         return data;
     } catch (e) {
         console.error(e);
@@ -71,7 +71,7 @@ export const getWorkspaceDetails = async (
     workspaceId: string,
 ): Promise<WorkspaceDetails> => {
     try {
-        const {data} = await baseClient.get(
+        const { data } = await baseClient.get(
             `/api/workspaces/${workspaceId}/details`,
         );
         return data;
@@ -86,7 +86,7 @@ export const createWorkspace = async (
     type: WorkspaceType,
 ): Promise<Workspace> => {
     try {
-        const {data} = await baseClient.post("/api/workspaces", {name, type});
+        const { data } = await baseClient.post("/api/workspaces", { name, type });
         return data;
     } catch (e) {
         console.error(e);
@@ -102,10 +102,10 @@ export const updateWorkspaceIcon = async (
         const formData = new FormData();
         formData.append(
             "image",
-            new Blob([image], {type: image.type}),
+            new Blob([image], { type: image.type }),
             image.name,
         );
-        const {data} = await baseClient.put(
+        const { data } = await baseClient.put(
             `/api/workspaces/${workspaceId}/icon`,
             formData,
             {
@@ -129,10 +129,10 @@ export const updateWorkspaceBanner = async (
         const formData = new FormData();
         formData.append(
             "image",
-            new Blob([image], {type: image.type}),
+            new Blob([image], { type: image.type }),
             image.name,
         );
-        const {data} = await baseClient.put(
+        const { data } = await baseClient.put(
             `/api/workspaces/${workspaceId}/banner`,
             formData,
             {
@@ -154,10 +154,10 @@ export const getWorkspaceMembers = async (
     limit: number,
 ): Promise<{ members: WorkspaceMember[]; total: number }> => {
     try {
-        const {data} = await baseClient.get(
+        const { data } = await baseClient.get(
             `/api/workspaces/${workspaceId}/members`,
             {
-                params: {page, limit},
+                params: { page, limit },
             },
         );
         return data;
@@ -192,7 +192,7 @@ export const getWorkspaceInviteLink = async (
     token: string,
 ): Promise<string> => {
     try {
-        const {data} = await baseClient.get(
+        const { data } = await baseClient.get(
             `/api/workspace-invite-link/${token}`,
         );
         return data;
@@ -206,7 +206,7 @@ export const createWorkspaceInviteLink = async (
     workspaceId: string,
 ): Promise<string> => {
     try {
-        const {data} = await baseClient.post(`/api/workspace-invite-link/create/${workspaceId}`, {
+        const { data } = await baseClient.post(`/api/workspace-invite-link/create/${workspaceId}`, {
             workspaceId,
         });
         return data;
@@ -216,7 +216,7 @@ export const createWorkspaceInviteLink = async (
     }
 };
 
-export const joinWorkspace = async (token: string): Promise<void> => {
+export const acceptWorkspaceInvitation = async (token: string): Promise<void> => {
     try {
         await baseClient.post(`/api/workspace-invite-link/${token}/join`);
     } catch (e) {
@@ -231,7 +231,7 @@ export const updateWorkspace = async (
     topic: string,
 ): Promise<Workspace> => {
     try {
-        const {data} = await baseClient.put(`/api/workspaces/${workspaceId}`, {
+        const { data } = await baseClient.put(`/api/workspaces/${workspaceId}`, {
             name,
             topic,
         });
@@ -247,9 +247,9 @@ export const updateTypeWorkspace = async (
     type: WorkspaceType,
 ): Promise<Workspace> => {
     try {
-        const {data} = await baseClient.put(
+        const { data } = await baseClient.put(
             `/api/workspaces/${workspaceId}/type`,
-            {type},
+            { type },
         );
         return data;
     } catch (e) {
@@ -277,7 +277,7 @@ export const getWorkspaceMemberId = async (
     userId: string,
 ): Promise<string> => {
     try {
-        const {data} = await baseClient.get(
+        const { data } = await baseClient.get(
             `/api/workspaces/${workspaceId}/members/${userId}`,
         );
         return data;

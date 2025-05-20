@@ -13,10 +13,14 @@
     import {AlertTriangle, MoreHorizontal, UserMinus} from "lucide-svelte";
     import {page} from "$app/state";
     import {checkRolePermission, RolePermission} from "$lib/api/workspaces/roles";
+    import {getS3ObjectUrl, S3Bucket} from "$lib/api/s3";
+    import {fallbackAvatarLetters} from "$lib/utils/fallbackAvatarLetters.js";
+    import * as Avatar from "$lib/components/ui/avatar";
 
     const {workspaceId} = page.params;
     let members = $state([]);
     let hasPermission = $state(false);
+    let forceRenderAvatar = $state(Date.now());
 
     onMount(async () => {
         try {
@@ -96,9 +100,22 @@
                             <TableRow>
                                 <TableCell class="w-24">
                                     <div class="flex items-center gap-2">
-                                        <div class="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center dark:bg-gray-700 dark:text-gray-300">
-                                            {member.pseudo.charAt(0).toUpperCase()}
-                                        </div>
+                                        <Avatar.Root>
+                                            <Avatar.Image
+                                                    src={`${getS3ObjectUrl(S3Bucket.USERS_AVATARS, member.userId)}?${forceRenderAvatar}`}
+                                            />
+                                            <Avatar.Fallback>
+                                                <div
+                                                        class="flex items-center justify-center w-full h-full bg-gray-200 text-gray-500 text-2xl font-bold rounded-full"
+                                                >
+                                                    {fallbackAvatarLetters(
+                                                        member.firstName +
+                                                        " " +
+                                                        member.lastName,
+                                                    )}
+                                                </div>
+                                            </Avatar.Fallback>
+                                        </Avatar.Root>
                                     </div>
                                 </TableCell>
                                 <TableCell class="w-24">

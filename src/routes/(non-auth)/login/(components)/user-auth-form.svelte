@@ -89,7 +89,7 @@
           </Label>
         </div>
         <Button
-          href="/password-forget"
+          href="/forgot-password"
           variant="ghost"
           class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
         >
@@ -120,7 +120,7 @@
       </span>
     </div>
   </div>
-  <div class="flex gap-1">
+  <div class="flex gap-1 w-full">
     <Button
       class="w-full"
       variant="outline"

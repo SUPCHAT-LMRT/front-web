@@ -134,7 +134,7 @@
                             class="min-h-[100px]"
                     />
                 </div>
-                <div class="space-y-2">
+                <div class="space-y-4">
                     <Label for="icon">Icône de l'espace de travail</Label>
                     <Input id="icon" type="file" accept="image/*" onchange={handleFileChange}/>
                     {#if iconPreview}

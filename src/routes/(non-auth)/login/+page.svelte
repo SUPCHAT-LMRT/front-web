@@ -44,7 +44,7 @@
 </script>
 
 <div
-  class="container flex flex-col min-h-screen items-center justify-center bg-white z-10 dark:bg-gray-900"
+  class="container flex flex-col min-h-screen items-center justify-center z-10"
 >
   <div class="pl-32">
     <div

@@ -1,4 +1,4 @@
-import type {WorkspaceRole} from "$lib/api/workspaces/roles";
+import type {Job} from "$lib/api/admin";
 
-export const roleList: {roles: WorkspaceRole[]} = $state({roles: []})
+export const jobList: {jobs: Job[]} = $state({jobs: []})
 
