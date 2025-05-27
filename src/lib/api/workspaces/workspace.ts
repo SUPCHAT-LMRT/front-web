@@ -2,8 +2,8 @@ import type { WorkspaceRole } from "$lib/api/workspaces/roles";
 import { baseClient } from "../client";
 
 export enum WorkspaceType {
-    PUBLIC = "public",
-    PRIVATE = "private",
+    PUBLIC = "PUBLIC",
+    PRIVATE = "PRIVATE",
 }
 
 export type Workspace = {
