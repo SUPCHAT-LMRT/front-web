@@ -32,7 +32,7 @@
   $effect(() => {
     workspaceChannelsStore.clearData();
     if (currentMemberId) {
-      workspaceChannelsStore.fetch(currentWorkspaceId, currentMemberId);
+      workspaceChannelsStore.fetch(currentWorkspaceId);
     }
   });
 

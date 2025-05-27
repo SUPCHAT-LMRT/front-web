@@ -1,9 +1,9 @@
-import {Store, StoreResultState, type StoreResult} from "./store.svelte";
 import {
-    type Channel,
     createWorkspaceChannel, getPrivateChannels,
     getWorkspaceChannels,
+    type Channel,
 } from "$lib/api/workspaces/channels";
+import { Store, StoreResultState, type StoreResult } from "./store.svelte";
 
 export type WorkspaceChannelsStoreResult = {
     channels: Channel[];
@@ -23,12 +23,11 @@ class WorkspaceChannelsStore extends Store<WorkspaceChannelsStoreResult> {
 
     public async fetch(
         workspaceId: string,
-        userId: string,
     ): Promise<WorkspaceChannelsStoreResult> {
         this.changeState(StoreResultState.LOADING);
         const [channels, privateChannels] = await Promise.all([
             getWorkspaceChannels(workspaceId),
-            getPrivateChannels(workspaceId, userId),
+            getPrivateChannels(workspaceId),
         ]);
 
         this.changeStateAndData(StoreResultState.LOADED, {
