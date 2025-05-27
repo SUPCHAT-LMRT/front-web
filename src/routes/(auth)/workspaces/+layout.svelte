@@ -210,11 +210,11 @@
                           </div>
                           <RadioGroup.Root bind:value={type} class="pt-4">
                             <div class="flex items-center space-x-2">
-                              <RadioGroup.Item value="PRIVATE" id="r1" />
+                              <RadioGroup.Item value="private" id="r1" />
                               <Label for="r1">Privé</Label>
                             </div>
                             <div class="flex items-center space-x-2">
-                              <RadioGroup.Item value="PUBLIC" id="r2" />
+                              <RadioGroup.Item value="public" id="r2" />
                               <Label for="r2">Public</Label>
                             </div>
                           </RadioGroup.Root>
