@@ -28,7 +28,7 @@
   import NumberFlow from "@number-flow/svelte";
   import { format } from "date-fns";
   import { fr } from "date-fns/locale";
-  import {Languages, Pen, Send, Trash2} from "lucide-svelte";
+  import { Languages, Pen, Send, Trash2 } from "lucide-svelte";
   import type { AuthenticatedUserState } from "src/routes/(auth)/authenticatedUser.svelte";
   import { onDestroy, tick } from "svelte";
 
@@ -344,10 +344,9 @@
     if (bottomObserver) bottomObserver.disconnect();
   });
 
-    const handleLanguageButtonClick = () => {
-      window.location.href = (`/chat/direct/${currentChatId}/translate`);
-    };
-
+  const handleLanguageButtonClick = () => {
+    window.location.href = `/chat/direct/${currentChatId}/translate`;
+  };
 </script>
 
 <div class="relative w-full h-full flex flex-col gap-y-4">
@@ -618,10 +617,10 @@
       ></div>
 
       <button
-              class="p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
-              onclick={handleLanguageButtonClick}
+        class="p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+        onclick={handleLanguageButtonClick}
       >
-        <Languages size={20} class="text-primary"/>
+        <Languages size={20} class="text-primary" />
       </button>
 
       <button
