@@ -87,7 +87,7 @@
     style="--sidebar-width: 6.1rem"
   >
     <Sidebar.Root
-      class="h-full border-l-2 border-r-2 border-gray-200 dark:border-gray-700 relative"
+      class="h-full border-r-2 border-gray-200 dark:border-gray-700 relative"
     >
       <Sidebar.Content class="dark:bg-gray-800">
         <Sidebar.Group class="p-0">
