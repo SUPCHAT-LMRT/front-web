@@ -1,4 +1,4 @@
-import {baseClient} from "../client";
+import { baseClient } from "../client";
 
 export type Channel = {
     id: string;
@@ -14,7 +14,7 @@ export const getWorkspaceChannels = async (
     workspaceId: string,
 ): Promise<Channel[]> => {
     try {
-        const {data} = await baseClient.get(
+        const { data } = await baseClient.get(
             `/api/workspaces/${workspaceId}/channels`,
         );
         return data;
@@ -26,11 +26,10 @@ export const getWorkspaceChannels = async (
 
 export const getPrivateChannels = async (
     workspaceId: string,
-    userId: string,
 ): Promise<Channel[]> => {
     try {
         const { data } = await baseClient.get(
-            `/api/workspaces/${workspaceId}/channels/private/${userId}`,
+            `/api/workspaces/${workspaceId}/channels/private`,
         );
         return data;
     } catch (e) {
@@ -47,7 +46,7 @@ export const createWorkspaceChannel = async (
     members: string[],
 ): Promise<Channel> => {
     try {
-        const {data} = await baseClient.post(
+        const { data } = await baseClient.post(
             `/api/workspaces/${workspaceId}/channels`,
             {
                 name,
@@ -68,7 +67,7 @@ export const getWorkspaceChannel = async (
     channelId: string,
 ): Promise<Channel> => {
     try {
-        const {data} = await baseClient.get(
+        const { data } = await baseClient.get(
             `/api/workspaces/${workspaceId}/channels/${channelId}`,
         );
         return data;
@@ -109,7 +108,7 @@ export const getWorkspaceChannelMessages = async (
     } = {},
 ): Promise<ChannelMessage[]> => {
     try {
-        let {data} = await baseClient.get(
+        let { data } = await baseClient.get(
             `/api/workspaces/${workspaceId}/channels/${channelId}/messages?limit=${params.limit}${params.before ? `&before=${params.before.toISOString()}` : ""}${params.after ? `&after=${params.after.toISOString()}` : ""}${params.aroundMessageId ? `&aroundMessageId=${params.aroundMessageId}` : ""}`,
         );
         data = data.map((message: Record<string, never>) => ({

@@ -9,7 +9,6 @@
   import ws from "$lib/api/ws";
   import CreateChannelDialog from "$lib/components/app/workspaces/CreateChannelDialog.svelte";
   import * as ContextMenu from "$lib/components/ui/context-menu";
-  import * as Dialog from "$lib/components/ui/dialog/index.js";
   import { Separator } from "$lib/components/ui/separator";
   import * as Sidebar from "$lib/components/ui/sidebar";
   import workspaceChannelsStore from "$lib/stores/workspaceChannelsStore";
@@ -32,7 +31,7 @@
   $effect(() => {
     workspaceChannelsStore.clearData();
     if (currentMemberId) {
-      workspaceChannelsStore.fetch(currentWorkspaceId, currentMemberId);
+      workspaceChannelsStore.fetch(currentWorkspaceId);
     }
   });
 
@@ -168,6 +167,10 @@
 </script>
 
 <div class="flex w-full justify-between dark:bg-gray-900">
+  <div class="h-full w-full">
+    {@render children?.()}
+  </div>
+
   <Sidebar.Provider
     class="!min-h-full h-full flex-1"
     style="--sidebar-width: 20rem"
@@ -302,7 +305,19 @@
                     class="mb-[2px] w-full flex justify-center px-4"
                   >
                     <Sidebar.MenuButton
-                      class="w-full text-sm bg-bl mb-5 bg-[#61A0AF] hover:bg-[#4B7986] text-white hover:text-white py-1.5 rounded transition flex justify-center items-center text-center"
+                      class="w-full text-sm bg-bl mb-5 bg-[#61A0AF] hover:bg-[#4B7986] text-white py-1.5 rounded transition flex justify-center items-center text-center"
+                      onclick={() =>
+                        goto(`/workspaces/${currentWorkspaceId}/polls`)}
+                    >
+                      <span class="text-sm font-semibold">Sondages</span>
+                    </Sidebar.MenuButton>
+                  </Sidebar.MenuItem>
+
+                  <Sidebar.MenuItem
+                    class="mb-[2px] w-full flex justify-center px-4"
+                  >
+                    <Sidebar.MenuButton
+                      class="w-full text-sm bg-bl mb-5 bg-[#61A0AF] hover:bg-[#4B7986] text-white py-1.5 rounded transition flex justify-center items-center text-center"
                       onclick={() => (createChannelData.dialogOpen = true)}
                     >
                       <span class="text-sm font-semibold">Créer un canal</span>
@@ -322,16 +337,3 @@
     </Sidebar.Root>
   </Sidebar.Provider>
 </div>
-
-<!-- Example dialog in context menu -->
-<Dialog.Root bind:open={dialogOpen.createChannel}>
-  <Dialog.Content>
-    <Dialog.Header>
-      <Dialog.Title>Are you sure absolutely sure?</Dialog.Title>
-      <Dialog.Description>
-        This action cannot be undone. This will permanently delete your account
-        and remove your data from our servers.
-      </Dialog.Description>
-    </Dialog.Header>
-  </Dialog.Content>
-</Dialog.Root>
