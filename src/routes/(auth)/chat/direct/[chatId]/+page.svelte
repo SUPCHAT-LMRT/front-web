@@ -353,16 +353,19 @@
   {#if otherUserProfile}
     <div class="flex items-center gap-x-2 bg-gray-100 dark:bg-gray-800 p-4">
       <div class="relative size-12">
-        <Avatar.Root>
-          <Avatar.Image
-            src={getS3ObjectUrl(S3Bucket.USERS_AVATARS, otherUserProfile.id)}
-          />
-          <Avatar.Fallback
-            >{fallbackAvatarLetters(
-              otherUserProfile.firstName + " " + otherUserProfile.lastName,
-            )}</Avatar.Fallback
-          >
-        </Avatar.Root>
+        <!-- Force render avatar when the user profile change -->
+        {#key otherUserProfile}
+          <Avatar.Root>
+            <Avatar.Image
+              src={getS3ObjectUrl(S3Bucket.USERS_AVATARS, otherUserProfile.id)}
+            />
+            <Avatar.Fallback
+              >{fallbackAvatarLetters(
+                otherUserProfile.firstName + " " + otherUserProfile.lastName,
+              )}</Avatar.Fallback
+            >
+          </Avatar.Root>
+        {/key}
         <span
           class={cn("rounded-full absolute bottom-2 right-2 size-3", {
             "bg-green-500": otherUserProfile.status === PublicStatus.ONLINE,
