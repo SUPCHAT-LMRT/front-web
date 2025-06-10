@@ -184,7 +184,7 @@
                     <span
                       class="text-sm truncate overflow-x-auto w-max dark:text-gray-300"
                     >
-                      {createdInviteLink}
+                      {shortenLink(createdInviteLink)}
                     </span>
                     <Button
                       onclick={copyInviteLink}

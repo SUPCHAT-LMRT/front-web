@@ -25,7 +25,7 @@
   import NumberFlow from "@number-flow/svelte";
   import { format } from "date-fns";
   import { fr } from "date-fns/locale";
-  import {ArrowLeft, Languages, Pen, Send, Trash2} from "lucide-svelte";
+  import { ArrowLeft, Languages, Pen, Send, Trash2 } from "lucide-svelte";
   import type { AuthenticatedUserState } from "src/routes/(auth)/authenticatedUser.svelte";
   import { onDestroy, tick } from "svelte";
 
@@ -347,10 +347,6 @@
     if (topObserver) topObserver.disconnect();
     if (bottomObserver) bottomObserver.disconnect();
   });
-
-    const handleLanguageButtonClick = () => {
-      window.location.href = (`/workspaces/${currentWorkspaceId}/channels/${currentChannelId}/translate`);
-    };
 </script>
 
 <div class="w-full h-full flex flex-col gap-y-4">
@@ -597,13 +593,13 @@
         autofocus
       ></div>
 
-<!--      button langage -->
-        <button
-            class="p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
-            onclick={handleLanguageButtonClick}
-        >
-          <Languages size={20} class="text-primary" />
-        </button>
+      <!--      button langage -->
+      <a
+        href="/workspaces/{currentWorkspaceId}/channels/{currentChannelId}/translate"
+        class="p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+      >
+        <Languages size={20} class="text-primary" />
+      </a>
 
       <button
         class="p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
