@@ -1,14 +1,13 @@
-import {getLoginUser, PrivateStatus} from "$lib/api/user";
+import { getLoginUser, PrivateStatus } from "$lib/api/user";
+import { getWorkspaceMemberId } from "$lib/api/workspaces/workspace";
 import ws from "$lib/api/ws";
-import {goto} from "$lib/utils/goto";
-import type {LayoutLoad} from "./$types";
-import {getWorkspaceMemberId} from "$lib/api/workspaces/workspace";
+import { goto } from "$lib/utils/goto";
+import type { LayoutLoad } from "./$types";
 
-export const load: LayoutLoad = async ({parent, params}): Promise<{ member: { id: string, memberId?: string } }> => {
-    const {authenticatedUserState} = await parent();
-    const {workspaceId} = params;
+export const load: LayoutLoad = async ({ parent, params }): Promise<{ member: { id: string, memberId?: string } }> => {
+    const { authenticatedUserState } = await parent();
+    const { workspaceId } = params;
     try {
-        console.log("data", await parent());
         authenticatedUserState.user = await getLoginUser();
     } catch (error) {
         console.error("Erreur lors de la vérification de l'utilisateur :", error);
