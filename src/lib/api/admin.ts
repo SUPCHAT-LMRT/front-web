@@ -1,4 +1,4 @@
-import {baseClient} from "$lib/api/client";
+import { baseClient } from "$lib/api/client";
 
 export type Job = {
     id: string;
@@ -8,10 +8,10 @@ export type Job = {
 }
 
 export type InviteLink = {
-    token:     string;
+    token: string;
     firstName: string;
-    lastName:  string;
-    email:     string;
+    lastName: string;
+    email: string;
     expiresAt: string;
 };
 
@@ -71,7 +71,7 @@ export const createJob = async (
 
 export const getJobForUser = async (userId: string): Promise<Job[]> => {
     try {
-        const {data} = await baseClient.get(`/api/job/user/${userId}`);
+        const { data } = await baseClient.get(`/api/job/user/${userId}`);
         return data;
     } catch (e) {
         console.error(e);
@@ -138,7 +138,7 @@ export const checkUserPermission = async (
     permissions: number
 ): Promise<boolean> => {
     try {
-        const {data} = await baseClient.post(
+        const { data } = await baseClient.post(
             `/api/job/check-permissions/${userId}`,
             {
                 permissions,
@@ -173,9 +173,9 @@ export const createInviteLink = async (
     firstName: string,
     lastName: string,
     email: string
-): Promise<InviteLink> => {
+): Promise<string> => {
     try {
-        const {data} = await baseClient.post<InviteLink>(
+        const { data } = await baseClient.post<string>(
             `/api/account/invite-link`,
             {
                 firstName,
