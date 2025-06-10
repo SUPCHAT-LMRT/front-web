@@ -164,7 +164,7 @@
 <div class="flex w-full h-full">
   <Sidebar.Provider class="!min-h-full h-full w-full flex-1">
     <Sidebar.Root
-      class="h-full border-l-2 border-r-2 border-gray-200 dark:border-gray-700 relative"
+      class="h-full border-r-2 border-gray-200 dark:border-gray-700 relative"
     >
       <Sidebar.Content class="p-4 containerTest z-0 dark:bg-gray-800">
         <Sidebar.Menu class="flex flex-col">
