@@ -110,6 +110,7 @@
     { label: "Canaux", value: 0 },
   ]);
   let forceRenderBanner = $state(Date.now());
+  let forceRenderIcon = $state(Date.now());
 
   $effect(() => {
     getWorkspaceTimeSeries(currentWorkspaceId)
@@ -138,6 +139,8 @@
           ...currentWorkspaceDetails,
           name: msg.name,
         };
+        forceRenderBanner = Date.now();
+        forceRenderIcon = Date.now();
       }
     });
   });
@@ -227,12 +230,12 @@
           class="absolute bottom-0 left-6 transform translate-y-1/2 w-20 h-20 rounded-full border-4 border-white shadow-lg overflow-hidden bg-white"
         >
           <Avatar.Image
-            src="{getS3ObjectUrl(
-              S3Bucket.WORKSPACES_ICONS,
-              currentWorkspaceId,
-            )}?{Date.now()}"
-            alt={`Workspace ${currentWorkspaceId}`}
-            class="w-full h-full object-cover"
+                  src="{getS3ObjectUrl(
+                    S3Bucket.WORKSPACES_ICONS,
+                    currentWorkspaceId,
+                  )}?{forceRenderIcon}"
+                  alt={`Workspace ${currentWorkspaceId}`}
+                  class="w-full h-full object-cover"
           />
           <Avatar.Fallback>
             {fallbackAvatarLetters(currentWorkspaceDetails.name)}
