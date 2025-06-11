@@ -60,3 +60,39 @@ export const unvotePoll = async (
         throw e;
     }
 }
+
+export const createPoll = async (
+    workspaceId: string,
+    question: string,
+    options: string[],
+    expiresAt?: string,
+): Promise<Poll> => {
+    try {
+        const {data} = await baseClient.post(
+            `/api/workspaces/${workspaceId}/poll`,
+            {
+                question,
+                options,
+                expiresat: expiresAt,
+            },
+        );
+        return data;
+    } catch (e) {
+        console.error(e);
+        throw e;
+    }
+};
+
+export const deletePoll = async (
+    workspaceId: string,
+    pollId: string,
+): Promise<void> => {
+    try {
+        await baseClient.delete(
+            `/api/workspaces/${workspaceId}/poll/${pollId}`,
+        );
+    } catch (e) {
+        console.error(e);
+        throw e;
+    }
+};
