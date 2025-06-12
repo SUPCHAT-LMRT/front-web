@@ -105,13 +105,6 @@
                             {authenticatedUser.lastName}
                         </div>
                     </div>
-                    <Button
-                            variant="secondary"
-                            class="bg-gray-200 hover:bg-gray-300 text-gray-700"
-                            size="sm"
-                    >
-                        Modifier
-                    </Button>
                 </div>
 
                 <div class="flex justify-between items-center">
@@ -123,13 +116,6 @@
                             <span>{authenticatedUser.email}</span>
                         </div>
                     </div>
-                    <Button
-                            variant="secondary"
-                            class="bg-gray-200 hover:bg-gray-300 text-gray-700"
-                            size="sm"
-                    >
-                        Modifier
-                    </Button>
                 </div>
             </div>
         </Card>
