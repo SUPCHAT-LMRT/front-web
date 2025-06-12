@@ -4,7 +4,7 @@
   import { getS3ObjectUrl, S3Bucket } from "$lib/api/s3";
   import {
     type Channel,
-    type ChannelMessage,
+    type ChannelMessage, getPrivateChannelMembers,
     getWorkspaceChannel,
     getWorkspaceChannelMessages,
   } from "$lib/api/workspaces/channels";
@@ -25,9 +25,11 @@
   import NumberFlow from "@number-flow/svelte";
   import { format } from "date-fns";
   import { fr } from "date-fns/locale";
-  import { ArrowLeft, Languages, Pen, Send, Trash2 } from "lucide-svelte";
+  import {ArrowLeft, Languages, Pen, Send, Trash2, Users} from "lucide-svelte";
   import type { AuthenticatedUserState } from "src/routes/(auth)/authenticatedUser.svelte";
   import { onDestroy, tick } from "svelte";
+  import {getWorkspaceMembers} from "$lib/api/workspaces/workspace";
+  import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger, DropdownMenuItem } from "$lib/components/ui/dropdown-menu";
 
   const { authenticatedUserState } = page.data as {
     authenticatedUserState: AuthenticatedUserState;
@@ -46,6 +48,8 @@
     id: null,
     messages: [],
   });
+  let channelMembers: { id: string; name: string }[] = $state([]);
+  let dropdownOpen = $state(false);
 
   let unsubscribeSendMessage = null;
   let unsubscribeMessageReactionAdded = null;
@@ -80,6 +84,25 @@
       currentRoom.messages = [];
     };
   });
+
+  const loadMembers = async () => {
+    try {
+      if (!currentWorkspaceId || !currentChannelId || !currentChannel) return;
+
+      if (currentChannel.isPrivate) {
+        channelMembers = await getPrivateChannelMembers(currentWorkspaceId, currentChannelId);
+      } else {
+        const res = await getWorkspaceMembers(currentWorkspaceId, 1, 50);
+        channelMembers = res.members.map((m) => ({
+          id: m.userId,
+          name: m.pseudo,
+        }));
+      }
+
+    } catch (err) {
+      console.error("Erreur lors du chargement des membres :", err);
+    }
+  };
 
   const joinRoomAndListenMessages = async (
     workspaceId: string,
@@ -351,16 +374,52 @@
 
 <div class="w-full h-full flex flex-col gap-y-4">
   {#if currentChannel}
-    <div class="items-center gap-x-2 bg-gray-100 dark:bg-gray-800 p-4">
-      <a href="/workspaces/{currentWorkspaceId}" class="flex">
-        <ArrowLeft size={20} />
-        <span>Retour à l'espace de travail</span>
-      </a>
-      <div class="flex">
-        <span class="font-semibold text-2xl">#{currentChannel.name}</span>
-        <span class="text-gray-500 text-lg translate-y-[1px]"
+    <div class="items-center flex justify-between gap-x-2 bg-gray-100 dark:bg-gray-800 p-4">
+      <div>
+        <a href="/workspaces/{currentWorkspaceId}" class="flex mb-4">
+          <ArrowLeft size={20} class="mr-2" />
+          <span>Retour à l'espace de travail</span>
+        </a>
+        <div class="flex">
+          <span class="font-semibold text-2xl mr-5">#{currentChannel.name}</span>
+          <span class="text-gray-500 text-lg translate-y-[1px]"
           >{currentChannel.topic}</span
-        >
+          >
+        </div>
+      </div>
+      <div class="flex items-center gap-2 mt-2">
+        <DropdownMenu>
+          <DropdownMenuTrigger>
+            <button
+                    onmouseenter={loadMembers}
+                    class="flex items-center gap-1 px-3 py-1 text-sm rounded-lg bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600"
+            >
+              <Users size={16} />
+              Membres
+            </button>
+          </DropdownMenuTrigger>
+
+          <DropdownMenuContent class="w-64 max-h-64 overflow-y-auto">
+            {#if channelMembers.length > 0}
+              {#each channelMembers as member}
+                <DropdownMenuItem onselect={(e) => e.preventDefault()}>
+                  <button
+                          type="button"
+                          class="w-full text-left bg-transparent border-none p-0"
+                          onclick={(e) => e.stopPropagation()}
+                          onkeydown={(e) => e.key === 'Enter' && e.stopPropagation()}
+                  >
+                    <HoveredUserProfile userId={member.id} self={member.id === authenticatedUser.id}>
+                      <snippet>{member.name}</snippet>
+                    </HoveredUserProfile>
+                  </button>
+                </DropdownMenuItem>
+              {/each}
+            {:else}
+              <DropdownMenuItem disabled>Chargement...</DropdownMenuItem>
+            {/if}
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
     </div>
   {/if}
