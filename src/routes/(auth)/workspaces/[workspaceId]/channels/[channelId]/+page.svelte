@@ -4,15 +4,23 @@
   import { getS3ObjectUrl, S3Bucket } from "$lib/api/s3";
   import {
     type Channel,
-    type ChannelMessage, getPrivateChannelMembers,
+    type ChannelMessage,
+    getPrivateChannelMembers,
     getWorkspaceChannel,
     getWorkspaceChannelMessages,
   } from "$lib/api/workspaces/channels";
+  import { getWorkspaceMembers } from "$lib/api/workspaces/member";
   import ws from "$lib/api/ws";
   import "$lib/assets/styles/chats.scss";
   import HoveredUserProfile from "$lib/components/app/HoveredUserProfile.svelte";
   import * as Avatar from "$lib/components/ui/avatar";
   import * as ContextMenu from "$lib/components/ui/context-menu";
+  import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+  } from "$lib/components/ui/dropdown-menu";
   import {
     Tooltip,
     TooltipContent,
@@ -25,11 +33,16 @@
   import NumberFlow from "@number-flow/svelte";
   import { format } from "date-fns";
   import { fr } from "date-fns/locale";
-  import {ArrowLeft, Languages, Pen, Send, Trash2, Users} from "lucide-svelte";
+  import {
+    ArrowLeft,
+    Languages,
+    Pen,
+    Send,
+    Trash2,
+    Users,
+  } from "lucide-svelte";
   import type { AuthenticatedUserState } from "src/routes/(auth)/authenticatedUser.svelte";
   import { onDestroy, tick } from "svelte";
-  import {getWorkspaceMembers} from "$lib/api/workspaces/workspace";
-  import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger, DropdownMenuItem } from "$lib/components/ui/dropdown-menu";
 
   const { authenticatedUserState } = page.data as {
     authenticatedUserState: AuthenticatedUserState;
@@ -90,7 +103,10 @@
       if (!currentWorkspaceId || !currentChannelId || !currentChannel) return;
 
       if (currentChannel.isPrivate) {
-        channelMembers = await getPrivateChannelMembers(currentWorkspaceId, currentChannelId);
+        channelMembers = await getPrivateChannelMembers(
+          currentWorkspaceId,
+          currentChannelId,
+        );
       } else {
         const res = await getWorkspaceMembers(currentWorkspaceId, 1, 50);
         channelMembers = res.members.map((m) => ({
@@ -98,7 +114,6 @@
           name: m.pseudo,
         }));
       }
-
     } catch (err) {
       console.error("Erreur lors du chargement des membres :", err);
     }
@@ -374,16 +389,19 @@
 
 <div class="w-full h-full flex flex-col gap-y-4">
   {#if currentChannel}
-    <div class="items-center flex justify-between gap-x-2 bg-gray-100 dark:bg-gray-800 p-4">
+    <div
+      class="items-center flex justify-between gap-x-2 bg-gray-100 dark:bg-gray-800 p-4"
+    >
       <div>
         <a href="/workspaces/{currentWorkspaceId}" class="flex mb-4">
           <ArrowLeft size={20} class="mr-2" />
           <span>Retour à l'espace de travail</span>
         </a>
         <div class="flex">
-          <span class="font-semibold text-2xl mr-5">#{currentChannel.name}</span>
+          <span class="font-semibold text-2xl mr-5">#{currentChannel.name}</span
+          >
           <span class="text-gray-500 text-lg translate-y-[1px]"
-          >{currentChannel.topic}</span
+            >{currentChannel.topic}</span
           >
         </div>
       </div>
@@ -391,8 +409,8 @@
         <DropdownMenu>
           <DropdownMenuTrigger>
             <button
-                    onmouseenter={loadMembers}
-                    class="flex items-center gap-1 px-3 py-1 text-sm rounded-lg bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600"
+              onmouseenter={loadMembers}
+              class="flex items-center gap-1 px-3 py-1 text-sm rounded-lg bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600"
             >
               <Users size={16} />
               Membres
@@ -404,12 +422,15 @@
               {#each channelMembers as member}
                 <DropdownMenuItem onselect={(e) => e.preventDefault()}>
                   <button
-                          type="button"
-                          class="w-full text-left bg-transparent border-none p-0"
-                          onclick={(e) => e.stopPropagation()}
-                          onkeydown={(e) => e.key === 'Enter' && e.stopPropagation()}
+                    type="button"
+                    class="w-full text-left bg-transparent border-none p-0"
+                    onclick={(e) => e.stopPropagation()}
+                    onkeydown={(e) => e.key === "Enter" && e.stopPropagation()}
                   >
-                    <HoveredUserProfile userId={member.id} self={member.id === authenticatedUser.id}>
+                    <HoveredUserProfile
+                      userId={member.id}
+                      self={member.id === authenticatedUser.id}
+                    >
                       <snippet>{member.name}</snippet>
                     </HoveredUserProfile>
                   </button>

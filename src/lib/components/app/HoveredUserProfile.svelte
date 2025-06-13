@@ -37,7 +37,7 @@
 
 <div>
   <Popover.Root bind:open={popoverOpened}>
-    <Popover.Trigger>{@render children?.()}</Popover.Trigger>
+    <Popover.Trigger class="w-full">{@render children?.()}</Popover.Trigger>
     <Popover.Content>
       {#await getUserProfile(userId)}
         <div class="flex flex-col gap-y-4">

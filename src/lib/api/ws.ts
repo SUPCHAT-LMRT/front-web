@@ -191,6 +191,20 @@ class Ws {
     });
   };
 
+  public asyncGroupJoinRoom = async (
+    roomId: string,
+    roomKind: RoomKind,
+  ): Promise<string> => {
+    return new Promise<string>((resolve) => {
+      const unsubscribe = this.subscribe("group-room-joined", (msg) => {
+        resolve(msg.roomId);
+        unsubscribe();
+      });
+
+      this.joinRoom(roomId, roomKind);
+    });
+  }
+
   public selectWorkspace = (workspaceId) => {
     const currentSelectedWorkspace = getCurrentSelectedWorkspace();
     if (currentSelectedWorkspace) {
