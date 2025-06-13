@@ -27,7 +27,9 @@
 
   <Sidebar.Provider class="!min-h-full h-full" style="--sidebar-width: 6rem">
     <AppSidebar bind:authenticatedUserState={authenticatedUser} />
-    {@render children?.()}
+    <div class="w-full overflow-y-auto">
+      {@render children?.()}
+    </div>
   </Sidebar.Provider>
 
   <Toaster>
