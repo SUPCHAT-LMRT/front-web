@@ -91,16 +91,4 @@
     >
         Changer le mot de passe
     </Button>
-
-    <h2 class="text-gray-700 text-xs font-bold mt-7 uppercase dark:text-gray-200">
-        Suppression du compte
-    </h2>
-    <p class="text-gray-700 text-sm mt-3 dark:text-gray-300">
-        Supprimer ton compte signifie que tu ne pourras plus le récupérer.
-    </p>
-    <Button
-            variant="outline" size="sm" class="border border-red-500 text-red-500 hover:bg-red-500 hover:text-white transition-colors mt-3"
-    >
-        Supprimer le compte
-    </Button>
 </section>
