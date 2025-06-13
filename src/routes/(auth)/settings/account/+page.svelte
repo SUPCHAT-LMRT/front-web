@@ -33,10 +33,10 @@
 <section class="px-4 py-2 ml-2 pt-8 w-[500px]">
     <ProfileCard {authenticatedUser}/>
 
-    <h2 class="text-gray-700 text-xs font-bold mt-7 uppercase">
+    <h2 class="text-gray-700 text-xs font-bold mt-7 uppercase dark:text-gray-200">
         Gestion des données
     </h2>
-    <p class="text-gray-700 text-sm mt-3">
+    <p class="text-gray-700 text-sm mt-3 dark:text-gray-300">
         Supprimer vos données signifie que vous ne pourrez plus les récupérer.
     </p>
     <div class="flex flex-col w-[50%] mt-3">
@@ -47,7 +47,7 @@
 
         <AlertDialog.Root >
             <AlertDialog.Trigger class="mb-2">
-                <Button variant="outline" size="sm" class="w-full border border-red-500 text-red-500 hover:bg-red-500 hover:text-white transition-colors" >
+                <Button variant="outline" size="sm" class="w-full border border-red-500 text-red-500 hover:bg-red-500 hover:text-white transition-colors">
                     Supprimer mes données
                 </Button>
             </AlertDialog.Trigger>
@@ -68,27 +68,27 @@
     </div>
 
 
-    <h2 class="text-gray-700 text-xs font-bold mt-7 uppercase">
+    <h2 class="text-gray-700 text-xs font-bold mt-7 uppercase dark:text-gray-200">
         Changement de mot de passe
     </h2>
-    <p class="text-gray-700 text-sm mt-3">
+    <p class="text-gray-700 text-sm mt-3 dark:text-gray-300">
         Changer ton mot de passe signifie que tu ne pourras plus le récupérer.
     </p>
     <Button
             onclick={handlePasswordChange}
-            class="bg-white border border-red-500 text-red-500 hover:bg-red-500 hover:text-white transition-colors h-8 mt-3"
+            variant="outline" size="sm" class="border border-red-500 text-red-500 hover:bg-red-500 hover:text-white transition-colors mt-3"
     >
         Changer le mot de passe
     </Button>
 
-    <h2 class="text-gray-700 text-xs font-bold mt-7 uppercase">
+    <h2 class="text-gray-700 text-xs font-bold mt-7 uppercase dark:text-gray-200">
         Suppression du compte
     </h2>
-    <p class="text-gray-700 text-sm mt-3">
+    <p class="text-gray-700 text-sm mt-3 dark:text-gray-300">
         Supprimer ton compte signifie que tu ne pourras plus le récupérer.
     </p>
     <Button
-            class="bg-white border border-red-500 text-red-500 hover:bg-red-500 hover:text-white transition-colors h-8 mt-3 mb-10"
+            variant="outline" size="sm" class="border border-red-500 text-red-500 hover:bg-red-500 hover:text-white transition-colors mt-3"
     >
         Supprimer le compte
     </Button>

@@ -34,7 +34,7 @@
 
 <section class="py-2 pt-4">
     <div class="mx-auto max-w-4xl">
-        <Card class="bg-white border border-gray-200 text-gray-800 p-6 shadow-sm">
+        <Card class="bg-white border border-gray-200 text-gray-800 p-6 shadow-s dark:bg-gray-800 dark:border-gray-700 dark:text-gray-200">
             <div class="flex items-center gap-6">
                 <!-- Avatar à gauche -->
                 <div class="flex-shrink-0">
@@ -48,7 +48,7 @@
                                     />
                                     <Avatar.Fallback>
                                         <div
-                                                class="flex items-center justify-center w-full h-full bg-gray-200 text-gray-500 text-2xl font-bold rounded-full"
+                                                class="flex items-center justify-center w-full h-full bg-gray-200 text-gray-500 text-2xl font-bold rounded-full dark:text-gray-200"
                                         >
                                             {fallbackAvatarLetters(
                                                 authenticatedUser.firstName +
