@@ -14,6 +14,7 @@
   import { StoreResultState, type StoreResult } from "$lib/stores/store.svelte";
   import { cn } from "$lib/utils";
   import { fallbackAvatarLetters } from "$lib/utils/fallbackAvatarLetters.js";
+  import { goto } from "$lib/utils/goto";
   import { BellIcon, CogIcon, UserIcon } from "lucide-svelte";
   import { onMount, type Snippet } from "svelte";
 
@@ -83,6 +84,39 @@
       },
     ),
   );
+
+  $effect(() =>
+    ws.subscribe(
+      "recent-group-chat-added",
+      async (msg: { groupId: string; chatName: string }) => {
+        const recentChatStore = {
+          id: msg.groupId,
+          name: msg.chatName,
+          avatarUrl: "",
+          kind: RecentChatKind.GROUP,
+        } as RecentChantStore;
+        recentChatsStore.add(recentChatStore);
+
+        recentChats.data = [
+          await convertRecentChat(recentChatStore),
+          ...recentChats.data,
+        ];
+      },
+    ),
+  );
+
+  $effect(() => {
+    return ws.subscribe(
+      "recent-group-chat-removed",
+      async (msg: { groupId: string }) => {
+        recentChatsStore.remove(msg.groupId);
+        recentChats.data = recentChats.data.filter(
+          (chat) => chat.id !== msg.groupId,
+        );
+        goto("/chat");
+      },
+    );
+  });
 
   const convertRecentChat = async (
     chat: RecentChantStore,

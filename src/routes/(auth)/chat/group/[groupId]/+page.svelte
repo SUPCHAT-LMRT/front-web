@@ -4,13 +4,18 @@
   import {
     addGroupMember,
     getGroupInfo,
+    leaveGroup as leaveGroupApi,
     removeGroupMember,
     type GroupInfo,
   } from "$lib/api/group/member";
   import { listGroupMessages, type GroupMessage } from "$lib/api/group/message";
   import { RoomKind } from "$lib/api/room";
   import { getS3ObjectUrl, S3Bucket } from "$lib/api/s3";
-  import { listAllUsers, PublicStatus, type User } from "$lib/api/user";
+  import {
+    listAllUsers,
+    PublicStatus,
+    type ListAllUsersResponse,
+  } from "$lib/api/user";
   import ws from "$lib/api/ws";
   import "$lib/assets/styles/chats.scss";
   import HoveredUserProfile from "$lib/components/app/HoveredUserProfile.svelte";
@@ -28,10 +33,10 @@
     TooltipContent,
     TooltipTrigger,
   } from "$lib/components/ui/tooltip";
+  import { error } from "$lib/toast/toast";
   import { cn } from "$lib/utils";
   import { fallbackAvatarLetters } from "$lib/utils/fallbackAvatarLetters";
   import { formatDate } from "$lib/utils/formatDate";
-  import { goto } from "$lib/utils/goto";
   import { scrollToBottom } from "$lib/utils/scrollToBottom";
   import NumberFlow from "@number-flow/svelte";
   import { format } from "date-fns";
@@ -77,7 +82,7 @@
   let isUpdatingName = $state(false);
 
   // Invite members states
-  let allUsers: User[] = $state([]);
+  let allUsers: ListAllUsersResponse[] = $state([]);
   let selectedUserIds = $state(new Set<string>());
   let isLoadingUsers = $state(false);
   let isInviting = $state(false);
@@ -106,8 +111,8 @@
 
   // Check if current user is admin
   const isAdmin = $derived(
-    groupInfo?.members?.find((m) => m.id === authenticatedUser.id)?.isAdmin ||
-      false,
+    groupInfo?.members?.find((m) => m.id === authenticatedUser.id)
+      ?.isGroupOwner || false,
   );
 
   $effect(() => {
@@ -137,15 +142,14 @@
       loadAllUsers();
     }
   });
-
   const loadAllUsers = async () => {
     try {
       isLoadingUsers = true;
       allUsers = await listAllUsers();
 
       // Filter out users who are already members
-      const memberIds = new Set(groupInfo.members.map((m) => m.id));
-      allUsers = allUsers.filter((user) => !memberIds.has(user.id));
+      const userIds = new Set(groupInfo.members.map((m) => m.userId));
+      allUsers = allUsers.filter((user) => !userIds.has(user.id));
 
       selectedUserIds = new Set();
     } catch (error) {
@@ -166,7 +170,10 @@
 
   const inviteMembers = async () => {
     if (selectedUserIds.size === 0) {
-      alert("Veuillez sélectionner au moins un utilisateur à inviter.");
+      error(
+        "Aucun utilisateur sélectionné",
+        "Veuillez sélectionner au moins un utilisateur à inviter.",
+      );
       return;
     }
 
@@ -184,7 +191,10 @@
       groupInfo = await getGroupInfo(currentGroupId);
     } catch (error) {
       console.error("Failed to invite members:", error);
-      alert("Erreur lors de l'invitation des membres.");
+      error(
+        "Erreur lors de l'invitation des membres.",
+        "Impossible d'inviter les membres, veuillez réessayer plus tard.",
+      );
     } finally {
       isInviting = false;
     }
@@ -202,7 +212,10 @@
       showGroupSettingsDialog = false;
     } catch (error) {
       console.error("Failed to update group name:", error);
-      alert("Erreur lors de la mise à jour du nom du groupe.");
+      error(
+        "Erreur lors de la mise à jour du nom du groupe.",
+        "Impossible de mettre à jour le nom du groupe, veuillez réessayer plus tard.",
+      );
     } finally {
       isUpdatingName = false;
     }
@@ -215,17 +228,22 @@
       groupInfo = await getGroupInfo(currentGroupId);
     } catch (error) {
       console.error("Failed to remove member:", error);
-      alert("Erreur lors de la suppression du membre.");
+      error(
+        "Erreur lors de la suppression du membre.",
+        "Impossible de supprimer le membre, veuillez réessayer plus tard.",
+      );
     }
   };
 
   const leaveGroup = async () => {
     try {
-      await removeGroupMember(currentGroupId, authenticatedUser.id);
-      goto("/chat");
-    } catch (error) {
+      await leaveGroupApi(currentGroupId);
+    } catch (e) {
       console.error("Failed to leave group:", error);
-      alert("Erreur lors de la sortie du groupe.");
+      error(
+        "Erreur lors de la sortie du groupe.",
+        "Impossible de quitter le groupe, veuillez réessayer plus tard.",
+      );
     }
   };
 
@@ -401,7 +419,7 @@
     if (currentRoom.messages.length === 0) return;
     try {
       const oldest = currentRoom.messages[0];
-      const newMessages = await getGroupMessages(currentGroupId, {
+      const newMessages = await listGroupMessages(currentGroupId, {
         limit: LIMIT_LOAD,
         before: oldest.createdAt,
       });
@@ -425,7 +443,7 @@
     if (currentRoom.messages.length === 0) return;
     try {
       const newest = currentRoom.messages[currentRoom.messages.length - 1];
-      const newMessages = await getGroupMessages(currentGroupId, {
+      const newMessages = await listGroupMessages(currentGroupId, {
         limit: LIMIT_LOAD,
         after: newest.createdAt,
       });
@@ -462,7 +480,7 @@
     currentMessage = "";
 
     if (timeDiff > 5 || !lastMessage) {
-      currentRoom.messages = await getGroupMessages(currentGroupId, {
+      currentRoom.messages = await listGroupMessages(currentGroupId, {
         limit: LIMIT_LOAD,
       });
       currentRoom.messages = currentRoom.messages.sort(
@@ -474,6 +492,52 @@
   $effect(() => {
     if (currentMessage.trim() === "" && inputElement)
       inputElement.innerText = "";
+  });
+
+  $effect(() => {
+    return ws.subscribe("user-status-updated", (msg) => {
+      if (groupInfo?.members) {
+        const member = groupInfo.members.find((m) => m.userId === msg.userId);
+        if (member) {
+          member.status = msg.status;
+        }
+      }
+
+      // Change allUsers status
+      const user = allUsers.find((u) => u.id === msg.userId);
+      if (user) {
+        user.status = msg.status;
+      }
+    });
+  });
+
+  $effect(() => {
+    return ws.subscribe("group-member-added", (msg) => {
+      // Add the user to the group info members
+      if (msg.groupId === currentGroupId) {
+        getGroupInfo(currentGroupId).then((info) => {
+          groupInfo = info;
+        });
+      }
+
+      // Remove the user from allUsers if they were there
+      allUsers = allUsers.filter((u) => u.id !== msg.member.userId);
+    });
+  });
+
+  $effect(() => {
+    return ws.subscribe("group-member-removed", async (msg) => {
+      // Remove the user to the group info members
+      if (msg.groupId === currentGroupId) {
+        getGroupInfo(currentGroupId).then((info) => {
+          groupInfo = info;
+        });
+      }
+
+      // Add the user from allUsers if they were there
+      allUsers = await listAllUsers();
+      allUsers = allUsers.filter((u) => u.id !== msg.userId);
+    });
   });
 
   const handleInputKeyDown = (e) => {

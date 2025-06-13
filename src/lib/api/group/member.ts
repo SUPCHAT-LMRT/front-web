@@ -42,13 +42,25 @@ export const getGroupInfo = async (groupId: string): Promise<GroupInfo> => {
 	}
 }
 
-// TODO impl backend
 export const removeGroupMember = async (
 	groupId: string,
-	userId: string,
+	memberId: string,
 ): Promise<void> => {
 	try {
-		await baseClient.delete(`/api/groups/${groupId}/members/${userId}`);
+		await baseClient.delete(`/api/groups/${groupId}/members`, {
+			data: {
+				memberId
+			}
+		});
+	} catch (e) {
+		console.error(e);
+		throw e;
+	}
+}
+
+export const leaveGroup = async (groupId: string): Promise<void> => {
+	try {
+		await baseClient.delete(`/api/groups/${groupId}`);
 	} catch (e) {
 		console.error(e);
 		throw e;
