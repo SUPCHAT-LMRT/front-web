@@ -138,7 +138,7 @@
             <div class="flex items-center gap-x-2">
               <span class="text-gray-600 dark:text-gray-400">Poste:</span>
               <span class="text-black dark:text-white"
-                >{userProfile?.poste ?? "Aucun poste"}</span
+                >{userProfile?.jobsNames ?? "Aucun poste"}</span
               >
             </div>
           </div>
@@ -220,7 +220,7 @@
               <div class="flex items-center gap-x-2">
                 <span class="text-gray-600 dark:text-gray-400">Poste:</span>
                 <span class="text-black dark:text-white"
-                  >{userProfile?.poste ?? "Aucun poste"}</span
+                  >{userProfile?.jobsNames ?? "Aucun poste"}</span
                 >
               </div>
             </div>
