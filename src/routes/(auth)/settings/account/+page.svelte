@@ -57,11 +57,6 @@
         </Button>
 
         <AlertDialog.Root >
-            <AlertDialog.Trigger class="mb-2">
-                <Button variant="outline" size="sm" class="w-full border border-red-500 text-red-500 hover:bg-red-500 hover:text-white transition-colors">
-                    Supprimer mes données
-                </Button>
-            </AlertDialog.Trigger>
             <AlertDialog.Content>
                 <AlertDialog.Header>
                     <AlertDialog.Title>Etes-vous sûr ?</AlertDialog.Title>
