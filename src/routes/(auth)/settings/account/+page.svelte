@@ -1,6 +1,6 @@
 <script lang="ts">
     import {page} from "$app/state";
-    import {requestResetPassword} from "$lib/api/user";
+    import {exportUserData, requestResetPassword} from "$lib/api/user";
     import ProfileCard from "$lib/components/app/settings/ProfileCard.svelte";
     import {Button} from "$lib/components/ui/button";
     import {error, success} from "$lib/toast/toast";
@@ -28,6 +28,17 @@
             );
         }
     };
+
+    const handleExportData = async () => {
+        try {
+            await exportUserData(authenticatedUser.id);
+            success("Export réussi", "Vos données ont été exportées avec succès.");
+        } catch (e) {
+            console.error(e);
+            error("Erreur", "Une erreur est survenue lors de l'exportation de vos données.");
+        }
+    };
+
 </script>
 
 <section class="px-4 py-2 ml-2 pt-8 w-[500px]">
@@ -40,7 +51,7 @@
         Supprimer vos données signifie que vous ne pourrez plus les récupérer.
     </p>
     <div class="flex flex-col w-[50%] mt-3">
-        <Button variant="outline" size="sm" class="mb-2">
+        <Button variant="outline" size="sm" class="mb-2" onclick={handleExportData}>
             <Download />
             Exporter mes données
         </Button>
