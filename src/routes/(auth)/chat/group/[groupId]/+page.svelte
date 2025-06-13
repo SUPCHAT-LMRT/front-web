@@ -17,7 +17,7 @@
     type ListAllUsersResponse,
   } from "$lib/api/user";
   import ws from "$lib/api/ws";
-  import "$lib/assets/styles/chats.scss";
+  import "$lib/assets/styles/chats.css";
   import HoveredUserProfile from "$lib/components/app/HoveredUserProfile.svelte";
   import * as Avatar from "$lib/components/ui/avatar";
   import { Button } from "$lib/components/ui/button";
@@ -479,7 +479,8 @@
     ws.sendGroupMessage(currentGroupId, currentMessage);
     currentMessage = "";
 
-    if (timeDiff > 5 || !lastMessage) {
+    // Si l'utilisateur est "loin" dans l'historique (ex. dernier message > 5 min), recharge les messages récents
+    if (timeDiff > 5) {
       currentRoom.messages = await listGroupMessages(currentGroupId, {
         limit: LIMIT_LOAD,
       });
@@ -551,10 +552,6 @@
     if (topObserver) topObserver.disconnect();
     if (bottomObserver) bottomObserver.disconnect();
   });
-
-  const handleLanguageButtonClick = () => {
-    window.location.href = `/chat/group/${currentGroupId}/translate`;
-  };
 </script>
 
 <div class="relative w-full h-full flex flex-col gap-y-4">
@@ -565,9 +562,6 @@
       <div class="flex items-center gap-x-3">
         <div class="relative size-12">
           <Avatar.Root class="size-12">
-            <Avatar.Image
-              src={getS3ObjectUrl(S3Bucket.GROUPS_AVATARS, groupInfo.id)}
-            />
             <Avatar.Fallback class="bg-primary text-primary-foreground">
               {fallbackAvatarLetters(groupInfo.name)}
             </Avatar.Fallback>
@@ -709,7 +703,7 @@
                           {message.author.lastName}
                         </span>
                       </HoveredUserProfile>
-                      {#if groupInfo.members.find((m) => m.id === message.author.userId)?.isAdmin}
+                      {#if groupInfo.members.find((m) => m.id === message.author.userId)?.isGroupOwner}
                         <Tooltip>
                           <TooltipTrigger>
                             <Crown size={14} class="text-yellow-500" />
@@ -882,12 +876,13 @@
         onkeydown={handleInputKeyDown}
       ></div>
 
-      <button
+      <Button
+        variant="ghost"
+        href="/chat/group/{currentGroupId}/translate"
         class="p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
-        onclick={handleLanguageButtonClick}
       >
         <Languages size={20} class="text-primary" />
-      </button>
+      </Button>
 
       <button
         class="p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"

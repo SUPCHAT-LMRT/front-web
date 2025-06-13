@@ -92,6 +92,9 @@ class Ws {
         case "direct-room-joined":
           this.handleDirectRoomJoined(msg);
           break;
+        case "group-room-joined":
+          this.handleGroupRoomJoined(msg);
+          break;
         default:
           break;
       }
@@ -115,6 +118,10 @@ class Ws {
     setCurrentOpenedRoom(otherUserId, RoomKind.DIRECT);
   };
 
+  private handleGroupRoomJoined = ({ roomId }: { roomId: string }) => {
+    setCurrentOpenedRoom(roomId, RoomKind.GROUP);
+  }
+
   public sendChannelMessage = (roomId, message) => {
     this.send(
       JSON.stringify({
@@ -135,6 +142,16 @@ class Ws {
     );
   };
 
+  public sendGroupMessage = (groupId, message) => {
+    this.send(
+      JSON.stringify({
+        action: "send-group-message",
+        content: message,
+        groupId,
+      }),
+    );
+  }
+
   public joinRoom = (roomId: string, roomKind: RoomKind) => {
     const currentOpenedRoom = getCurrentOpenedRoom();
     if (currentOpenedRoom.id !== "") {
@@ -150,7 +167,7 @@ class Ws {
       case RoomKind.GROUP:
         this.send(
           // TODO handle group rooms
-          JSON.stringify({ action: "join-group-room", message: roomId }),
+          JSON.stringify({ action: "join-group-room", groupId: roomId }),
         );
         break;
       case RoomKind.CHANNEL:
@@ -258,6 +275,21 @@ class Ws {
       }),
     );
   };
+
+  public toggleGroupMessageReaction = (
+    groupId: string,
+    messageId: string,
+    reaction: string,
+  ) => {
+    this.send(
+      JSON.stringify({
+        action: "group-message-reaction-toggle",
+        groupId,
+        messageId,
+        reaction,
+      }),
+    );
+  }
 
   public subscribe = (
     action: string,

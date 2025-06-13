@@ -1,8 +1,8 @@
 <script lang="ts">
   import { page } from "$app/state";
   import {
-    type DirectMessage,
     getDirectMessages,
+    type DirectMessage,
   } from "$lib/api/direct/message.js";
   import { createGroupChat } from "$lib/api/group/group";
   import { RoomKind } from "$lib/api/room";
@@ -11,11 +11,11 @@
     getUserProfile,
     listAllUsers,
     PublicStatus,
-    type User,
+    type ListAllUsersResponse,
     type UserProfile,
   } from "$lib/api/user";
   import ws from "$lib/api/ws";
-  import "$lib/assets/styles/chats.scss";
+  import "$lib/assets/styles/chats.css";
   import HoveredUserProfile from "$lib/components/app/HoveredUserProfile.svelte";
   import * as Avatar from "$lib/components/ui/avatar";
   import { Button } from "$lib/components/ui/button";
@@ -63,7 +63,7 @@
 
   // Group creation states
   let showCreateGroupDialog = $state(false);
-  let allUsers: User[] = $state([]);
+  let allUsers: ListAllUsersResponse[] = $state([]);
   let selectedUserIds = $state(new SvelteSet<string>());
   let groupName = $state("");
   let isLoadingUsers = $state(false);
@@ -395,7 +395,7 @@
     ws.sendDirectMessage(currentChatId, currentMessage);
     currentMessage = "";
 
-    if (timeDiff > 5 || !lastMessage) {
+    if (timeDiff > 5) {
       currentRoom.messages = await getDirectMessages(currentChatId, {
         limit: LIMIT_LOAD,
       });
@@ -772,7 +772,9 @@
           {#each allUsers as user (user.id)}
             <div
               class="flex items-center space-x-3 p-3 rounded-lg border bg-card hover:bg-accent/50 transition-colors"
-              onclick={() => toggleUserSelection(user.id)}
+              onclick={() =>
+                user.id !== authenticatedUser.id &&
+                toggleUserSelection(user.id)}
             >
               <Checkbox
                 checked={selectedUserIds.has(user.id)}

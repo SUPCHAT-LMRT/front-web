@@ -11,7 +11,7 @@
   } from "$lib/api/workspaces/channels";
   import { getWorkspaceMembers } from "$lib/api/workspaces/member";
   import ws from "$lib/api/ws";
-  import "$lib/assets/styles/chats.scss";
+  import "$lib/assets/styles/chats.css";
   import HoveredUserProfile from "$lib/components/app/HoveredUserProfile.svelte";
   import * as Avatar from "$lib/components/ui/avatar";
   import * as ContextMenu from "$lib/components/ui/context-menu";
@@ -354,7 +354,7 @@
     currentMessage = "";
 
     // Si l'utilisateur est "loin" dans l'historique (ex. dernier message > 5 min), recharge les messages récents
-    if (timeDiff > 5 || !lastMessage) {
+    if (timeDiff > 5) {
       currentRoom.messages = await getWorkspaceChannelMessages(
         currentWorkspaceId,
         currentChannelId,

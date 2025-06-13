@@ -5,11 +5,18 @@ export type GroupMessage = {
   content: string;
   author: GroupMessageAuthor;
   createdAt: Date;
+  reactions: GroupMessageReaction[];
 };
 
 type GroupMessageAuthor = {
   userId: string;
-  pseudo: string;
+  firstName: string;
+  lastName: string;
+};
+
+type GroupMessageReaction = {
+  users: { id: string; name: string }[];
+  reaction: string;
 };
 
 export const listGroupMessages = async (
