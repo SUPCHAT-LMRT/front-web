@@ -1003,16 +1003,16 @@
                 </div>
 
                 <div class="flex-1">
-                  <div class="font-medium flex items-center gap-2">
+                  <div class="font-medium flex items-center gap-2 text-left">
                     {member.userName}
                     {#if member.isGroupOwner}
                       <Crown size={14} class="text-yellow-500" />
                     {/if}
-                    {#if member.id === authenticatedUser.id}
+                    {#if member.userId === authenticatedUser.id}
                       <span class="text-xs text-muted-foreground">(Vous)</span>
                     {/if}
                   </div>
-                  <div class="text-sm text-muted-foreground">
+                  <div class="text-sm text-muted-foreground text-left">
                     {member.email}
                   </div>
                 </div>
