@@ -41,7 +41,7 @@
 
 </script>
 
-<section class="px-4 py-2 ml-2 pt-8 w-[500px]">
+<section class="px-4 py-2 ml-2 pt-8 ">
     <ProfileCard {authenticatedUser}/>
 
     <h2 class="text-gray-700 text-xs font-bold mt-7 uppercase dark:text-gray-200">

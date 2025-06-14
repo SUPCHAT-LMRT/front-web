@@ -30,7 +30,7 @@
   let { children } = $props();
 </script>
 
-<section class="border-gray-200 dark:border-gray-800 dark:bg-gray-800 w-full">
+<section class="border-gray-200 dark:border-gray-800 dark:bg-gray-800 h-full">
   <div class="flex flex-col px-4 py-2">
     <section>
       <div class="flex items-end mb-4">
