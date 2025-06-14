@@ -1,18 +1,29 @@
 <script lang="ts">
   import { page } from "$app/state";
+  import { smartFly } from "$lib/animation/visibleFly";
   import { RoomKind } from "$lib/api/room";
   import { getS3ObjectUrl, S3Bucket } from "$lib/api/s3";
   import {
     type Channel,
     type ChannelMessage,
+    getPrivateChannelMembers,
     getWorkspaceChannel,
     getWorkspaceChannelMessages,
   } from "$lib/api/workspaces/channels";
+  import { getWorkspaceMembers } from "$lib/api/workspaces/member";
   import ws from "$lib/api/ws";
-  import "$lib/assets/styles/chats.scss";
+  import "$lib/assets/styles/chats.css";
   import HoveredUserProfile from "$lib/components/app/HoveredUserProfile.svelte";
+  import * as AlertDialog from "$lib/components/ui/alert-dialog";
   import * as Avatar from "$lib/components/ui/avatar";
+  import { Button } from "$lib/components/ui/button";
   import * as ContextMenu from "$lib/components/ui/context-menu";
+  import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+  } from "$lib/components/ui/dropdown-menu";
   import {
     Tooltip,
     TooltipContent,
@@ -25,9 +36,21 @@
   import NumberFlow from "@number-flow/svelte";
   import { format } from "date-fns";
   import { fr } from "date-fns/locale";
-  import {ArrowLeft, Languages, Pen, Send, Trash2} from "lucide-svelte";
+  import {
+    ArrowLeft,
+    Languages,
+    Pen,
+    Send,
+    Trash2,
+    Users,
+  } from "lucide-svelte";
   import type { AuthenticatedUserState } from "src/routes/(auth)/authenticatedUser.svelte";
   import { onDestroy, tick } from "svelte";
+
+  type CustomChannelMessage = ChannelMessage & {
+    editMode?: boolean;
+    editInputElement?: HTMLDivElement;
+  };
 
   const { authenticatedUserState } = page.data as {
     authenticatedUserState: AuthenticatedUserState;
@@ -42,14 +65,26 @@
   let currentChannelId = $derived(page.params.channelId);
   let currentChannel: Channel = $state(null);
   let currentMessage = $state("");
-  let currentRoom: { id: string | null; messages: ChannelMessage[] } = $state({
-    id: null,
-    messages: [],
+  let currentRoom: { id: string | null; messages: CustomChannelMessage[] } =
+    $state({
+      id: null,
+      messages: [],
+    });
+  let channelMembers: { id: string; name: string }[] = $state([]);
+
+  let deleteMessageDialog: {
+    open: boolean;
+    message: CustomChannelMessage | null;
+  } = $state({
+    open: false,
+    message: null,
   });
 
   let unsubscribeSendMessage = null;
   let unsubscribeMessageReactionAdded = null;
   let unsubscribeMessageReactionRemoved = null;
+  let unsubscribeGroupMessageContentEdited = null;
+  let unsubscribeGroupMessageDeleted = null;
   let inputElement: HTMLDivElement = $state(null);
   let elementsList: HTMLDivElement = $state(null);
   let isAutoScrolling = $state(false);
@@ -75,11 +110,34 @@
       unsubscribeSendMessage?.();
       unsubscribeMessageReactionAdded?.();
       unsubscribeMessageReactionRemoved?.();
+      unsubscribeGroupMessageContentEdited?.();
+      unsubscribeGroupMessageDeleted?.();
       ws.leaveRoom(currentRoom.id);
       currentRoom.id = null;
       currentRoom.messages = [];
     };
   });
+
+  const loadMembers = async () => {
+    try {
+      if (!currentWorkspaceId || !currentChannelId || !currentChannel) return;
+
+      if (currentChannel.isPrivate) {
+        channelMembers = await getPrivateChannelMembers(
+          currentWorkspaceId,
+          currentChannelId,
+        );
+      } else {
+        const res = await getWorkspaceMembers(currentWorkspaceId, 1, 50);
+        channelMembers = res.members.map((m) => ({
+          id: m.userId,
+          name: m.pseudo,
+        }));
+      }
+    } catch (err) {
+      console.error("Erreur lors du chargement des membres :", err);
+    }
+  };
 
   const joinRoomAndListenMessages = async (
     workspaceId: string,
@@ -221,6 +279,34 @@
           }
         },
       );
+
+      unsubscribeGroupMessageContentEdited = ws.subscribe(
+        "channel-message-content-edited",
+        (msg) => {
+          const message = currentRoom.messages.find(
+            (m) => m.id === msg.messageId,
+          );
+          if (message) {
+            message.content = msg.newContent;
+          }
+        },
+      );
+
+      unsubscribeGroupMessageDeleted = ws.subscribe(
+        "channel-message-deleted",
+        (msg) => {
+          currentRoom.messages = currentRoom.messages.filter(
+            (m) => m.id !== msg.messageId,
+          );
+          if (
+            deleteMessageDialog.open &&
+            deleteMessageDialog.message?.id === msg.messageId
+          ) {
+            deleteMessageDialog.open = false;
+            deleteMessageDialog.message = null;
+          }
+        },
+      );
     } catch (e) {
       console.error(e);
     }
@@ -316,7 +402,7 @@
     currentMessage = "";
 
     // Si l'utilisateur est "loin" dans l'historique (ex. dernier message > 5 min), recharge les messages récents
-    if (timeDiff > 5 || !lastMessage) {
+    if (timeDiff > 5) {
       currentRoom.messages = await getWorkspaceChannelMessages(
         currentWorkspaceId,
         currentChannelId,
@@ -348,23 +434,88 @@
     if (bottomObserver) bottomObserver.disconnect();
   });
 
-    const handleLanguageButtonClick = () => {
-      window.location.href = (`/workspaces/${currentWorkspaceId}/channels/${currentChannelId}/translate`);
-    };
+  const handleMessageEdit = async (message: CustomChannelMessage) => {
+    // Toggle edit mode
+    message.editMode = !message.editMode;
+    if (message.editMode) {
+      await tick(); // Wait for the DOM to update
+      // Focus the input element if entering edit mode
+      message.editInputElement?.focus();
+    } else {
+      // Send the edited message
+      ws.editChannelMessage(currentChannelId, message.id, message.content);
+    }
+  };
+
+  const handleMessageDelete = async (message: CustomChannelMessage) => {
+    if (!message) return;
+
+    try {
+      await ws.deleteChannelMessage(currentChannelId, message.id);
+    } catch (error) {
+      console.error("Failed to delete message:", error);
+      error(
+        "Erreur lors de la suppression du message.",
+        "Impossible de supprimer le message, veuillez réessayer plus tard.",
+      );
+    }
+  };
 </script>
 
 <div class="w-full h-full flex flex-col gap-y-4">
   {#if currentChannel}
-    <div class="items-center gap-x-2 bg-gray-100 dark:bg-gray-800 p-4">
-      <a href="/workspaces/{currentWorkspaceId}" class="flex">
-        <ArrowLeft size={20} />
-        <span>Retour à l'espace de travail</span>
-      </a>
-      <div class="flex">
-        <span class="font-semibold text-2xl">#{currentChannel.name}</span>
-        <span class="text-gray-500 text-lg translate-y-[1px]"
-          >{currentChannel.topic}</span
-        >
+    <div
+      class="items-center flex justify-between gap-x-2 bg-gray-100 dark:bg-gray-800 p-4"
+    >
+      <div>
+        <a href="/workspaces/{currentWorkspaceId}" class="flex mb-4">
+          <ArrowLeft size={20} class="mr-2" />
+          <span>Retour à l'espace de travail</span>
+        </a>
+        <div class="flex">
+          <span class="font-semibold text-2xl mr-5">#{currentChannel.name}</span
+          >
+          <span class="text-gray-500 text-lg translate-y-[1px]"
+            >{currentChannel.topic}</span
+          >
+        </div>
+      </div>
+      <div class="flex items-center gap-2 mt-2">
+        <DropdownMenu>
+          <DropdownMenuTrigger>
+            <button
+              onmouseenter={loadMembers}
+              class="flex items-center gap-1 px-3 py-1 text-sm rounded-lg bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600"
+            >
+              <Users size={16} />
+              Membres
+            </button>
+          </DropdownMenuTrigger>
+
+          <DropdownMenuContent class="w-64 max-h-64 overflow-y-auto">
+            {#if channelMembers.length > 0}
+              {#each channelMembers as member}
+                <DropdownMenuItem onselect={(e) => e.preventDefault()}>
+                  <button
+                    type="button"
+                    class="w-full text-left bg-transparent border-none p-0"
+                    onclick={(e) => e.stopPropagation()}
+                    onkeydown={(e) => e.key === "Enter" && e.stopPropagation()}
+                  >
+                    <HoveredUserProfile
+                      userId={member.id}
+                      self={member.id === authenticatedUser.id}
+                    >
+                      <snippet>{member.name}</snippet>
+                    </HoveredUserProfile>
+                  </button>
+                </DropdownMenuItem>
+              {/each}
+            {:else}
+              <DropdownMenuItem disabled>Chargement...</DropdownMenuItem>
+            {/if}
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
     </div>
   {/if}
@@ -377,8 +528,19 @@
       <!-- Sentinel en haut -->
       <div bind:this={topSentinel} class="sentinel mt-4"></div>
 
-      {#each currentRoom.messages as message (message.id)}
-        <div data-message-id={message.id}>
+      {#each currentRoom.messages as message, i (message.id)}
+        <div
+          data-message-id={message.id}
+          in:smartFly|global={{
+            y: -10,
+            duration: 300,
+            delay: 100,
+            isNewMessage: i >= Math.max(0, currentRoom.messages.length - 10),
+            messageIndex: i,
+            totalMessages: currentRoom.messages.length,
+            staggerDelay: 50, // 50ms delay between each message
+          }}
+        >
           <ContextMenu.Root>
             <ContextMenu.Trigger>
               <div
@@ -489,11 +651,26 @@
                               )}
                             </TooltipContent>
                           </Tooltip>
-                          <span
-                            class="p-2 rounded-xl break-all bg-primary text-white shadow-lg w-full"
-                          >
-                            {message.content}
-                          </span>
+                          {#if message.editMode}
+                            <input
+                              type="text"
+                              class="p-2 rounded-lg bg-gray-100 dark:bg-gray-800 w-full"
+                              bind:this={message.editInputElement}
+                              bind:value={message.content}
+                              onkeydown={(e) => {
+                                if (e.key === "Enter") {
+                                  e.preventDefault();
+                                  handleMessageEdit(message);
+                                }
+                              }}
+                            />
+                          {:else}
+                            <span
+                              class="p-2 rounded-xl break-all bg-primary text-white shadow-lg w-full"
+                            >
+                              {message.content}
+                            </span>
+                          {/if}
                         </div>
 
                         <HoveredUserProfile
@@ -558,21 +735,30 @@
                   {/each}
                 </ContextMenu.SubContent>
               </ContextMenu.Sub>
-              <ContextMenu.Separator />
-              <ContextMenu.Item class="flex justify-between">
-                <span>Modifier</span>
-                <div>
-                  <Pen size="18" />
-                </div>
-              </ContextMenu.Item>
-              <ContextMenu.Item
-                class="text-red-500 hover:!bg-red-500 hover:!text-white flex justify-between"
-              >
-                <span>Supprimer</span>
-                <div>
-                  <Trash2 size="18" />
-                </div>
-              </ContextMenu.Item>
+              {#if message.author.userId === authenticatedUser.id}
+                <ContextMenu.Separator />
+                <ContextMenu.Item
+                  class="flex justify-between"
+                  onclick={() => handleMessageEdit(message)}
+                >
+                  <span>Modifier</span>
+                  <div>
+                    <Pen size="18" />
+                  </div>
+                </ContextMenu.Item>
+                <ContextMenu.Item
+                  class="text-red-500 hover:!bg-red-500 hover:!text-white flex justify-between"
+                  onclick={() => {
+                    deleteMessageDialog.open = true;
+                    deleteMessageDialog.message = message;
+                  }}
+                >
+                  <span>Supprimer</span>
+                  <div>
+                    <Trash2 size="18" />
+                  </div>
+                </ContextMenu.Item>
+              {/if}
             </ContextMenu.Content>
           </ContextMenu.Root>
         </div>
@@ -597,13 +783,13 @@
         autofocus
       ></div>
 
-<!--      button langage -->
-        <button
-            class="p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
-            onclick={handleLanguageButtonClick}
-        >
-          <Languages size={20} class="text-primary" />
-        </button>
+      <!--      button langage -->
+      <a
+        href="/workspaces/{currentWorkspaceId}/channels/{currentChannelId}/translate"
+        class="p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+      >
+        <Languages size={20} class="text-primary" />
+      </a>
 
       <button
         class="p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
@@ -614,6 +800,35 @@
     </div>
   {/if}
 </div>
+
+<!-- Delete Message Dialog -->
+<AlertDialog.Root bind:open={deleteMessageDialog.open}>
+  <AlertDialog.Content>
+    <AlertDialog.Header>
+      <AlertDialog.Title>Supprimer le message</AlertDialog.Title>
+      <AlertDialog.Description>
+        Êtes-vous sûr de vouloir supprimer ce message ?
+      </AlertDialog.Description>
+    </AlertDialog.Header>
+
+    <AlertDialog.Footer>
+      <Button
+        variant="outline"
+        onclick={() => (deleteMessageDialog.open = false)}
+      >
+        Annuler
+      </Button>
+      <Button
+        variant="destructive"
+        onclick={() => {
+          handleMessageDelete(deleteMessageDialog.message);
+        }}
+      >
+        Supprimer
+      </Button>
+    </AlertDialog.Footer>
+  </AlertDialog.Content>
+</AlertDialog.Root>
 
 <style>
   .sentinel {

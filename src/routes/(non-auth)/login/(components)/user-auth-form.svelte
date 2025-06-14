@@ -1,6 +1,6 @@
 <script lang="ts">
   import {
-    PUBLIC_API_OAUTH_FACEBOOK_URL,
+    PUBLIC_API_OAUTH_GITHUB_URL,
     PUBLIC_API_OAUTH_GOOGLE_URL,
   } from "$env/static/public";
   import { loginUser } from "$lib/api/user";
@@ -156,30 +156,27 @@
       Google
     </Button>
     <Button
-      class="w-full"
-      variant="outline"
-      type="button"
-      disabled={isSubmitting}
-      href={PUBLIC_API_OAUTH_FACEBOOK_URL}
+            class="w-full"
+            variant="outline"
+            type="button"
+            disabled={isSubmitting}
+            href={PUBLIC_API_OAUTH_GITHUB_URL}
     >
       {#if isSubmitting}
         <Loader class="mr-2 h-4 w-4 animate-spin" />
       {/if}
       <svg
-        xmlns="http://www.w3.org/2000/svg"
-        x="0px"
-        y="0px"
-        width="31"
-        height="31"
-        viewBox="0 0 48 48"
+              xmlns="http://www.w3.org/2000/svg"
+              width="31"
+              height="31"
+              viewBox="0 0 24 24"
+              fill="currentColor"
       >
-        <path fill="#039be5" d="M24 5A19 19 0 1 0 24 43A19 19 0 1 0 24 5Z"
-        ></path><path
-          fill="#fff"
-          d="M26.572,29.036h4.917l0.772-4.995h-5.69v-2.73c0-2.075,0.678-3.915,2.619-3.915h3.119v-4.359c-0.548-0.074-1.707-0.236-3.897-0.236c-4.573,0-7.254,2.415-7.254,7.917v3.323h-4.701v4.995h4.701v13.729C22.089,42.905,23.032,43,24,43c0.875,0,1.729-0.08,2.572-0.194V29.036z"
-        ></path>
+        <path
+                d="M12 0C5.37 0 0 5.373 0 12a12 12 0 008.205 11.385c.6.113.82-.258.82-.577v-2.232c-3.338.726-4.033-1.416-4.033-1.416-.546-1.388-1.333-1.757-1.333-1.757-1.089-.745.083-.73.083-.73 1.204.085 1.837 1.237 1.837 1.237 1.07 1.833 2.807 1.303 3.492.996.108-.775.419-1.303.762-1.602-2.665-.303-5.466-1.334-5.466-5.933 0-1.312.468-2.384 1.235-3.222-.123-.303-.535-1.522.117-3.176 0 0 1.008-.322 3.3 1.23a11.42 11.42 0 013.003-.404c1.02.005 2.047.138 3.003.404 2.289-1.552 3.295-1.23 3.295-1.23.655 1.654.243 2.873.12 3.176.77.838 1.234 1.91 1.234 3.222 0 4.61-2.806 5.626-5.478 5.922.43.372.823 1.102.823 2.222v3.293c0 .322.216.694.825.576A12.005 12.005 0 0024 12c0-6.627-5.373-12-12-12z"
+        />
       </svg>
-      Facebook
+      GitHub
     </Button>
   </div>
 </div>

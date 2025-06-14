@@ -37,7 +37,7 @@
 
 <div>
   <Popover.Root bind:open={popoverOpened}>
-    <Popover.Trigger>{@render children?.()}</Popover.Trigger>
+    <Popover.Trigger class="w-full">{@render children?.()}</Popover.Trigger>
     <Popover.Content>
       {#await getUserProfile(userId)}
         <div class="flex flex-col gap-y-4">
@@ -138,7 +138,7 @@
             <div class="flex items-center gap-x-2">
               <span class="text-gray-600 dark:text-gray-400">Poste:</span>
               <span class="text-black dark:text-white"
-                >{userProfile?.poste ?? "Aucun poste"}</span
+                >{userProfile?.jobsNames || "Aucun poste"}</span
               >
             </div>
           </div>
@@ -195,7 +195,7 @@
               >
                 <a
                   title="Envoyer un message"
-                  href="/chat/{RoomKind.DIRECT.toLowerCase()}/{userId}"
+                  href="/chat/{RoomKind.DIRECT.toLowerCase()}?chatId={userId}"
                 >
                   <MessageCircle strokeWidth={1.5} />
                 </a>
@@ -220,7 +220,7 @@
               <div class="flex items-center gap-x-2">
                 <span class="text-gray-600 dark:text-gray-400">Poste:</span>
                 <span class="text-black dark:text-white"
-                  >{userProfile?.poste ?? "Aucun poste"}</span
+                  >{userProfile?.jobsNames || "Aucun poste"}</span
                 >
               </div>
             </div>

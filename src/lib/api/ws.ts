@@ -75,8 +75,8 @@ class Ws {
       console.log(
         `WebSocket still connecting, queuing message ${message}...`,
       );
+      this.messageQueue.push(message);
     }
-    this.messageQueue.push(message);
   };
 
   private handleNewMessage = (event) => {
@@ -91,6 +91,9 @@ class Ws {
           break;
         case "direct-room-joined":
           this.handleDirectRoomJoined(msg);
+          break;
+        case "group-room-joined":
+          this.handleGroupRoomJoined(msg);
           break;
         default:
           break;
@@ -115,6 +118,10 @@ class Ws {
     setCurrentOpenedRoom(otherUserId, RoomKind.DIRECT);
   };
 
+  private handleGroupRoomJoined = ({ roomId }: { roomId: string }) => {
+    setCurrentOpenedRoom(roomId, RoomKind.GROUP);
+  }
+
   public sendChannelMessage = (roomId, message) => {
     this.send(
       JSON.stringify({
@@ -135,6 +142,16 @@ class Ws {
     );
   };
 
+  public sendGroupMessage = (groupId, message) => {
+    this.send(
+      JSON.stringify({
+        action: "send-group-message",
+        content: message,
+        groupId,
+      }),
+    );
+  }
+
   public joinRoom = (roomId: string, roomKind: RoomKind) => {
     const currentOpenedRoom = getCurrentOpenedRoom();
     if (currentOpenedRoom.id !== "") {
@@ -150,7 +167,7 @@ class Ws {
       case RoomKind.GROUP:
         this.send(
           // TODO handle group rooms
-          JSON.stringify({ action: "join-group-room", message: roomId }),
+          JSON.stringify({ action: "join-group-room", groupId: roomId }),
         );
         break;
       case RoomKind.CHANNEL:
@@ -190,6 +207,20 @@ class Ws {
       this.joinRoom(roomId, roomKind);
     });
   };
+
+  public asyncGroupJoinRoom = async (
+    roomId: string,
+    roomKind: RoomKind,
+  ): Promise<string> => {
+    return new Promise<string>((resolve) => {
+      const unsubscribe = this.subscribe("group-room-joined", (msg) => {
+        resolve(msg.roomId);
+        unsubscribe();
+      });
+
+      this.joinRoom(roomId, roomKind);
+    });
+  }
 
   public selectWorkspace = (workspaceId) => {
     const currentSelectedWorkspace = getCurrentSelectedWorkspace();
@@ -244,6 +275,105 @@ class Ws {
       }),
     );
   };
+
+  public toggleGroupMessageReaction = (
+    groupId: string,
+    messageId: string,
+    reaction: string,
+  ) => {
+    this.send(
+      JSON.stringify({
+        action: "group-message-reaction-toggle",
+        groupId,
+        messageId,
+        reaction,
+      }),
+    );
+  }
+
+  public editGroupMessage = (
+    groupId: string,
+    messageId: string,
+    newContent: string,
+  ) => {
+    this.send(
+      JSON.stringify({
+        action: "group-message-content-edit",
+        groupId,
+        messageId,
+        newContent,
+      }),
+    );
+  }
+
+  public deleteGroupMessage = (
+    groupId: string,
+    messageId: string,
+  ) => {
+    this.send(
+      JSON.stringify({
+        action: "group-message-delete",
+        groupId,
+        messageId,
+      }),
+    );
+  }
+
+  public editDirectMessage = (
+    otherUserId: string,
+    messageId: string,
+    newContent: string,
+  ) => {
+    this.send(
+      JSON.stringify({
+        action: "direct-message-content-edit",
+        otherUserId,
+        messageId,
+        newContent,
+      }),
+    );
+  }
+
+  public deleteDirectMessage = (
+    otherUserId: string,
+    messageId: string,
+  ) => {
+    this.send(
+      JSON.stringify({
+        action: "direct-message-delete",
+        otherUserId,
+        messageId,
+      }),
+    );
+  }
+
+  public editChannelMessage = (
+    channelId: string,
+    messageId: string,
+    newContent: string,
+  ) => {
+    this.send(
+      JSON.stringify({
+        action: "channel-message-content-edit",
+        channelId,
+        messageId,
+        newContent,
+      }),
+    );
+  }
+
+  public deleteChannelMessage = (
+    channelId: string,
+    messageId: string,
+  ) => {
+    this.send(
+      JSON.stringify({
+        action: "channel-message-delete",
+        channelId,
+        messageId,
+      }),
+    );
+  }
 
   public subscribe = (
     action: string,

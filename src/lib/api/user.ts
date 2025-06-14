@@ -1,5 +1,5 @@
-import {baseClient} from "$lib/api/client";
-import type {Job} from "$lib/api/admin";
+import type { Job } from "$lib/api/admin";
+import { baseClient } from "$lib/api/client";
 
 export enum PublicStatus {
     UNKNOWN = "unknown",
@@ -51,7 +51,7 @@ export const loginUser = async (
     rememberMe: boolean,
 ): Promise<User> => {
     try {
-        const {data} = await baseClient.post("/api/account/auth/login", {
+        const { data } = await baseClient.post("/api/account/auth/login", {
             email,
             password,
             rememberMe,
@@ -89,7 +89,7 @@ export const validateAccount = async (token: string): Promise<void> => {
 
 export const requestForgotPassword = async (email: string): Promise<void> => {
     try {
-        await baseClient.post("/api/account/forgot-password/request", {email});
+        await baseClient.post("/api/account/forgot-password/request", { email });
     } catch (e) {
         console.error(e);
         throw e;
@@ -141,7 +141,7 @@ export const resetPassword = async (
 
 export const getLoginUser = async (): Promise<User> => {
     try {
-        const {data} = await baseClient.get("/api/account/me");
+        const { data } = await baseClient.get("/api/account/me");
         return data;
     } catch (e) {
         console.error(e);
@@ -151,7 +151,7 @@ export const getLoginUser = async (): Promise<User> => {
 
 export const getInviteLinkData = async (token: string): Promise<User> => {
     try {
-        const {data} = await baseClient.get(`/api/account/invite-link/${token}`);
+        const { data } = await baseClient.get(`/api/account/invite-link/${token}`);
         return data;
     } catch (e) {
         console.error(e);
@@ -165,11 +165,12 @@ export type UserProfile = {
     firstName: string;
     lastName: string;
     status: PublicStatus;
+    jobsNames: string;
 };
 
 export const getUserProfile = async (userId: string): Promise<UserProfile> => {
     try {
-        const {data} = await baseClient.get(`/api/account/${userId}/profile`);
+        const { data } = await baseClient.get(`/api/account/${userId}/profile`);
         return data;
     } catch (e) {
         console.error(e);
@@ -182,16 +183,24 @@ export const changeUserStatus = async (
     status: PrivateStatus,
 ): Promise<void> => {
     try {
-        await baseClient.patch("/api/account/status", {status});
+        await baseClient.patch("/api/account/status", { status });
     } catch (e) {
         console.error(e);
         throw e;
     }
 }
 
-export const listAllUsers = async (): Promise<User[]> => {
+export type ListAllUsersResponse = {
+    id: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+    status: PublicStatus;
+}
+
+export const listAllUsers = async (): Promise<ListAllUsersResponse[]> => {
     try {
-        const {data} = await baseClient.get("/api/account/users");
+        const { data } = await baseClient.get("/api/account/users");
         return data;
     } catch (e) {
         console.error(e);
@@ -215,7 +224,7 @@ export const updateUserAvatar = async (
         throw e;
     }
 }
-export const deleteUser= async (
+export const deleteUser = async (
     userId: string,
 ): Promise<void> => {
     try {
@@ -238,6 +247,24 @@ export const updateUser = async (
             lastName,
             email,
         });
+    } catch (e) {
+        console.error(e);
+        throw e;
+    }
+}
+
+export const exportUserData = async (userId: string): Promise<string> => {
+    try {
+        const {data} = await baseClient.get(`/api/account/export-data`, {
+            responseType: 'blob',
+        });
+        const url = window.URL.createObjectURL(new Blob([data]));
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', `user_data_export_${userId}.json`);
+        document.body.appendChild(link);
+        link.click();
+        return url;
     } catch (e) {
         console.error(e);
         throw e;

@@ -2,18 +2,18 @@
   import { page } from "$app/state";
   import { smartFly } from "$lib/animation/visibleFly";
   import {
-    getDirectMessages,
-    type DirectMessage,
-  } from "$lib/api/direct/message.js";
-  import { createGroupChat } from "$lib/api/group/group";
+    addGroupMember,
+    getGroupInfo,
+    leaveGroup as leaveGroupApi,
+    type GroupInfo,
+  } from "$lib/api/group/member";
+  import { listGroupMessages, type GroupMessage } from "$lib/api/group/message";
   import { RoomKind } from "$lib/api/room";
   import { getS3ObjectUrl, S3Bucket } from "$lib/api/s3";
   import {
-    getUserProfile,
     listAllUsers,
     PublicStatus,
     type ListAllUsersResponse,
-    type UserProfile,
   } from "$lib/api/user";
   import ws from "$lib/api/ws";
   import "$lib/assets/styles/chats.css";
@@ -24,29 +24,39 @@
   import { Checkbox } from "$lib/components/ui/checkbox";
   import * as ContextMenu from "$lib/components/ui/context-menu";
   import * as Dialog from "$lib/components/ui/dialog";
-  import { Input } from "$lib/components/ui/input";
-  import { Label } from "$lib/components/ui/label";
+  import * as DropdownMenu from "$lib/components/ui/dropdown-menu";
+  import * as Sheet from "$lib/components/ui/sheet";
   import {
     Tooltip,
     TooltipContent,
     TooltipTrigger,
   } from "$lib/components/ui/tooltip";
+  import { error } from "$lib/toast/toast";
   import { cn } from "$lib/utils";
-  import { fallbackAvatarLetters } from "$lib/utils/fallbackAvatarLetters.js";
+  import { fallbackAvatarLetters } from "$lib/utils/fallbackAvatarLetters";
   import { formatDate } from "$lib/utils/formatDate";
   import { goto } from "$lib/utils/goto";
   import { scrollToBottom } from "$lib/utils/scrollToBottom";
   import NumberFlow from "@number-flow/svelte";
   import { format } from "date-fns";
   import { fr } from "date-fns/locale";
-  import { Languages, Pen, Send, Trash2, Users } from "lucide-svelte";
+  import {
+    Crown,
+    Languages,
+    LogOut,
+    MoreVertical,
+    Pen,
+    Send,
+    Trash2,
+    UserPlus,
+    Users,
+  } from "lucide-svelte";
   import type { AuthenticatedUserState } from "src/routes/(auth)/authenticatedUser.svelte";
   import { onDestroy, tick } from "svelte";
-  import { SvelteSet } from "svelte/reactivity";
 
-  type CustomDirectMessage = DirectMessage & {
+  type CustomGroupMessage = GroupMessage & {
     editMode?: boolean;
-    editInputElement?: HTMLDivElement;
+    editInputElement?: HTMLInputElement;
   };
 
   const { authenticatedUserState } = page.data as {
@@ -59,36 +69,37 @@
     page.url.searchParams.get("aroundMessageId"),
   );
 
-  // the chatId is the userId of the other user
-  let currentChatId = $derived(page.params.chatId);
-  let otherUserProfile: UserProfile = $state(null);
+  let currentGroupId = $derived(page.params.groupId);
+  let groupInfo: GroupInfo = $state(null);
   let currentMessage = $state("");
-  let currentRoom: { id: string | null; messages: CustomDirectMessage[] } =
+  let currentRoom: { id: string | null; messages: CustomGroupMessage[] } =
     $state({
       id: null,
       messages: [],
     });
 
+  let showMembersSheet = $state(false);
+  let showInviteDialog = $state(false);
   let deleteMessageDialog: {
     open: boolean;
-    message: CustomDirectMessage | null;
+    message: CustomGroupMessage | null;
   } = $state({
     open: false,
     message: null,
   });
 
-  // Group creation states
-  let showCreateGroupDialog = $state(false);
+  // Invite members states
   let allUsers: ListAllUsersResponse[] = $state([]);
-  let selectedUserIds = $state(new SvelteSet<string>());
-  let groupName = $state("");
+  let selectedUserIds = $state(new Set<string>());
   let isLoadingUsers = $state(false);
-  let isCreatingGroup = $state(false);
+  let isInviting = $state(false);
 
   let unsubscribeSendMessage = null;
   let unsubscribeMessageReactionAdded = null;
   let unsubscribeMessageReactionRemoved = null;
   let unsubscribeUserStatusUpdated = null;
+  let unsubscribeGroupMemberAdded = null;
+  let unsubscribeGroupMemberRemoved = null;
   let unsubscribeGroupMessageContentEdited = null;
   let unsubscribeGroupMessageDeleted = null;
   let inputElement: HTMLDivElement = $state(null);
@@ -106,17 +117,25 @@
   const LIMIT_LOAD = 50;
   const MAX_MESSAGES = 75;
 
+  // Check if current user is admin
+  const isAdmin = $derived(
+    groupInfo?.members?.find((m) => m.userId === authenticatedUser.id)
+      ?.isGroupOwner || false,
+  );
+
   $effect(() => {
-    joinRoomAndListenMessages(currentChatId);
-    getUserProfile(currentChatId).then(
-      (userProfile) => (otherUserProfile = userProfile),
-    );
+    joinRoomAndListenMessages(currentGroupId);
+    getGroupInfo(currentGroupId).then((info) => {
+      groupInfo = info;
+    });
 
     return () => {
       unsubscribeSendMessage?.();
       unsubscribeMessageReactionAdded?.();
       unsubscribeMessageReactionRemoved?.();
       unsubscribeUserStatusUpdated?.();
+      unsubscribeGroupMemberAdded?.();
+      unsubscribeGroupMemberRemoved?.();
       unsubscribeGroupMessageContentEdited?.();
       unsubscribeGroupMessageDeleted?.();
       ws.leaveRoom(currentRoom.id);
@@ -125,25 +144,22 @@
     };
   });
 
-  // Load all users when dialog opens
+  // Load all users when invite dialog opens
   $effect(() => {
-    if (showCreateGroupDialog) {
+    if (showInviteDialog) {
       loadAllUsers();
     }
   });
-
   const loadAllUsers = async () => {
     try {
       isLoadingUsers = true;
       allUsers = await listAllUsers();
 
-      // Pre-select the current chat user and authenticated user
-      selectedUserIds = new SvelteSet([authenticatedUser.id, currentChatId]);
+      // Filter out users who are already members
+      const userIds = new Set(groupInfo.members.map((m) => m.userId));
+      allUsers = allUsers.filter((user) => !userIds.has(user.id));
 
-      // Set default group name
-      if (otherUserProfile) {
-        groupName = `Groupe avec ${otherUserProfile.firstName} ${otherUserProfile.lastName}`;
-      }
+      selectedUserIds = new Set();
     } catch (error) {
       console.error("Failed to load users:", error);
     } finally {
@@ -157,64 +173,65 @@
     } else {
       selectedUserIds.add(userId);
     }
+    selectedUserIds = new Set(selectedUserIds); // Trigger reactivity
   };
 
-  const createGroup = async () => {
-    if (selectedUserIds.size < 2) {
-      alert("Un groupe doit contenir au moins 2 personnes.");
-      return;
-    }
-
-    if (!groupName.trim()) {
-      alert("Veuillez entrer un nom pour le groupe.");
-      return;
-    }
-
-    try {
-      isCreatingGroup = true;
-
-      const newGroupId = await createGroupChat(
-        groupName.trim(),
-        Array.from(selectedUserIds),
+  const inviteMembers = async () => {
+    if (selectedUserIds.size === 0) {
+      error(
+        "Aucun utilisateur sélectionné",
+        "Veuillez sélectionner au moins un utilisateur à inviter.",
       );
+      return;
+    }
 
-      console.log("Creating group with:", {
-        name: groupName.trim(),
-        memberIds: Array.from(selectedUserIds),
-      });
+    try {
+      isInviting = true;
 
-      goto(`/chat/group/${newGroupId}`);
+      for (const userId of selectedUserIds) {
+        await addGroupMember(currentGroupId, userId);
+      }
 
-      showCreateGroupDialog = false;
-      resetGroupCreationState();
+      showInviteDialog = false;
+      selectedUserIds = new Set();
+
+      // Refresh group info
+      groupInfo = await getGroupInfo(currentGroupId);
     } catch (error) {
-      console.error("Failed to create group:", error);
-      alert("Erreur lors de la création du groupe.");
+      console.error("Failed to invite members:", error);
+      error(
+        "Erreur lors de l'invitation des membres.",
+        "Impossible d'inviter les membres, veuillez réessayer plus tard.",
+      );
     } finally {
-      isCreatingGroup = false;
+      isInviting = false;
     }
   };
 
-  const resetGroupCreationState = () => {
-    selectedUserIds = new SvelteSet();
-    groupName = "";
-    allUsers = [];
+  const leaveGroup = async () => {
+    try {
+      await leaveGroupApi(currentGroupId);
+      await goto("/");
+    } catch (e) {
+      console.error("Failed to leave group:", error);
+      error(
+        "Erreur lors de la sortie du groupe.",
+        "Impossible de quitter le groupe, veuillez réessayer plus tard.",
+      );
+    }
   };
 
-  const joinRoomAndListenMessages = async (otherUserId: string) => {
+  const joinRoomAndListenMessages = async (groupId: string) => {
     try {
-      currentRoom.messages = await getDirectMessages(otherUserId, {
+      currentRoom.messages = await listGroupMessages(groupId, {
         limit: LIMIT_LOAD,
         aroundMessageId,
       });
       currentRoom.messages = currentRoom.messages.sort(
         (a, b) => a.createdAt.getTime() - b.createdAt.getTime(),
       );
-      const joinedRoom = await ws.asyncDirectJoinRoom(
-        otherUserId,
-        RoomKind.DIRECT,
-      );
-      currentRoom.id = joinedRoom.roomId;
+      const joinedRoom = await ws.asyncGroupJoinRoom(groupId, RoomKind.GROUP);
+      currentRoom.id = joinedRoom;
 
       await tick();
       if (aroundMessageId) {
@@ -258,7 +275,7 @@
       }
 
       unsubscribeSendMessage = ws.subscribe(
-        "send-direct-message",
+        "send-group-message",
         async (msg) => {
           currentRoom.messages.push({
             id: msg.messageId,
@@ -278,7 +295,7 @@
       );
 
       unsubscribeMessageReactionAdded = ws.subscribe(
-        "direct-message-reaction-added",
+        "group-message-reaction-added",
         (msg) => {
           const message = currentRoom.messages.find(
             (m) => m.id === msg.messageId,
@@ -306,7 +323,7 @@
       );
 
       unsubscribeMessageReactionRemoved = ws.subscribe(
-        "direct-message-reaction-removed",
+        "group-message-reaction-removed",
         (msg) => {
           const message = currentRoom.messages.find(
             (m) => m.id === msg.messageId,
@@ -329,17 +346,28 @@
         },
       );
 
-      unsubscribeUserStatusUpdated = ws.subscribe(
-        "user-status-updated",
-        (msg) => {
-          if (msg.userId === otherUserProfile.id) {
-            otherUserProfile.status = msg.status;
+      unsubscribeGroupMemberAdded = ws.subscribe(
+        "group-member-added",
+        async (msg) => {
+          if (msg.groupId === currentGroupId) {
+            // Refresh group info
+            groupInfo = await getGroupInfo(currentGroupId);
+          }
+        },
+      );
+
+      unsubscribeGroupMemberRemoved = ws.subscribe(
+        "group-member-removed",
+        async (msg) => {
+          if (msg.groupId === currentGroupId) {
+            // Refresh group info
+            groupInfo = await getGroupInfo(currentGroupId);
           }
         },
       );
 
       unsubscribeGroupMessageContentEdited = ws.subscribe(
-        "direct-message-content-edited",
+        "group-message-content-edited",
         (msg) => {
           const message = currentRoom.messages.find(
             (m) => m.id === msg.messageId,
@@ -351,7 +379,7 @@
       );
 
       unsubscribeGroupMessageDeleted = ws.subscribe(
-        "direct-message-deleted",
+        "group-message-deleted",
         (msg) => {
           currentRoom.messages = currentRoom.messages.filter(
             (m) => m.id !== msg.messageId,
@@ -383,7 +411,7 @@
     if (currentRoom.messages.length === 0) return;
     try {
       const oldest = currentRoom.messages[0];
-      const newMessages = await getDirectMessages(currentChatId, {
+      const newMessages = await listGroupMessages(currentGroupId, {
         limit: LIMIT_LOAD,
         before: oldest.createdAt,
       });
@@ -407,7 +435,7 @@
     if (currentRoom.messages.length === 0) return;
     try {
       const newest = currentRoom.messages[currentRoom.messages.length - 1];
-      const newMessages = await getDirectMessages(currentChatId, {
+      const newMessages = await listGroupMessages(currentGroupId, {
         limit: LIMIT_LOAD,
         after: newest.createdAt,
       });
@@ -428,7 +456,7 @@
   };
 
   const handleMessageReactionToggle = (messageId: string, reaction: string) => {
-    ws.toggleDirectMessageReaction(currentChatId, messageId, reaction);
+    ws.toggleGroupMessageReaction(currentGroupId, messageId, reaction);
   };
 
   const sendMessageToWs = async () => {
@@ -440,11 +468,12 @@
       ? (now.getTime() - lastMessage.createdAt.getTime()) / 1000 / 60
       : 0;
 
-    ws.sendDirectMessage(currentChatId, currentMessage);
+    ws.sendGroupMessage(currentGroupId, currentMessage);
     currentMessage = "";
 
+    // Si l'utilisateur est "loin" dans l'historique (ex. dernier message > 5 min), recharge les messages récents
     if (timeDiff > 5) {
-      currentRoom.messages = await getDirectMessages(currentChatId, {
+      currentRoom.messages = await listGroupMessages(currentGroupId, {
         limit: LIMIT_LOAD,
       });
       currentRoom.messages = currentRoom.messages.sort(
@@ -456,6 +485,63 @@
   $effect(() => {
     if (currentMessage.trim() === "" && inputElement)
       inputElement.innerText = "";
+  });
+
+  $effect(() => {
+    return ws.subscribe("user-status-updated", (msg) => {
+      if (groupInfo?.members) {
+        const member = groupInfo.members.find((m) => m.userId === msg.userId);
+        if (member) {
+          member.status = msg.status;
+        }
+      }
+
+      // Change allUsers status
+      const user = allUsers.find((u) => u.id === msg.userId);
+      if (user) {
+        user.status = msg.status;
+      }
+    });
+  });
+
+  $effect(() => {
+    return ws.subscribe("group-member-added", (msg) => {
+      // Add the user to the group info members
+      if (msg.groupId === currentGroupId) {
+        getGroupInfo(currentGroupId).then((info) => {
+          groupInfo = info;
+        });
+      }
+
+      // Remove the user from allUsers if they were there
+      allUsers = allUsers.filter((u) => u.id !== msg.member.userId);
+    });
+  });
+
+  $effect(() => {
+    return ws.subscribe("group-member-removed", async (msg) => {
+      // Remove the user to the group info members
+      if (msg.groupId === currentGroupId) {
+        getGroupInfo(currentGroupId).then((info) => {
+          groupInfo = info;
+        });
+      }
+
+      // Add the user from allUsers if they were there
+      allUsers = await listAllUsers();
+      allUsers = allUsers.filter((u) => u.id !== msg.userId);
+    });
+  });
+
+  $effect(() => {
+    return ws.subscribe("group-ownership-transferred", (msg) => {
+      // Refresh group info to reflect ownership change
+      if (msg.groupId === currentGroupId) {
+        getGroupInfo(currentGroupId).then((info) => {
+          groupInfo = info;
+        });
+      }
+    });
   });
 
   const handleInputKeyDown = (e) => {
@@ -470,11 +556,7 @@
     if (bottomObserver) bottomObserver.disconnect();
   });
 
-  const handleLanguageButtonClick = () => {
-    window.location.href = `/chat/direct/${currentChatId}/translate`;
-  };
-
-  const handleMessageEdit = async (message: CustomDirectMessage) => {
+  const handleMessageEdit = async (message: CustomGroupMessage) => {
     // Toggle edit mode
     message.editMode = !message.editMode;
     if (message.editMode) {
@@ -483,15 +565,15 @@
       message.editInputElement?.focus();
     } else {
       // Send the edited message
-      ws.editDirectMessage(currentChatId, message.id, message.content);
+      ws.editGroupMessage(currentGroupId, message.id, message.content);
     }
   };
 
-  const handleMessageDelete = async (message: CustomDirectMessage) => {
+  const handleMessageDelete = async (message: CustomGroupMessage) => {
     if (!message) return;
 
     try {
-      await ws.deleteDirectMessage(currentChatId, message.id);
+      await ws.deleteGroupMessage(currentGroupId, message.id);
     } catch (error) {
       console.error("Failed to delete message:", error);
       error(
@@ -503,56 +585,67 @@
 </script>
 
 <div class="relative w-full h-full flex flex-col gap-y-4">
-  {#if otherUserProfile}
+  {#if groupInfo}
     <div
       class="flex items-center justify-between bg-gray-100 dark:bg-gray-800 p-4"
     >
-      <div class="flex items-center gap-x-2">
+      <div class="flex items-center gap-x-3">
         <div class="relative size-12">
-          {#key otherUserProfile}
-            <Avatar.Root>
-              <Avatar.Image
-                src={getS3ObjectUrl(
-                  S3Bucket.USERS_AVATARS,
-                  otherUserProfile.id,
-                )}
-              />
-              <Avatar.Fallback
-                >{fallbackAvatarLetters(
-                  otherUserProfile.firstName + " " + otherUserProfile.lastName,
-                )}</Avatar.Fallback
-              >
-            </Avatar.Root>
-          {/key}
-          <span
-            class={cn("rounded-full absolute bottom-2 right-2 size-3", {
-              "bg-green-500": otherUserProfile.status === PublicStatus.ONLINE,
-              "bg-yellow-500": otherUserProfile.status === PublicStatus.AWAY,
-              "bg-red-500":
-                otherUserProfile.status === PublicStatus.DO_NOT_DISTURB,
-              "bg-gray-500": otherUserProfile.status === PublicStatus.OFFLINE,
-            })}
-          >
-          </span>
+          <Avatar.Root class="size-12">
+            <Avatar.Fallback class="bg-primary text-primary-foreground">
+              {fallbackAvatarLetters(groupInfo.name)}
+            </Avatar.Fallback>
+          </Avatar.Root>
         </div>
 
-        <span class="font-semibold text-2xl"
-          >{otherUserProfile.firstName} {otherUserProfile.lastName}</span
-        >
-        <span class="text-gray-500 text-lg translate-y-[1px]"
-          >{otherUserProfile.email}</span
-        >
+        <div class="flex flex-col">
+          <span class="font-semibold text-xl">{groupInfo.name}</span>
+          <span class="text-gray-500 text-sm">
+            {groupInfo.members.length} membre{groupInfo.members.length > 1
+              ? "s"
+              : ""}
+          </span>
+        </div>
       </div>
 
-      <Button
-        variant="outline"
-        size="sm"
-        onclick={() => (showCreateGroupDialog = true)}
-        class="flex items-center gap-2"
-      >
-        <Users size={16} />
-        Créer un groupe
-      </Button>
+      <div class="flex items-center gap-2">
+        <Button
+          variant="outline"
+          size="sm"
+          onclick={() => (showMembersSheet = true)}
+          class="flex items-center gap-2"
+        >
+          <Users size={16} />
+          Membres
+        </Button>
+
+        <Button
+          variant="outline"
+          size="sm"
+          onclick={() => (showInviteDialog = true)}
+          class="flex items-center gap-2"
+        >
+          <UserPlus size={16} />
+          Inviter
+        </Button>
+
+        <DropdownMenu.Root>
+          <DropdownMenu.Trigger>
+            <Button variant="outline" size="sm">
+              <MoreVertical size={16} />
+            </Button>
+          </DropdownMenu.Trigger>
+          <DropdownMenu.Content align="end">
+            <DropdownMenu.Item
+              onclick={leaveGroup}
+              class="text-red-600 focus:text-red-600"
+            >
+              <LogOut size={16} class="mr-2" />
+              Quitter le groupe
+            </DropdownMenu.Item>
+          </DropdownMenu.Content>
+        </DropdownMenu.Root>
+      </div>
     </div>
   {/if}
 
@@ -622,13 +715,13 @@
                           message.author.userId,
                         )}
                       />
-                      <Avatar.Fallback
-                        >{fallbackAvatarLetters(
+                      <Avatar.Fallback>
+                        {fallbackAvatarLetters(
                           message.author.firstName +
                             " " +
                             message.author.lastName,
-                        )}</Avatar.Fallback
-                      >
+                        )}
+                      </Avatar.Fallback>
                     </Avatar.Root>
                   </HoveredUserProfile>
                   <div class="flex flex-col">
@@ -637,11 +730,19 @@
                         userId={message.author.userId}
                         self={false}
                       >
-                        <span class="font-semibold"
-                          >{message.author.firstName}
-                          {message.author.lastName}</span
-                        >
+                        <span class="font-semibold">
+                          {message.author.firstName}
+                          {message.author.lastName}
+                        </span>
                       </HoveredUserProfile>
+                      {#if groupInfo?.members?.find((m) => m.userId === message.author.userId)?.isGroupOwner}
+                        <Tooltip>
+                          <TooltipTrigger>
+                            <Crown size={14} class="text-yellow-500" />
+                          </TooltipTrigger>
+                          <TooltipContent>Administrateur</TooltipContent>
+                        </Tooltip>
+                      {/if}
                       <Tooltip>
                         <TooltipTrigger>
                           <span class="text-sm text-gray-500">
@@ -675,20 +776,30 @@
                     <div class="flex flex-col gap-y-2">
                       <div class="flex items-end gap-2 justify-end">
                         <div class="flex flex-col items-end gap-y-2">
-                          <Tooltip>
-                            <TooltipTrigger class="text-left">
-                              <span class="text-sm text-gray-500">
-                                {formatDate(message.createdAt)}
-                              </span>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                              {format(
-                                new Date(message.createdAt),
-                                "EEEE d MMMM yyyy à HH:mm",
-                                { locale: fr },
-                              )}
-                            </TooltipContent>
-                          </Tooltip>
+                          <div class="flex items-center gap-2">
+                            <Tooltip>
+                              <TooltipTrigger class="text-left">
+                                <span class="text-sm text-gray-500">
+                                  {formatDate(message.createdAt)}
+                                </span>
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                {format(
+                                  new Date(message.createdAt),
+                                  "EEEE d MMMM yyyy à HH:mm",
+                                  { locale: fr },
+                                )}
+                              </TooltipContent>
+                            </Tooltip>
+                            {#if isAdmin}
+                              <Tooltip>
+                                <TooltipTrigger>
+                                  <Crown size={14} class="text-yellow-500" />
+                                </TooltipTrigger>
+                                <TooltipContent>Administrateur</TooltipContent>
+                              </Tooltip>
+                            {/if}
+                          </div>
                           {#if message.editMode}
                             <input
                               type="text"
@@ -703,11 +814,13 @@
                               }}
                             />
                           {:else}
-                            <span
-                              class="p-2 rounded-xl break-all bg-primary text-white shadow-lg w-full"
-                            >
-                              {message.content}
-                            </span>
+                            <div class="flex items-center gap-2">
+                              <span
+                                class="p-2 rounded-xl break-all bg-primary text-white shadow-lg w-full"
+                              >
+                                {message.content}
+                              </span>
+                            </div>
                           {/if}
                         </div>
 
@@ -724,13 +837,13 @@
                                 message.author.userId,
                               )}
                             />
-                            <Avatar.Fallback
-                              >{fallbackAvatarLetters(
+                            <Avatar.Fallback>
+                              {fallbackAvatarLetters(
                                 message.author.firstName +
                                   " " +
                                   message.author.lastName,
-                              )}</Avatar.Fallback
-                            >
+                              )}
+                            </Avatar.Fallback>
                           </Avatar.Root>
                         </HoveredUserProfile>
                       </div>
@@ -779,7 +892,9 @@
                 <ContextMenu.Separator />
                 <ContextMenu.Item
                   class="flex justify-between"
-                  onclick={() => handleMessageEdit(message)}
+                  onclick={() => {
+                    handleMessageEdit(message);
+                  }}
                 >
                   <span>Modifier</span>
                   <div>
@@ -808,25 +923,26 @@
     {/if}
   </div>
 
-  {#if otherUserProfile}
+  {#if groupInfo}
     <div
       class="flex items-center gap-x-2 px-4 py-3 bg-gray-100 dark:bg-gray-800 border-t-[2px] border-t-primary"
     >
       <div
         class="flex-1 p-2 rounded-lg bg-white dark:bg-gray-700 min-h-[40px] max-h-32 overflow-y-auto break-all cursor-text"
         contenteditable
-        placeholder="Écrivez un message à {otherUserProfile.firstName}"
+        placeholder="Écrivez un message au groupe"
         bind:this={inputElement}
         bind:innerText={currentMessage}
         onkeydown={handleInputKeyDown}
       ></div>
 
-      <button
+      <Button
+        variant="ghost"
+        href="/chat/group/{currentGroupId}/translate"
         class="p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
-        onclick={handleLanguageButtonClick}
       >
         <Languages size={20} class="text-primary" />
-      </button>
+      </Button>
 
       <button
         class="p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
@@ -838,30 +954,91 @@
   {/if}
 </div>
 
-<!-- Create Group Dialog -->
-<Dialog.Root bind:open={showCreateGroupDialog}>
+<!-- Members Sheet -->
+<Sheet.Root bind:open={showMembersSheet}>
+  <Sheet.Content side="right" class="w-80">
+    <Sheet.Header>
+      <Sheet.Title class="flex items-center gap-2">
+        <Users size={20} />
+        Membres du groupe ({groupInfo?.members?.length || 0})
+      </Sheet.Title>
+    </Sheet.Header>
+
+    <div class="space-y-3 mt-6">
+      {#if groupInfo?.members}
+        {#each groupInfo.members as member (member.id)}
+          <HoveredUserProfile
+            userId={member.userId}
+            self={member.userId === authenticatedUser.id}
+          >
+            <div
+              class="flex items-center justify-between p-3 rounded-lg border bg-card"
+            >
+              <div class="flex items-center space-x-3">
+                <div class="relative">
+                  <Avatar.Root class="size-10">
+                    <Avatar.Image
+                      src={getS3ObjectUrl(
+                        S3Bucket.USERS_AVATARS,
+                        member.userId,
+                      )}
+                    />
+                    <Avatar.Fallback>
+                      {fallbackAvatarLetters(member.userName)}
+                    </Avatar.Fallback>
+                  </Avatar.Root>
+
+                  <span
+                    class={cn(
+                      "rounded-full absolute bottom-0 right-0 size-3 border-2 border-white dark:border-gray-800",
+                      {
+                        "bg-green-500": member.status === PublicStatus.ONLINE,
+                        "bg-yellow-500": member.status === PublicStatus.AWAY,
+                        "bg-red-500":
+                          member.status === PublicStatus.DO_NOT_DISTURB,
+                        "bg-gray-500": member.status === PublicStatus.OFFLINE,
+                      },
+                    )}
+                  />
+                </div>
+
+                <div class="flex-1">
+                  <div class="font-medium flex items-center gap-2">
+                    {member.userName}
+                    {#if member.isGroupOwner}
+                      <Crown size={14} class="text-yellow-500" />
+                    {/if}
+                    {#if member.id === authenticatedUser.id}
+                      <span class="text-xs text-muted-foreground">(Vous)</span>
+                    {/if}
+                  </div>
+                  <div class="text-sm text-muted-foreground">
+                    {member.email}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </HoveredUserProfile>
+        {/each}
+      {/if}
+    </div>
+  </Sheet.Content>
+</Sheet.Root>
+
+<!-- Invite Members Dialog -->
+<Dialog.Root bind:open={showInviteDialog}>
   <Dialog.Content class="max-w-2xl max-h-[80vh]">
     <Dialog.Header>
       <Dialog.Title class="flex items-center gap-2">
-        <Users size={20} />
-        Créer un nouveau groupe
+        <UserPlus size={20} />
+        Inviter des membres
       </Dialog.Title>
       <Dialog.Description>
-        Sélectionnez les utilisateurs que vous souhaitez ajouter au groupe.
+        Sélectionnez les utilisateurs que vous souhaitez inviter au groupe.
       </Dialog.Description>
     </Dialog.Header>
 
     <div class="space-y-6 py-4">
-      <!-- Group Name Input -->
-      <div class="space-y-2">
-        <Label for="group-name">Nom du groupe</Label>
-        <Input
-          id="group-name"
-          placeholder="Entrez le nom du groupe..."
-          bind:value={groupName}
-        />
-      </div>
-
       <!-- Selected Users Count -->
       <div class="text-sm text-muted-foreground">
         {selectedUserIds.size} utilisateur{selectedUserIds.size > 1 ? "s" : ""} sélectionné{selectedUserIds.size >
@@ -882,14 +1059,9 @@
           {#each allUsers as user (user.id)}
             <div
               class="flex items-center space-x-3 p-3 rounded-lg border bg-card hover:bg-accent/50 transition-colors"
-              onclick={() =>
-                user.id !== authenticatedUser.id &&
-                toggleUserSelection(user.id)}
+              onclick={() => toggleUserSelection(user.id)}
             >
-              <Checkbox
-                checked={selectedUserIds.has(user.id)}
-                disabled={user.id === authenticatedUser.id}
-              />
+              <Checkbox checked={selectedUserIds.has(user.id)} />
 
               <div class="relative">
                 <Avatar.Root class="size-10">
@@ -920,14 +1092,6 @@
                 <div class="font-medium">
                   {user.firstName}
                   {user.lastName}
-                  {#if user.id === authenticatedUser.id}
-                    <span class="text-xs text-muted-foreground">(Vous)</span>
-                  {/if}
-                  {#if user.id === currentChatId}
-                    <span class="text-xs text-primary"
-                      >(Discussion actuelle)</span
-                    >
-                  {/if}
                 </div>
                 <div class="text-sm text-muted-foreground">{user.email}</div>
               </div>
@@ -940,26 +1104,24 @@
     <Dialog.Footer>
       <Button
         variant="outline"
-        onclick={() => (showCreateGroupDialog = false)}
-        disabled={isCreatingGroup}
+        onclick={() => (showInviteDialog = false)}
+        disabled={isInviting}
       >
         Annuler
       </Button>
       <Button
-        onclick={createGroup}
-        disabled={selectedUserIds.size < 2 ||
-          !groupName.trim() ||
-          isCreatingGroup}
+        onclick={inviteMembers}
+        disabled={selectedUserIds.size === 0 || isInviting}
         class="flex items-center gap-2"
       >
-        {#if isCreatingGroup}
+        {#if isInviting}
           <div
             class="size-4 border-2 border-white border-t-transparent rounded-full animate-spin"
           />
         {:else}
-          <Users size={16} />
+          <UserPlus size={16} />
         {/if}
-        Créer le groupe
+        Inviter ({selectedUserIds.size})
       </Button>
     </Dialog.Footer>
   </Dialog.Content>

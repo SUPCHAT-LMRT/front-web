@@ -87,7 +87,7 @@
     style="--sidebar-width: 6.1rem"
   >
     <Sidebar.Root
-      class="h-full border-l-2 border-r-2 border-gray-200 dark:border-gray-700 relative"
+      class="h-full border-r-2 border-gray-200 dark:border-gray-700 relative"
     >
       <Sidebar.Content class="dark:bg-gray-800">
         <Sidebar.Group class="p-0">
@@ -133,7 +133,7 @@
                                 {/key}
 
                                 <Avatar.Fallback
-                                  class="rounded-3xl transition-all hover:rounded-2xl hover:scale-105"
+                                  class="rounded-3xl transition-all hover:rounded-2xl hover:scale-105 bg-gray-200 dark:bg-gray-700 text-gray-500 text-sm flex items-center justify-center"
                                 >
                                   {fallbackAvatarLetters(workspace.name)}
                                 </Avatar.Fallback>

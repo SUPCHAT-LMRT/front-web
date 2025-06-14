@@ -1,6 +1,7 @@
 import axios from 'axios';
+import { env } from "$env/dynamic/public";
 
-const API_URL = 'https://api.mymemory.translated.net/get';
+const PUBLIC_API_TRANSLATE_URL = `${env.PUBLIC_API_TRANSLATE_URL}`;
 
 interface MyMemoryResponse {
     responseData: {
@@ -19,7 +20,7 @@ export const translateText = async (text: string, sourceLang: string, targetLang
         const sourceParam = sourceLang === 'auto' ? '' : sourceLang;
         const langPair = `${sourceParam}|${targetLang}`;
 
-        const response = await axios.get<MyMemoryResponse>(API_URL, {
+        const response = await axios.get<MyMemoryResponse>(PUBLIC_API_TRANSLATE_URL, {
             params: {
                 q: text,
                 langpair: langPair,
@@ -27,11 +28,11 @@ export const translateText = async (text: string, sourceLang: string, targetLang
         });
 
         if (response.data.quotaFinished) {
-            new Error('Limite quotidienne de traduction atteinte');
+            throw new Error('Limite quotidienne de traduction atteinte');
         }
 
         if (response.data.responseStatus === '403') {
-            new Error('Service temporairement indisponible');
+            throw new Error('Service temporairement indisponible');
         }
 
         return response.data.responseData.translatedText;

@@ -17,8 +17,8 @@
     case "/(auth)/settings/connection":
       activeTab = { displayName: "Connexion", label: "connections" };
       break;
-    case "/(auth)/settings/voice":
-      activeTab = { displayName: "Voix & Vidéo", label: "voiceAndVideo" };
+    case "/(auth)/settings/notifications":
+      activeTab = { displayName: "Notifications", label: "notifications" };
       break;
   }
 
@@ -30,9 +30,7 @@
   let { children } = $props();
 </script>
 
-<section
-  class="border-l-2 border-gray-200 dark:border-gray-800 dark:bg-gray-800 w-full"
->
+<section class="border-gray-200 dark:border-gray-800 dark:bg-gray-800 h-full">
   <div class="flex flex-col px-4 py-2">
     <section>
       <div class="flex items-end mb-4">
@@ -73,15 +71,15 @@
               Connexion
             </Tabs.Trigger>
             <Tabs.Trigger
-              value="voiceAndVideo"
-              class="text-gray-600 dark:text-gray-200"
-              onclick={() =>
+                    value="notifications"
+                    class="text-gray-600 dark:text-gray-200"
+                    onclick={() =>
                 handleTabChange(
-                  { displayName: "Voix & Vidéo", label: "voiceAndVideo" },
-                  "/settings/voice",
+                  { displayName: "Notifications", label: "notifications" },
+                  "/settings/notifications",
                 )}
             >
-              Voix & Vidéo
+              Notifications
             </Tabs.Trigger>
           </Tabs.List>
         </Tabs.Root>

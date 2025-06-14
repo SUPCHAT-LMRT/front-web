@@ -3,34 +3,84 @@
     import {formatDistanceToNow} from "date-fns";
     import {fr} from "date-fns/locale";
     import {onMount} from "svelte";
-    import {getPolls, type Poll, votePoll, unvotePoll} from "$lib/api/workspaces/polls";
+    import {
+        getPolls,
+        votePoll,
+        unvotePoll,
+        type Poll,
+        createPoll, deletePoll
+    } from "$lib/api/workspaces/polls";
     import {page} from "$app/state";
     import {notifyByLevel, success} from "$lib/toast/toast";
     import * as Dialog from "$lib/components/ui/dialog";
     import {Button} from "$lib/components/ui/button";
     import * as Card from "$lib/components/ui/card/index.js";
     import * as Chart from "$lib/components/ui/chart/index.js";
-    import { Arc, PieChart, Text } from "layerchart";
+    import {Arc, PieChart, Text} from "layerchart";
+    import {Input} from "$lib/components/ui/input";
+    import {Label} from "$lib/components/ui/label";
+    import {MoreHorizontal} from "lucide-svelte";
 
     let currentWorkspaceId = $derived(page.params.workspaceId);
     let polls: Poll[] = $state([]);
     let showUnvoteConfirmation = $state(false);
-    let selectedPollOption = $state({ pollId: "", optionId: "" });
+    let selectedPollOption = $state({pollId: "", optionId: ""});
 
     const COLORS = [
-        "hsl(200, 70%, 50%)",  // Bleu
-        "hsl(150, 70%, 50%)",  // Vert
-        "hsl(350, 70%, 50%)",  // Rouge
-        "hsl(50, 70%, 50%)",   // Jaune
-        "hsl(280, 70%, 50%)",  // Violet
-        "hsl(25, 70%, 50%)",   // Orange
-        "hsl(180, 70%, 50%)",  // Turquoise
-        "hsl(320, 70%, 50%)",  // Rose
-        "hsl(100, 70%, 50%)",  // Vert clair
-        "hsl(240, 70%, 50%)"   // Bleu foncé
+        "hsl(200, 70%, 50%)",
+        "hsl(150, 70%, 50%)",
+        "hsl(350, 70%, 50%)",
+        "hsl(50, 70%, 50%)",
+        "hsl(280, 70%, 50%)",
+        "hsl(25, 70%, 50%)",
+        "hsl(180, 70%, 50%)",
+        "hsl(320, 70%, 50%)",
+        "hsl(100, 70%, 50%)",
+        "hsl(240, 70%, 50%)"
     ];
 
     const getColor = (index: number) => COLORS[index % COLORS.length];
+
+    // Formulaire de création de sondage
+    let newQuestion = $state("");
+    let newOptions: string[] = $state(["", ""]);
+    let newExpiresAt = $state("");
+
+    function addOption() {
+        newOptions = [...newOptions, ""];
+    }
+
+    function updateOption(index: number, value: string) {
+        newOptions[index] = value;
+    }
+
+    async function submitNewPoll() {
+        if (!currentWorkspaceId || !newQuestion || newOptions.some(opt => !opt.trim())) {
+            notifyByLevel({
+                title: "Erreur",
+                level: "error",
+                message: "Veuillez remplir tous les champs.",
+            });
+            return;
+        }
+
+        try {
+            const isoDate = newExpiresAt ? new Date(newExpiresAt).toISOString() : undefined;
+            await createPoll(currentWorkspaceId, newQuestion, newOptions, isoDate);
+            polls = await getPolls(currentWorkspaceId);
+            success("Sondage créé", "Votre sondage a été créé avec succès.");
+            newQuestion = "";
+            newOptions = [""];
+            newExpiresAt = "";
+        } catch (error) {
+            console.error("Erreur lors de la création du sondage :", error);
+            notifyByLevel({
+                title: "Erreur",
+                level: "error",
+                message: "Impossible de créer le sondage.",
+            });
+        }
+    }
 
     async function Handle(pollId: string, optionId: string) {
         if (currentWorkspaceId) {
@@ -67,7 +117,7 @@
         if (!currentWorkspaceId) return;
 
         if (isVoted) {
-            selectedPollOption = { pollId, optionId };
+            selectedPollOption = {pollId, optionId};
             showUnvoteConfirmation = true;
         } else {
             await Handle(pollId, optionId);
@@ -97,6 +147,24 @@
         }
     }
 
+    async function handleDeletePoll(pollId: string) {
+        if (!currentWorkspaceId) return;
+
+        try {
+            await deletePoll(currentWorkspaceId, pollId);
+            polls = await getPolls(currentWorkspaceId);
+            success("Sondage supprimé", "Le sondage a bien été supprimé.");
+        } catch (error) {
+            console.error("Erreur lors de la suppression :", error);
+            notifyByLevel({
+                title: "Erreur",
+                level: "error",
+                message: "Une erreur est survenue lors de la suppression.",
+            });
+        }
+    }
+
+
     function cancelUnvote() {
         showUnvoteConfirmation = false;
     }
@@ -106,6 +174,20 @@
             polls = await getPolls(currentWorkspaceId);
         }
     });
+
+    let showDeleteDialog = $state(false);
+    let pollToDelete: Poll | null = $state(null);
+
+    function openDeleteDialog(poll: Poll) {
+        pollToDelete = poll;
+        showDeleteDialog = true;
+    }
+
+    function closeDeleteDialog() {
+        pollToDelete = null;
+        showDeleteDialog = false;
+    }
+
 </script>
 
 <Dialog.Root open={showUnvoteConfirmation} onOpenChange={(open) => showUnvoteConfirmation = open}>
@@ -123,9 +205,42 @@
     </Dialog.Content>
 </Dialog.Root>
 
-<div class="flex flex-col w-full p-6 space-y-6 text-gray-900 dark:text-white">
+<div class="flex flex-col w-full p-6 space-y-6 text-gray-900 dark:text-white h-full overflow-y-auto">
     <h1 class="text-2xl font-bold text-[#61A0AF]">Sondages</h1>
     <Separator class="dark:bg-gray-700"/>
+
+    <!-- Formulaire de création de sondage -->
+    <div class="bg-white dark:bg-gray-900 p-4 rounded-xl shadow-md space-y-4">
+        <Label for="question">Question du sondage</Label>
+        <Input id="question" bind:value={newQuestion} placeholder="Ex : Quel est votre langage préféré ?"/>
+
+        <div class="space-y-2">
+            <Label>Options</Label>
+            {#each newOptions as option, index}
+                <div class="flex items
+                    space-x-2">
+                    <Input
+                            type="text"
+                            bind:value={newOptions[index]}
+                            placeholder={`Option ${index + 1}`}
+                            oninput={() => updateOption(index, newOptions[index])}
+                    />
+                    {#if index > 1}
+                        <Button variant="destructive"
+                                onclick={() => newOptions = newOptions.filter((_, i) => i !== index)}>
+                            Supprimer
+                        </Button>
+                    {/if}
+                </div>
+            {/each}
+            <Button variant="ghost" class="mt-2" onclick={addOption}>+ Ajouter une option</Button>
+        </div>
+
+        <Label for="expires">Expire le (facultatif)</Label>
+        <Input id="expires" type="datetime-local" bind:value={newExpiresAt}/>
+
+        <Button onclick={submitNewPoll}>Créer le sondage</Button>
+    </div>
 
     {#if polls.length === 0}
         <p>Aucun sondage pour le moment.</p>
@@ -135,11 +250,16 @@
                 <div class="bg-white dark:bg-gray-800 shadow-md rounded-2xl p-4">
                     <div class="flex justify-between items-start mb-2">
                         <h2 class="text-lg font-semibold">{poll.question}</h2>
-                        <span class="text-sm text-gray-500 dark:text-gray-400">
-                            {formatDistanceToNow(new Date(poll.expiresat), {addSuffix: true, locale: fr})}
-                        </span>
+                        <div class="flex items-center space-x-2">
+                            <button
+                                    class="hover:bg-gray-200 dark:hover:bg-gray-700 p-1 rounded-full transition"
+                                    onclick={() => openDeleteDialog(poll)}
+                                    aria-label="Options"
+                            >
+                                <MoreHorizontal class="w-5 h-5 text-muted-foreground" />
+                            </button>
+                        </div>
                     </div>
-
                     <div class="flex flex-col space-y-2">
                         {#each poll.options as option}
                             <button
@@ -149,7 +269,8 @@
                                     ? 'bg-transparent'
                                     : 'bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600'}
                                 transition-colors w-full`}
-                                    onclick={() => handleVoteAction(poll.id, option.id, option.is_voted)}>
+                                    onclick={() => handleVoteAction(poll.id, option.id, option.is_voted)}
+                            >
                                 <div class={`absolute inset-0 transition-transform duration-500 ease-out
                                 ${option.is_voted ? 'translate-x-0' : '-translate-x-full'}
                                 bg-primary`}>
@@ -176,18 +297,18 @@
                                 >
                                     <PieChart
                                             data={poll.options.map((opt, index) => ({
-                                option: opt.text,
-                                votes: opt.votes,
-                                color: getColor(index)
-                            }))}
+                                            option: opt.text,
+                                            votes: opt.votes,
+                                            color: getColor(index)
+                                        }))}
                                             key="option"
                                             value="votes"
                                             cRange={poll.options.map((_, index) => getColor(index))}
                                             c="color"
                                             innerRadius={60}
                                             props={{
-                                pie: { motion: "tween" }
-                            }}
+                                            pie: { motion: "tween" }
+                                        }}
                                     >
                                         {#snippet aboveMarks()}
                                             <Text
@@ -206,11 +327,11 @@
                                             />
                                         {/snippet}
                                         {#snippet tooltip()}
-                                            <Chart.Tooltip hideLabel indicator="line" />
+                                            <Chart.Tooltip hideLabel indicator="line"/>
                                         {/snippet}
-                                        {#snippet arc({ props, visibleData, index })}
+                                        {#snippet arc({props, visibleData, index})}
                                             <Arc {...props}>
-                                                {#snippet children({ getArcTextProps })}
+                                                {#snippet children({getArcTextProps})}
                                                     <Text
                                                             value={`${visibleData[index].option.slice(0, 10)}${visibleData[index].option.length > 10 ? '...' : ''} (${visibleData[index].votes})`}
                                                             {...getArcTextProps("outer", {
@@ -227,9 +348,33 @@
                             </Card.Content>
                         </Card.Root>
                     {/if}
-
                 </div>
             {/each}
         </div>
     {/if}
 </div>
+
+<Dialog.Root open={showDeleteDialog} onOpenChange={(open) => showDeleteDialog = open}>
+    <Dialog.Content>
+        <Dialog.Header>
+            <Dialog.Title>Supprimer le sondage</Dialog.Title>
+            <Dialog.Description>
+                Êtes-vous sûr de vouloir supprimer ce sondage ? Cette action est irréversible.
+            </Dialog.Description>
+        </Dialog.Header>
+        <div class="flex justify-end space-x-2 pt-4">
+            <Button variant="outline" onclick={closeDeleteDialog}>Annuler</Button>
+            <Button
+                    variant="destructive"
+                    onclick={async () => {
+                    if (pollToDelete) {
+                        await handleDeletePoll(pollToDelete.id);
+                        closeDeleteDialog();
+                    }
+                }}
+            >
+                Supprimer
+            </Button>
+        </div>
+    </Dialog.Content>
+</Dialog.Root>

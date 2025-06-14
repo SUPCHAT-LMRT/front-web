@@ -16,6 +16,7 @@
     import {getS3ObjectUrl, S3Bucket} from "$lib/api/s3";
     import {fallbackAvatarLetters} from "$lib/utils/fallbackAvatarLetters.js";
     import * as Avatar from "$lib/components/ui/avatar";
+    import InviteMemberDialog from "$lib/components/app/workspaces/InviteMemberDialog.svelte";
 
     const {workspaceId} = page.params;
     let members = $state([]);
@@ -78,7 +79,9 @@
     <div class="space-y-6">
         <div class="flex justify-between items-center">
             <h2 class="text-xl font-semibold">Gestion des Membres</h2>
-            <Button class="text-white">Inviter un membre</Button>
+            <Button class="text-white">
+                <InviteMemberDialog workspaceId={workspaceId} />
+            </Button>
         </div>
 
         <Card>

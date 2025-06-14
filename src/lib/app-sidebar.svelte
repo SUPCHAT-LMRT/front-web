@@ -24,6 +24,9 @@
   import { changeUserStatus, PrivateStatus } from "./api/user";
   import { cn } from "./utils";
   import { fallbackAvatarLetters } from "./utils/fallbackAvatarLetters";
+  import Logodark from "$lib/assets/logo/Logodark.svelte";
+  import { mode } from "mode-watcher";
+  import Logo from "$lib/assets/logo/Logo.svelte";
 
   type Props = {
     authenticatedUserState: AuthenticatedUserState;
@@ -69,10 +72,17 @@
       <Sidebar.GroupContent>
         <Sidebar.Menu class="flex flex-col items-center">
           <Sidebar.MenuItem class="mb-4 flex flex-col items-center">
+            {#if mode.current === "dark"}
+              <Logodark width={60} />
+            {:else}
+              <Logo width={60} />
+            {/if}
+          </Sidebar.MenuItem>
+          <Sidebar.MenuItem class="mb-4 flex flex-col items-center">
             <Sidebar.MenuButton
-              class={`hover:bg-primary/70 flex items-center justify-center h-12 w-12 transition-all duration-300 ${
+              class={`hover:bg-yellow-app/70 flex items-center justify-center h-12 w-12 transition-all duration-300 ${
                 selected === "chat"
-                  ? "bg-primary dark:bg-primary shadow-["
+                  ? "bg-yellow-app dark:bg-primary shadow-["
                   : "bg-gray-200 dark:bg-gray-800"
               }`}
               onclick={() => select("chat")}
@@ -88,9 +98,9 @@
 
           <Sidebar.MenuItem class="mb-4 flex flex-col items-center">
             <Sidebar.MenuButton
-              class={`hover:bg-primary/70 flex items-center justify-center h-12 w-12 transition-all duration-300 ${
+              class={`hover:bg-yellow-app/70 flex items-center justify-center h-12 w-12 transition-all duration-300 ${
                 selected === "workspaces"
-                  ? "bg-primary shadow-md"
+                  ? "bg-yellow-app dark:bg-primary shadow-md"
                   : "bg-gray-200 dark:bg-gray-800"
               }`}
               onclick={() => select("workspaces")}
@@ -106,9 +116,9 @@
 
           <Sidebar.MenuItem class="mb-4 flex flex-col items-center">
             <Sidebar.MenuButton
-              class={`hover:bg-primary/70 flex items-center justify-center h-12 w-12 transition-all duration-300 ${
+              class={`hover:bg-yellow-app/70 flex items-center justify-center h-12 w-12 transition-all duration-300 ${
                 selected === "settings"
-                  ? "bg-primary shadow-md"
+                  ? "bg-yellow-app dark:bg-primary shadow-md"
                   : "bg-gray-200 dark:bg-gray-800"
               }`}
               onclick={() => select("settings")}
@@ -124,9 +134,9 @@
 
           <Sidebar.MenuItem class="mb-4 flex flex-col items-center">
             <Sidebar.MenuButton
-              class={` hover:bg-primary/70 flex items-center justify-center h-12 w-12 transition-all duration-300 ${
+              class={` hover:bg-yellow-app/70 flex items-center justify-center h-12 w-12 transition-all duration-300 ${
                 selected === "discover"
-                  ? "bg-primary shadow-md"
+                  ? "bg-yellow-app dark:bg-primary shadow-md"
                   : "bg-gray-200 dark:bg-gray-800"
               }`}
               onclick={() => select("discover")}
@@ -143,9 +153,9 @@
           {#if hasAdminPermission}
             <Sidebar.MenuItem class="mb-4 flex flex-col items-center">
               <Sidebar.MenuButton
-                class={`hover:bg-primary/70 flex items-center justify-center h-12 w-12 transition-all duration-300 ${
+                class={`hover:bg-yellow-app/70 flex items-center justify-center h-12 w-12 transition-all duration-300 ${
                   selected === "admin"
-                    ? "bg-primary shadow-md"
+                    ? "bg-yellow-app dark:bg-primary shadow-md"
                     : "bg-gray-200 dark:bg-gray-800"
                 }`}
                 onclick={() => select("admin")}
@@ -160,17 +170,6 @@
             </Sidebar.MenuItem>
           {/if}
 
-          <Sidebar.MenuItem>
-            <Button onclick={toggleMode} variant="outline" size="icon">
-              <Sun
-                class="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0"
-              />
-              <Moon
-                class="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100"
-              />
-              <span class="sr-only">Toggle theme</span>
-            </Button>
-          </Sidebar.MenuItem>
         </Sidebar.Menu>
       </Sidebar.GroupContent>
     </Sidebar.Group>
@@ -183,29 +182,29 @@
           <DropdownMenu.Trigger>
             {#snippet child({ props })}
               <Sidebar.MenuButton
-                {...props}
-                class="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground py-6"
+                      {...props}
+                      class="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground py-6"
               >
                 <div class="mx-auto relative size-12 flex items-center">
                   <Avatar.Root class="rounded-full">
                     <Avatar.Image
-                      src={getS3ObjectUrl(
+                            src={getS3ObjectUrl(
                         S3Bucket.USERS_AVATARS,
                         authenticatedUser.id,
                       )}
-                      alt="Photo de profile"
+                            alt="Photo de profile"
                     />
                     <Avatar.Fallback
-                      >{fallbackAvatarLetters(
-                        authenticatedUser.firstName +
-                          " " +
-                          authenticatedUser.lastName,
-                      )}</Avatar.Fallback
+                    >{fallbackAvatarLetters(
+                            authenticatedUser.firstName +
+                            " " +
+                            authenticatedUser.lastName,
+                    )}</Avatar.Fallback
                     >
                   </Avatar.Root>
 
                   <span
-                    class={cn("rounded-full absolute bottom-1 right-2 size-3", {
+                          class={cn("rounded-full absolute bottom-1 right-2 size-3", {
                       "bg-green-500":
                         authenticatedUser.status === PrivateStatus.ONLINE,
                       "bg-yellow-500":
@@ -226,35 +225,35 @@
 
           <!-- dropdown for switching status -->
           <DropdownMenu.Content
-            side={sidebar.isMobile ? "top" : "right"}
-            class="min-w-[200px]"
+                  side={sidebar.isMobile ? "top" : "right"}
+                  class="min-w-[200px]"
           >
             <DropdownMenu.Group>
               <DropdownMenu.GroupHeading>Status</DropdownMenu.GroupHeading>
               <DropdownMenu.Item
-                class="cursor-pointer flex items-center gap-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800"
-                onclick={() => selectStatus(PrivateStatus.ONLINE)}
+                      class="cursor-pointer flex items-center gap-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800"
+                      onclick={() => selectStatus(PrivateStatus.ONLINE)}
               >
                 <span class="w-3 h-3 bg-green-500 rounded-full"></span>
                 Connecté
               </DropdownMenu.Item>
               <DropdownMenu.Item
-                class="cursor-pointer flex items-center gap-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800"
-                onclick={() => selectStatus(PrivateStatus.AWAY)}
+                      class="cursor-pointer flex items-center gap-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800"
+                      onclick={() => selectStatus(PrivateStatus.AWAY)}
               >
                 <span class="w-3 h-3 bg-yellow-500 rounded-full"></span>
                 Absent
               </DropdownMenu.Item>
               <DropdownMenu.Item
-                class="cursor-pointer flex items-center gap-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800"
-                onclick={() => selectStatus(PrivateStatus.DO_NOT_DISTURB)}
+                      class="cursor-pointer flex items-center gap-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800"
+                      onclick={() => selectStatus(PrivateStatus.DO_NOT_DISTURB)}
               >
                 <span class="w-3 h-3 bg-red-500 rounded-full"></span>
                 Ne pas déranger
               </DropdownMenu.Item>
               <DropdownMenu.Item
-                class="cursor-pointer flex items-center gap-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800"
-                onclick={() => selectStatus(PrivateStatus.INVISIBLE)}
+                      class="cursor-pointer flex items-center gap-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800"
+                      onclick={() => selectStatus(PrivateStatus.INVISIBLE)}
               >
                 <span class="w-3 h-3 bg-gray-500 rounded-full"></span>
                 Invisible
@@ -264,15 +263,29 @@
             <DropdownMenu.Group>
               <DropdownMenu.GroupHeading>Autres</DropdownMenu.GroupHeading>
               <DropdownMenu.Item
-                class="cursor-pointer flex items-center gap-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800"
-                onclick={() => select("settings")}
+                      class="cursor-pointer flex items-center gap-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800"
+                      onclick={() => select("settings")}
               >
                 <Settings class="w-4 h-4" />
                 Paramètres
               </DropdownMenu.Item>
               <DropdownMenu.Item
-                class="cursor-pointer flex items-center gap-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:!bg-red-500 hover:!text-destructive-foreground"
-                onclick={() => goto("/logout")}
+                      class="cursor-pointer flex items-center gap-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800"
+                      onclick={toggleMode}
+              >
+                <div class="relative w-4 h-4 flex items-center justify-center">
+                  <Sun
+                          class="absolute h-[1rem] w-[1rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0"
+                  />
+                  <Moon
+                          class="absolute h-[1rem] w-[1rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100"
+                  />
+                </div>
+                Changer le thème
+              </DropdownMenu.Item>
+              <DropdownMenu.Item
+                      class="cursor-pointer flex items-center gap-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:!bg-red-500 hover:!text-destructive-foreground"
+                      onclick={() => goto("/logout")}
               >
                 <LogOut class="w-4 h-4" />
                 Déconnexion

@@ -14,22 +14,13 @@
   import { StoreResultState, type StoreResult } from "$lib/stores/store.svelte";
   import { cn } from "$lib/utils";
   import { fallbackAvatarLetters } from "$lib/utils/fallbackAvatarLetters.js";
-  import { BellIcon, CogIcon, UserIcon } from "lucide-svelte";
+  import { goto } from "$lib/utils/goto";
+  import { BellIcon } from "@lucide/svelte";
   import { onMount, type Snippet } from "svelte";
 
   const currentChatId = $derived(page.url.pathname.split("/").pop());
 
   const mainItems = [
-    {
-      name: "Profil",
-      url: "#",
-      icon: UserIcon,
-    },
-    {
-      name: "Paramètres",
-      url: "#",
-      icon: CogIcon,
-    },
     {
       name: "Notifications",
       url: "#",
@@ -41,6 +32,13 @@
     id: string;
     name: string;
     avatarUrl: string;
+    lastMessage?: {
+      id: string;
+      content: string;
+      createdAt: Date;
+      authorId: string;
+      authorName: string;
+    };
   };
 
   type RecentChat =
@@ -84,6 +82,39 @@
     ),
   );
 
+  $effect(() =>
+    ws.subscribe(
+      "recent-group-chat-added",
+      async (msg: { groupId: string; chatName: string }) => {
+        const recentChatStore = {
+          id: msg.groupId,
+          name: msg.chatName,
+          avatarUrl: "",
+          kind: RecentChatKind.GROUP,
+        } as RecentChantStore;
+        recentChatsStore.add(recentChatStore);
+
+        recentChats.data = [
+          await convertRecentChat(recentChatStore),
+          ...recentChats.data,
+        ];
+      },
+    ),
+  );
+
+  $effect(() => {
+    return ws.subscribe(
+      "recent-group-chat-removed",
+      async (msg: { groupId: string }) => {
+        recentChatsStore.remove(msg.groupId);
+        recentChats.data = recentChats.data.filter(
+          (chat) => chat.id !== msg.groupId,
+        );
+        goto("/chat");
+      },
+    );
+  });
+
   const convertRecentChat = async (
     chat: RecentChantStore,
   ): Promise<RecentChat> => {
@@ -95,6 +126,15 @@
         avatarUrl: chat.avatarUrl,
         kind: chat.kind,
         userStatus: userProfile.status,
+        lastMessage: chat.lastMessage
+          ? {
+              id: chat.lastMessage.id,
+              content: chat.lastMessage.content,
+              createdAt: new Date(chat.lastMessage.createdAt),
+              authorId: chat.lastMessage.authorId,
+              authorName: chat.lastMessage.authorName,
+            }
+          : undefined,
       };
     }
 
@@ -103,6 +143,15 @@
       name: chat.name,
       avatarUrl: chat.avatarUrl,
       kind: chat.kind,
+      lastMessage: chat.lastMessage
+        ? {
+            id: chat.lastMessage.id,
+            content: chat.lastMessage.content,
+            createdAt: new Date(chat.lastMessage.createdAt),
+            authorId: chat.lastMessage.authorId,
+            authorName: chat.lastMessage.authorName,
+          }
+        : undefined,
     };
   };
 
@@ -164,7 +213,7 @@
 <div class="flex w-full h-full">
   <Sidebar.Provider class="!min-h-full h-full w-full flex-1">
     <Sidebar.Root
-      class="h-full border-l-2 border-r-2 border-gray-200 dark:border-gray-700 relative"
+      class="h-full border-r-2 border-gray-200 dark:border-gray-700 relative"
     >
       <Sidebar.Content class="p-4 containerTest z-0 dark:bg-gray-800">
         <Sidebar.Menu class="flex flex-col">
@@ -245,9 +294,27 @@
                           </span>
                         {/if}
                       </div>
-                      <span class="ml-4 text-sm text-gray-700 dark:text-inherit"
-                        >{chat.name}</span
-                      >
+                      <div class="ml-4">
+                        <div class="text-sm text-gray-700 dark:text-inherit">
+                          {chat.name}
+                        </div>
+                        {#if chat.lastMessage}
+                          {#if chat.lastMessage.authorId !== chat.id}
+                            <span class="text-muted-foreground text-sm">
+                              {chat.lastMessage.authorName}:
+                            </span>
+                          {:else}
+                            <span class="text-muted-foreground text-sm"
+                              >Vous:</span
+                            >
+                          {/if}
+                          {chat.lastMessage.content}
+                        {:else}
+                          <span class="text-muted-foreground">
+                            Aucun message
+                          </span>
+                        {/if}
+                      </div>
                     </a>
                   </div>
                 </div>
