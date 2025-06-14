@@ -8,6 +8,7 @@
   } from "$lib/api/workspaces/channels";
   import ws from "$lib/api/ws";
   import CreateChannelDialog from "$lib/components/app/workspaces/CreateChannelDialog.svelte";
+  import { buttonVariants } from "$lib/components/ui/button";
   import * as ContextMenu from "$lib/components/ui/context-menu";
   import { Separator } from "$lib/components/ui/separator";
   import * as Sidebar from "$lib/components/ui/sidebar";
@@ -299,13 +300,13 @@
             <Sidebar.Group class="p-0">
               <Sidebar.GroupContent>
                 <Sidebar.Menu
-                  class="flex mx-auto flex-col items-center min-w-64"
+                  class="flex mx-auto gap-2 flex-col items-center min-w-64 mb-5"
                 >
                   <Sidebar.MenuItem
                     class="mb-[2px] w-full flex justify-center px-4"
                   >
                     <Sidebar.MenuButton
-                      class="w-full text-sm bg-bl mb-5 bg-[#61A0AF] hover:bg-[#4B7986] text-white py-1.5 rounded transition flex justify-center items-center text-center"
+                      class={buttonVariants({ variant: "default" })}
                       onclick={() =>
                         goto(`/workspaces/${currentWorkspaceId}/polls`)}
                     >
@@ -317,7 +318,7 @@
                     class="mb-[2px] w-full flex justify-center px-4"
                   >
                     <Sidebar.MenuButton
-                      class="w-full text-sm bg-bl mb-5 bg-[#61A0AF] hover:bg-[#4B7986] text-white py-1.5 rounded transition flex justify-center items-center text-center"
+                      class={buttonVariants({ variant: "default" })}
                       onclick={() => (createChannelData.dialogOpen = true)}
                     >
                       <span class="text-sm font-semibold">Créer un canal</span>
