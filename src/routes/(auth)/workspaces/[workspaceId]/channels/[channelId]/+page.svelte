@@ -14,7 +14,9 @@
   import ws from "$lib/api/ws";
   import "$lib/assets/styles/chats.css";
   import HoveredUserProfile from "$lib/components/app/HoveredUserProfile.svelte";
+  import * as AlertDialog from "$lib/components/ui/alert-dialog";
   import * as Avatar from "$lib/components/ui/avatar";
+  import { Button } from "$lib/components/ui/button";
   import * as ContextMenu from "$lib/components/ui/context-menu";
   import {
     DropdownMenu,
@@ -45,6 +47,11 @@
   import type { AuthenticatedUserState } from "src/routes/(auth)/authenticatedUser.svelte";
   import { onDestroy, tick } from "svelte";
 
+  type CustomChannelMessage = ChannelMessage & {
+    editMode?: boolean;
+    editInputElement?: HTMLDivElement;
+  };
+
   const { authenticatedUserState } = page.data as {
     authenticatedUserState: AuthenticatedUserState;
   };
@@ -58,16 +65,26 @@
   let currentChannelId = $derived(page.params.channelId);
   let currentChannel: Channel = $state(null);
   let currentMessage = $state("");
-  let currentRoom: { id: string | null; messages: ChannelMessage[] } = $state({
-    id: null,
-    messages: [],
-  });
+  let currentRoom: { id: string | null; messages: CustomChannelMessage[] } =
+    $state({
+      id: null,
+      messages: [],
+    });
   let channelMembers: { id: string; name: string }[] = $state([]);
-  let dropdownOpen = $state(false);
+
+  let deleteMessageDialog: {
+    open: boolean;
+    message: CustomChannelMessage | null;
+  } = $state({
+    open: false,
+    message: null,
+  });
 
   let unsubscribeSendMessage = null;
   let unsubscribeMessageReactionAdded = null;
   let unsubscribeMessageReactionRemoved = null;
+  let unsubscribeGroupMessageContentEdited = null;
+  let unsubscribeGroupMessageDeleted = null;
   let inputElement: HTMLDivElement = $state(null);
   let elementsList: HTMLDivElement = $state(null);
   let isAutoScrolling = $state(false);
@@ -93,6 +110,8 @@
       unsubscribeSendMessage?.();
       unsubscribeMessageReactionAdded?.();
       unsubscribeMessageReactionRemoved?.();
+      unsubscribeGroupMessageContentEdited?.();
+      unsubscribeGroupMessageDeleted?.();
       ws.leaveRoom(currentRoom.id);
       currentRoom.id = null;
       currentRoom.messages = [];
@@ -260,6 +279,34 @@
           }
         },
       );
+
+      unsubscribeGroupMessageContentEdited = ws.subscribe(
+        "channel-message-content-edited",
+        (msg) => {
+          const message = currentRoom.messages.find(
+            (m) => m.id === msg.messageId,
+          );
+          if (message) {
+            message.content = msg.newContent;
+          }
+        },
+      );
+
+      unsubscribeGroupMessageDeleted = ws.subscribe(
+        "channel-message-deleted",
+        (msg) => {
+          currentRoom.messages = currentRoom.messages.filter(
+            (m) => m.id !== msg.messageId,
+          );
+          if (
+            deleteMessageDialog.open &&
+            deleteMessageDialog.message?.id === msg.messageId
+          ) {
+            deleteMessageDialog.open = false;
+            deleteMessageDialog.message = null;
+          }
+        },
+      );
     } catch (e) {
       console.error(e);
     }
@@ -386,6 +433,33 @@
     if (topObserver) topObserver.disconnect();
     if (bottomObserver) bottomObserver.disconnect();
   });
+
+  const handleMessageEdit = async (message: CustomChannelMessage) => {
+    // Toggle edit mode
+    message.editMode = !message.editMode;
+    if (message.editMode) {
+      await tick(); // Wait for the DOM to update
+      // Focus the input element if entering edit mode
+      message.editInputElement?.focus();
+    } else {
+      // Send the edited message
+      ws.editChannelMessage(currentChannelId, message.id, message.content);
+    }
+  };
+
+  const handleMessageDelete = async (message: CustomChannelMessage) => {
+    if (!message) return;
+
+    try {
+      await ws.deleteChannelMessage(currentChannelId, message.id);
+    } catch (error) {
+      console.error("Failed to delete message:", error);
+      error(
+        "Erreur lors de la suppression du message.",
+        "Impossible de supprimer le message, veuillez réessayer plus tard.",
+      );
+    }
+  };
 </script>
 
 <div class="w-full h-full flex flex-col gap-y-4">
@@ -577,11 +651,26 @@
                               )}
                             </TooltipContent>
                           </Tooltip>
-                          <span
-                            class="p-2 rounded-xl break-all bg-primary text-white shadow-lg w-full"
-                          >
-                            {message.content}
-                          </span>
+                          {#if message.editMode}
+                            <input
+                              type="text"
+                              class="p-2 rounded-lg bg-gray-100 dark:bg-gray-800 w-full"
+                              bind:this={message.editInputElement}
+                              bind:value={message.content}
+                              onkeydown={(e) => {
+                                if (e.key === "Enter") {
+                                  e.preventDefault();
+                                  handleMessageEdit(message);
+                                }
+                              }}
+                            />
+                          {:else}
+                            <span
+                              class="p-2 rounded-xl break-all bg-primary text-white shadow-lg w-full"
+                            >
+                              {message.content}
+                            </span>
+                          {/if}
                         </div>
 
                         <HoveredUserProfile
@@ -648,7 +737,10 @@
               </ContextMenu.Sub>
               {#if message.author.userId === authenticatedUser.id}
                 <ContextMenu.Separator />
-                <ContextMenu.Item class="flex justify-between">
+                <ContextMenu.Item
+                  class="flex justify-between"
+                  onclick={() => handleMessageEdit(message)}
+                >
                   <span>Modifier</span>
                   <div>
                     <Pen size="18" />
@@ -656,6 +748,10 @@
                 </ContextMenu.Item>
                 <ContextMenu.Item
                   class="text-red-500 hover:!bg-red-500 hover:!text-white flex justify-between"
+                  onclick={() => {
+                    deleteMessageDialog.open = true;
+                    deleteMessageDialog.message = message;
+                  }}
                 >
                   <span>Supprimer</span>
                   <div>
@@ -704,6 +800,35 @@
     </div>
   {/if}
 </div>
+
+<!-- Delete Message Dialog -->
+<AlertDialog.Root bind:open={deleteMessageDialog.open}>
+  <AlertDialog.Content>
+    <AlertDialog.Header>
+      <AlertDialog.Title>Supprimer le message</AlertDialog.Title>
+      <AlertDialog.Description>
+        Êtes-vous sûr de vouloir supprimer ce message ?
+      </AlertDialog.Description>
+    </AlertDialog.Header>
+
+    <AlertDialog.Footer>
+      <Button
+        variant="outline"
+        onclick={() => (deleteMessageDialog.open = false)}
+      >
+        Annuler
+      </Button>
+      <Button
+        variant="destructive"
+        onclick={() => {
+          handleMessageDelete(deleteMessageDialog.message);
+        }}
+      >
+        Supprimer
+      </Button>
+    </AlertDialog.Footer>
+  </AlertDialog.Content>
+</AlertDialog.Root>
 
 <style>
   .sentinel {
