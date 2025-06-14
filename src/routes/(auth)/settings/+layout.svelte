@@ -17,6 +17,9 @@
     case "/(auth)/settings/connection":
       activeTab = { displayName: "Connexion", label: "connections" };
       break;
+    case "/(auth)/settings/notifications":
+      activeTab = { displayName: "Notifications", label: "notifications" };
+      break;
   }
 
   function handleTabChange(tab: Tab, url: string) {
@@ -66,6 +69,17 @@
                 )}
             >
               Connexion
+            </Tabs.Trigger>
+            <Tabs.Trigger
+                    value="notifications"
+                    class="text-gray-600 dark:text-gray-200"
+                    onclick={() =>
+                handleTabChange(
+                  { displayName: "Notifications", label: "notifications" },
+                  "/settings/notifications",
+                )}
+            >
+              Notifications
             </Tabs.Trigger>
           </Tabs.List>
         </Tabs.Root>
