@@ -17,6 +17,9 @@
     case "/(auth)/settings/connection":
       activeTab = { displayName: "Connexion", label: "connections" };
       break;
+    case "/(auth)/settings/notifications":
+      activeTab = { displayName: "Notifications", label: "notifications" };
+      break;
   }
 
   function handleTabChange(tab: Tab, url: string) {
@@ -27,7 +30,7 @@
   let { children } = $props();
 </script>
 
-<section class="border-gray-200 dark:border-gray-800 dark:bg-gray-800 w-full">
+<section class="border-gray-200 dark:border-gray-800 dark:bg-gray-800 h-full">
   <div class="flex flex-col px-4 py-2">
     <section>
       <div class="flex items-end mb-4">
@@ -66,6 +69,17 @@
                 )}
             >
               Connexion
+            </Tabs.Trigger>
+            <Tabs.Trigger
+                    value="notifications"
+                    class="text-gray-600 dark:text-gray-200"
+                    onclick={() =>
+                handleTabChange(
+                  { displayName: "Notifications", label: "notifications" },
+                  "/settings/notifications",
+                )}
+            >
+              Notifications
             </Tabs.Trigger>
           </Tabs.List>
         </Tabs.Root>

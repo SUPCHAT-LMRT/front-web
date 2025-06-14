@@ -1,12 +1,12 @@
 <script lang="ts">
-    import { Checkbox } from "$lib/components/ui/checkbox";
-    import { Label } from "$lib/components/ui/label";
-    import { Separator } from "$lib/components/ui/separator";
-    import { ScrollArea } from "$lib/components/ui/scroll-area";
+    import {Checkbox} from "$lib/components/ui/checkbox";
+    import {Label} from "$lib/components/ui/label";
+    import {Separator} from "$lib/components/ui/separator";
+    import {ScrollArea} from "$lib/components/ui/scroll-area";
     import {RolePermission, type WorkspaceRole} from "$lib/api/workspaces/roles";
     import HexColorPicker from "$lib/components/app/workspaces/HexColorPicker.svelte";
 
-    const { role = $bindable() }: { role: WorkspaceRole | null } = $props();
+    const {role = $bindable()}: { role: WorkspaceRole | null } = $props();
 
     const permissionCategories = [
         {
@@ -16,7 +16,6 @@
                 RolePermission.MANAGE_WORKSPACE_SETTINGS,
                 RolePermission.MANAGE_ROLES,
                 RolePermission.MANAGE_CHANNELS,
-                RolePermission.MANAGE_INVITES
             ]
         },
         {
@@ -26,7 +25,6 @@
                 RolePermission.SEND_MESSAGES,
                 RolePermission.ATTACH_FILES,
                 RolePermission.MANAGE_MESSAGES,
-                RolePermission.PIN_MESSAGES
             ]
         },
         {
@@ -53,7 +51,7 @@
             />
         </div>
         <div class="flex-shrink-0">
-            <HexColorPicker bind:color={role.color} />
+            <HexColorPicker bind:color={role.color}/>
         </div>
     </div>
 </div>
@@ -70,10 +68,14 @@
                             <Checkbox
                                     id={`${role.id}-${permission.permissionBit}`}
                                     checked={(role.permissions & permission.permissionBit) !== 0}
+                                    disabled={role.name === "Owner"}
                                     onCheckedChange={() => {
+                                    if (role.name !== "Owner") {
                                         role.permissions ^= permission.permissionBit;
-                                    }}
+                                    }
+                                }}
                             />
+
                             <div class="grid gap-1.5 leading-none">
                                 <Label
                                         for={`${role.id}-${permission.permissionBit}`}
@@ -87,7 +89,7 @@
                     {/each}
                 </div>
                 {#if index < permissionCategories.length - 1}
-                    <Separator class="my-4" />
+                    <Separator class="my-4"/>
                 {/if}
             </div>
         {/each}
