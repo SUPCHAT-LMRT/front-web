@@ -110,10 +110,12 @@
                         </Badge>
                     </div>
                     <div class="flex gap-1">
-                        <Button variant="ghost" size="icon" class="h-7 w-7"
-                                onclick={(event) => handleDeleteRole(role.id, event)}>
-                            <Trash2 class="h-4 w-4"/>
-                        </Button>
+                        {#if role.name !== "Owner"}
+                            <Button variant="ghost" size="icon" class="h-7 w-7"
+                                    onclick={(event) => handleDeleteRole(role.id, event)}>
+                                <Trash2 class="h-4 w-4"/>
+                            </Button>
+                        {/if}
                     </div>
                 </button>
             {/each}

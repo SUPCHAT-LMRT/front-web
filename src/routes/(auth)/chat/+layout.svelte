@@ -14,22 +14,12 @@
   import { StoreResultState, type StoreResult } from "$lib/stores/store.svelte";
   import { cn } from "$lib/utils";
   import { fallbackAvatarLetters } from "$lib/utils/fallbackAvatarLetters.js";
-  import { BellIcon, CogIcon, UserIcon } from "lucide-svelte";
+  import { BellIcon } from "lucide-svelte";
   import { onMount, type Snippet } from "svelte";
 
   const currentChatId = $derived(page.url.pathname.split("/").pop());
 
   const mainItems = [
-    {
-      name: "Profil",
-      url: "#",
-      icon: UserIcon,
-    },
-    {
-      name: "Paramètres",
-      url: "#",
-      icon: CogIcon,
-    },
     {
       name: "Notifications",
       url: "#",
