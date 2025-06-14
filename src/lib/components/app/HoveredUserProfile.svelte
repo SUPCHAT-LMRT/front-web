@@ -195,7 +195,7 @@
               >
                 <a
                   title="Envoyer un message"
-                  href="/chat/{RoomKind.DIRECT.toLowerCase()}/{userId}"
+                  href="/chat/{RoomKind.DIRECT.toLowerCase()}?chatId={userId}"
                 >
                   <MessageCircle strokeWidth={1.5} />
                 </a>

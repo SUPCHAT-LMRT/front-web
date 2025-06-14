@@ -5,7 +5,6 @@
     addGroupMember,
     getGroupInfo,
     leaveGroup as leaveGroupApi,
-    removeGroupMember,
     type GroupInfo,
   } from "$lib/api/group/member";
   import { listGroupMessages, type GroupMessage } from "$lib/api/group/message";
@@ -36,6 +35,7 @@
   import { cn } from "$lib/utils";
   import { fallbackAvatarLetters } from "$lib/utils/fallbackAvatarLetters";
   import { formatDate } from "$lib/utils/formatDate";
+  import { goto } from "$lib/utils/goto";
   import { scrollToBottom } from "$lib/utils/scrollToBottom";
   import NumberFlow from "@number-flow/svelte";
   import { format } from "date-fns";
@@ -208,23 +208,10 @@
     }
   };
 
-  const removeMember = async (userId: string) => {
-    try {
-      await removeGroupMember(currentGroupId, userId);
-      // Refresh group info
-      groupInfo = await getGroupInfo(currentGroupId);
-    } catch (error) {
-      console.error("Failed to remove member:", error);
-      error(
-        "Erreur lors de la suppression du membre.",
-        "Impossible de supprimer le membre, veuillez réessayer plus tard.",
-      );
-    }
-  };
-
   const leaveGroup = async () => {
     try {
       await leaveGroupApi(currentGroupId);
+      await goto("/");
     } catch (e) {
       console.error("Failed to leave group:", error);
       error(
@@ -1030,24 +1017,6 @@
                   </div>
                 </div>
               </div>
-
-              {#if isAdmin && member.id !== authenticatedUser.id}
-                <DropdownMenu.Root>
-                  <DropdownMenu.Trigger>
-                    <Button variant="ghost" size="sm">
-                      <MoreVertical size={16} />
-                    </Button>
-                  </DropdownMenu.Trigger>
-                  <DropdownMenu.Content align="end">
-                    <DropdownMenu.Item
-                      onclick={() => removeMember(member.id)}
-                      class="text-red-600 focus:text-red-600"
-                    >
-                      Retirer du groupe
-                    </DropdownMenu.Item>
-                  </DropdownMenu.Content>
-                </DropdownMenu.Root>
-              {/if}
             </div>
           </HoveredUserProfile>
         {/each}
