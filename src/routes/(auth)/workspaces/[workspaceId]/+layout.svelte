@@ -218,7 +218,7 @@
                               >
                                 <div class="flex items-center h-6 pt-[2px]">
                                   <span
-                                    class="text-[#61A0AF] font-bold text-base group-hover:scale-105 transition-transform"
+                                    class="text-yellow-app font-bold text-base group-hover:scale-105 transition-transform"
                                     >#</span
                                   >
                                 </div>
@@ -266,7 +266,7 @@
                             >
                               <div class="flex items-center h-6 pt-[2px]">
                                 <span
-                                  class="text-[#61A0AF] font-bold text-base group-hover:scale-105 transition-transform"
+                                  class="text-yellow-app font-bold text-base group-hover:scale-105 transition-transform"
                                   >#</span
                                 >
                               </div>

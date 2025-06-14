@@ -133,7 +133,7 @@
                                 {/key}
 
                                 <Avatar.Fallback
-                                  class="rounded-3xl transition-all hover:rounded-2xl hover:scale-105"
+                                  class="rounded-3xl transition-all hover:rounded-2xl hover:scale-105 bg-gray-200 dark:bg-gray-700 text-gray-500 text-sm flex items-center justify-center"
                                 >
                                   {fallbackAvatarLetters(workspace.name)}
                                 </Avatar.Fallback>

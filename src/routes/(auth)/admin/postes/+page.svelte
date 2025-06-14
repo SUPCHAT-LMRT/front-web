@@ -84,7 +84,7 @@
         <CardDescription class="mt-4 text-sm text-muted-foreground space-y-3">
           <div class="flex items-start gap-3">
             <span
-              class="inline-block shrink-0 bg-primary text-white text-xs font-semibold px-2.5 py-0.5 rounded-full mt-0.5"
+              class="inline-block shrink-0 bg-yellow-app text-white text-xs font-semibold px-2.5 py-0.5 rounded-full mt-0.5"
             >
               Admin
             </span>
@@ -96,7 +96,7 @@
           </div>
           <div class="flex items-start gap-3">
             <span
-              class="inline-block shrink-0 bg-primary text-white text-xs font-semibold px-2.5 py-0.5 rounded-full mt-0.5"
+              class="inline-block shrink-0 bg-yellow-app text-white text-xs font-semibold px-2.5 py-0.5 rounded-full mt-0.5"
             >
               Manager
             </span>
@@ -107,7 +107,7 @@
           </div>
           <div class="flex items-start gap-3">
             <span
-              class="inline-block shrink-0 bg-primary text-white text-xs font-semibold px-2.5 py-0.5 rounded-full mt-0.5"
+              class="inline-block shrink-0 bg-yellow-app text-white text-xs font-semibold px-2.5 py-0.5 rounded-full mt-0.5"
             >
               Utilisateur
             </span>
