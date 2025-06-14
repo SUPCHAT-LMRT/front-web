@@ -6,6 +6,7 @@ export type WorkspaceMember = {
 	id: string;
 	userId: string;
 	pseudo: string;
+	email: string;
 	roles: WorkspaceRole[];
 };
 

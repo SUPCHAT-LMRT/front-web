@@ -186,7 +186,7 @@
               <Sidebar.MenuButton
                 class="flex mx-auto flex-col items-center mb-2"
                 onclick={() => goto("/workspaces")}
-                >Vue d'ensembles
+                >Vue d'ensemble
               </Sidebar.MenuButton>
               <Separator class="dark:bg-gray-700" />
               <Sidebar.GroupLabel>Canaux</Sidebar.GroupLabel>
