@@ -298,7 +298,7 @@
                         <div class="text-sm text-gray-700 dark:text-inherit">
                           {chat.name}
                         </div>
-                        {#if chat.lastMessage}
+                        {#if chat.lastMessage?.id}
                           {#if chat.lastMessage.authorId !== chat.id}
                             <span class="text-muted-foreground text-sm">
                               {chat.lastMessage.authorName}:
