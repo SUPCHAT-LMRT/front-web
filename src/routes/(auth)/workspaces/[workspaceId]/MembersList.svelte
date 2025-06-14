@@ -7,6 +7,7 @@
   import HoveredUserProfile from "$lib/components/app/HoveredUserProfile.svelte";
   import * as Pagination from "$lib/components/ui/pagination";
   import { ChevronLeft, ChevronRight } from "lucide-svelte";
+  import type { AuthenticatedUserState } from "../../authenticatedUser.svelte";
 
   const { workspaceId }: { workspaceId: string } = $props();
   const { authenticatedUserState } = page.data as {
@@ -63,7 +64,12 @@
             self={member.userId === authenticatedUser.id}
           >
             <div class="text-left">
-              {member.pseudo}
+              <span>
+                {member.pseudo}
+              </span>
+              <span class="text-muted-foreground">
+                ({member.email})
+              </span>
             </div>
           </HoveredUserProfile>
         </li>
