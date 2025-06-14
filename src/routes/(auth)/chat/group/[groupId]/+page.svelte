@@ -1,6 +1,6 @@
 <script lang="ts">
   import { page } from "$app/state";
-  import { updateGroupName } from "$lib/api/group/group";
+  import { smartFly } from "$lib/animation/visibleFly";
   import {
     addGroupMember,
     getGroupInfo,
@@ -19,14 +19,13 @@
   import ws from "$lib/api/ws";
   import "$lib/assets/styles/chats.css";
   import HoveredUserProfile from "$lib/components/app/HoveredUserProfile.svelte";
+  import * as AlertDialog from "$lib/components/ui/alert-dialog";
   import * as Avatar from "$lib/components/ui/avatar";
   import { Button } from "$lib/components/ui/button";
   import { Checkbox } from "$lib/components/ui/checkbox";
   import * as ContextMenu from "$lib/components/ui/context-menu";
   import * as Dialog from "$lib/components/ui/dialog";
   import * as DropdownMenu from "$lib/components/ui/dropdown-menu";
-  import { Input } from "$lib/components/ui/input";
-  import { Label } from "$lib/components/ui/label";
   import * as Sheet from "$lib/components/ui/sheet";
   import {
     Tooltip,
@@ -48,13 +47,17 @@
     MoreVertical,
     Pen,
     Send,
-    Settings,
     Trash2,
     UserPlus,
     Users,
   } from "lucide-svelte";
   import type { AuthenticatedUserState } from "src/routes/(auth)/authenticatedUser.svelte";
   import { onDestroy, tick } from "svelte";
+
+  type CustomGroupMessage = GroupMessage & {
+    editMode?: boolean;
+    editInputElement?: HTMLInputElement;
+  };
 
   const { authenticatedUserState } = page.data as {
     authenticatedUserState: AuthenticatedUserState;
@@ -69,17 +72,21 @@
   let currentGroupId = $derived(page.params.groupId);
   let groupInfo: GroupInfo = $state(null);
   let currentMessage = $state("");
-  let currentRoom: { id: string | null; messages: GroupMessage[] } = $state({
-    id: null,
-    messages: [],
-  });
+  let currentRoom: { id: string | null; messages: CustomGroupMessage[] } =
+    $state({
+      id: null,
+      messages: [],
+    });
 
-  // Group settings states
-  let showGroupSettingsDialog = $state(false);
   let showMembersSheet = $state(false);
   let showInviteDialog = $state(false);
-  let newGroupName = $state("");
-  let isUpdatingName = $state(false);
+  let deleteMessageDialog: {
+    open: boolean;
+    message: CustomGroupMessage | null;
+  } = $state({
+    open: false,
+    message: null,
+  });
 
   // Invite members states
   let allUsers: ListAllUsersResponse[] = $state([]);
@@ -93,7 +100,8 @@
   let unsubscribeUserStatusUpdated = null;
   let unsubscribeGroupMemberAdded = null;
   let unsubscribeGroupMemberRemoved = null;
-  let unsubscribeGroupNameUpdated = null;
+  let unsubscribeGroupMessageContentEdited = null;
+  let unsubscribeGroupMessageDeleted = null;
   let inputElement: HTMLDivElement = $state(null);
   let elementsList: HTMLDivElement = $state(null);
   let isAutoScrolling = $state(false);
@@ -111,7 +119,7 @@
 
   // Check if current user is admin
   const isAdmin = $derived(
-    groupInfo?.members?.find((m) => m.id === authenticatedUser.id)
+    groupInfo?.members?.find((m) => m.userId === authenticatedUser.id)
       ?.isGroupOwner || false,
   );
 
@@ -119,7 +127,6 @@
     joinRoomAndListenMessages(currentGroupId);
     getGroupInfo(currentGroupId).then((info) => {
       groupInfo = info;
-      newGroupName = info.name;
     });
 
     return () => {
@@ -129,7 +136,8 @@
       unsubscribeUserStatusUpdated?.();
       unsubscribeGroupMemberAdded?.();
       unsubscribeGroupMemberRemoved?.();
-      unsubscribeGroupNameUpdated?.();
+      unsubscribeGroupMessageContentEdited?.();
+      unsubscribeGroupMessageDeleted?.();
       ws.leaveRoom(currentRoom.id);
       currentRoom.id = null;
       currentRoom.messages = [];
@@ -197,27 +205,6 @@
       );
     } finally {
       isInviting = false;
-    }
-  };
-
-  const updateName = async () => {
-    if (!newGroupName.trim() || newGroupName === groupInfo.name) {
-      return;
-    }
-
-    try {
-      isUpdatingName = true;
-      await updateGroupName(currentGroupId, newGroupName.trim());
-      groupInfo.name = newGroupName.trim();
-      showGroupSettingsDialog = false;
-    } catch (error) {
-      console.error("Failed to update group name:", error);
-      error(
-        "Erreur lors de la mise à jour du nom du groupe.",
-        "Impossible de mettre à jour le nom du groupe, veuillez réessayer plus tard.",
-      );
-    } finally {
-      isUpdatingName = false;
     }
   };
 
@@ -392,12 +379,30 @@
         },
       );
 
-      unsubscribeGroupNameUpdated = ws.subscribe(
-        "group-name-updated",
+      unsubscribeGroupMessageContentEdited = ws.subscribe(
+        "group-message-content-edited",
         (msg) => {
-          if (msg.groupId === currentGroupId) {
-            groupInfo.name = msg.newName;
-            newGroupName = msg.newName;
+          const message = currentRoom.messages.find(
+            (m) => m.id === msg.messageId,
+          );
+          if (message) {
+            message.content = msg.newContent;
+          }
+        },
+      );
+
+      unsubscribeGroupMessageDeleted = ws.subscribe(
+        "group-message-deleted",
+        (msg) => {
+          currentRoom.messages = currentRoom.messages.filter(
+            (m) => m.id !== msg.messageId,
+          );
+          if (
+            deleteMessageDialog.open &&
+            deleteMessageDialog.message?.id === msg.messageId
+          ) {
+            deleteMessageDialog.open = false;
+            deleteMessageDialog.message = null;
           }
         },
       );
@@ -541,6 +546,17 @@
     });
   });
 
+  $effect(() => {
+    return ws.subscribe("group-ownership-transferred", (msg) => {
+      // Refresh group info to reflect ownership change
+      if (msg.groupId === currentGroupId) {
+        getGroupInfo(currentGroupId).then((info) => {
+          groupInfo = info;
+        });
+      }
+    });
+  });
+
   const handleInputKeyDown = (e) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
@@ -552,6 +568,33 @@
     if (topObserver) topObserver.disconnect();
     if (bottomObserver) bottomObserver.disconnect();
   });
+
+  const handleMessageEdit = async (message: CustomGroupMessage) => {
+    // Toggle edit mode
+    message.editMode = !message.editMode;
+    if (message.editMode) {
+      await tick(); // Wait for the DOM to update
+      // Focus the input element if entering edit mode
+      message.editInputElement?.focus();
+    } else {
+      // Send the edited message
+      ws.editGroupMessage(currentGroupId, message.id, message.content);
+    }
+  };
+
+  const handleMessageDelete = async (message: CustomGroupMessage) => {
+    if (!message) return;
+
+    try {
+      await ws.deleteGroupMessage(currentGroupId, message.id);
+    } catch (error) {
+      console.error("Failed to delete message:", error);
+      error(
+        "Erreur lors de la suppression du message.",
+        "Impossible de supprimer le message, veuillez réessayer plus tard.",
+      );
+    }
+  };
 </script>
 
 <div class="relative w-full h-full flex flex-col gap-y-4">
@@ -606,15 +649,6 @@
             </Button>
           </DropdownMenu.Trigger>
           <DropdownMenu.Content align="end">
-            {#if isAdmin}
-              <DropdownMenu.Item
-                onclick={() => (showGroupSettingsDialog = true)}
-              >
-                <Settings size={16} class="mr-2" />
-                Paramètres du groupe
-              </DropdownMenu.Item>
-              <DropdownMenu.Separator />
-            {/if}
             <DropdownMenu.Item
               onclick={leaveGroup}
               class="text-red-600 focus:text-red-600"
@@ -635,8 +669,19 @@
     {#if currentRoom.id !== null}
       <div bind:this={topSentinel} class="sentinel mt-4"></div>
 
-      {#each currentRoom.messages as message (message.id)}
-        <div data-message-id={message.id}>
+      {#each currentRoom.messages as message, i (message.id)}
+        <div
+          data-message-id={message.id}
+          in:smartFly|global={{
+            y: -10,
+            duration: 300,
+            delay: 100,
+            isNewMessage: i >= Math.max(0, currentRoom.messages.length - 10),
+            messageIndex: i,
+            totalMessages: currentRoom.messages.length,
+            staggerDelay: 50, // 50ms delay between each message
+          }}
+        >
           <ContextMenu.Root>
             <ContextMenu.Trigger>
               <div
@@ -703,7 +748,7 @@
                           {message.author.lastName}
                         </span>
                       </HoveredUserProfile>
-                      {#if groupInfo.members.find((m) => m.id === message.author.userId)?.isGroupOwner}
+                      {#if groupInfo?.members?.find((m) => m.userId === message.author.userId)?.isGroupOwner}
                         <Tooltip>
                           <TooltipTrigger>
                             <Crown size={14} class="text-yellow-500" />
@@ -768,11 +813,28 @@
                               </Tooltip>
                             {/if}
                           </div>
-                          <span
-                            class="p-2 rounded-xl break-all bg-primary text-white shadow-lg w-full"
-                          >
-                            {message.content}
-                          </span>
+                          {#if message.editMode}
+                            <input
+                              type="text"
+                              class="p-2 rounded-lg bg-gray-100 dark:bg-gray-800 w-full"
+                              bind:this={message.editInputElement}
+                              bind:value={message.content}
+                              onkeydown={(e) => {
+                                if (e.key === "Enter") {
+                                  e.preventDefault();
+                                  handleMessageEdit(message);
+                                }
+                              }}
+                            />
+                          {:else}
+                            <div class="flex items-center gap-2">
+                              <span
+                                class="p-2 rounded-xl break-all bg-primary text-white shadow-lg w-full"
+                              >
+                                {message.content}
+                              </span>
+                            </div>
+                          {/if}
                         </div>
 
                         <HoveredUserProfile
@@ -839,21 +901,32 @@
                   {/each}
                 </ContextMenu.SubContent>
               </ContextMenu.Sub>
-              <ContextMenu.Separator />
-              <ContextMenu.Item class="flex justify-between">
-                <span>Modifier</span>
-                <div>
-                  <Pen size="18" />
-                </div>
-              </ContextMenu.Item>
-              <ContextMenu.Item
-                class="text-red-500 hover:!bg-red-500 hover:!text-white flex justify-between"
-              >
-                <span>Supprimer</span>
-                <div>
-                  <Trash2 size="18" />
-                </div>
-              </ContextMenu.Item>
+              {#if message.author.userId === authenticatedUser.id}
+                <ContextMenu.Separator />
+                <ContextMenu.Item
+                  class="flex justify-between"
+                  onclick={() => {
+                    handleMessageEdit(message);
+                  }}
+                >
+                  <span>Modifier</span>
+                  <div>
+                    <Pen size="18" />
+                  </div>
+                </ContextMenu.Item>
+                <ContextMenu.Item
+                  class="text-red-500 hover:!bg-red-500 hover:!text-white flex justify-between"
+                  onclick={() => {
+                    deleteMessageDialog.open = true;
+                    deleteMessageDialog.message = message;
+                  }}
+                >
+                  <span>Supprimer</span>
+                  <div>
+                    <Trash2 size="18" />
+                  </div>
+                </ContextMenu.Item>
+              {/if}
             </ContextMenu.Content>
           </ContextMenu.Root>
         </div>
@@ -893,58 +966,6 @@
     </div>
   {/if}
 </div>
-
-<!-- Group Settings Dialog -->
-<Dialog.Root bind:open={showGroupSettingsDialog}>
-  <Dialog.Content class="max-w-md">
-    <Dialog.Header>
-      <Dialog.Title class="flex items-center gap-2">
-        <Settings size={20} />
-        Paramètres du groupe
-      </Dialog.Title>
-      <Dialog.Description>
-        Modifiez les paramètres de votre groupe.
-      </Dialog.Description>
-    </Dialog.Header>
-
-    <div class="space-y-4 py-4">
-      <div class="space-y-2">
-        <Label for="group-name">Nom du groupe</Label>
-        <Input
-          id="group-name"
-          placeholder="Nom du groupe"
-          bind:value={newGroupName}
-        />
-      </div>
-    </div>
-
-    <Dialog.Footer>
-      <Button
-        variant="outline"
-        onclick={() => (showGroupSettingsDialog = false)}
-        disabled={isUpdatingName}
-      >
-        Annuler
-      </Button>
-      <Button
-        onclick={updateName}
-        disabled={!newGroupName.trim() ||
-          newGroupName === groupInfo?.name ||
-          isUpdatingName}
-        class="flex items-center gap-2"
-      >
-        {#if isUpdatingName}
-          <div
-            class="size-4 border-2 border-white border-t-transparent rounded-full animate-spin"
-          />
-        {:else}
-          <Settings size={16} />
-        {/if}
-        Enregistrer
-      </Button>
-    </Dialog.Footer>
-  </Dialog.Content>
-</Dialog.Root>
 
 <!-- Members Sheet -->
 <Sheet.Root bind:open={showMembersSheet}>
@@ -1136,6 +1157,35 @@
     </Dialog.Footer>
   </Dialog.Content>
 </Dialog.Root>
+
+<!-- Delete Message Dialog -->
+<AlertDialog.Root bind:open={deleteMessageDialog.open}>
+  <AlertDialog.Content>
+    <AlertDialog.Header>
+      <AlertDialog.Title>Supprimer le message</AlertDialog.Title>
+      <AlertDialog.Description>
+        Êtes-vous sûr de vouloir supprimer ce message ?
+      </AlertDialog.Description>
+    </AlertDialog.Header>
+
+    <AlertDialog.Footer>
+      <Button
+        variant="outline"
+        onclick={() => (deleteMessageDialog.open = false)}
+      >
+        Annuler
+      </Button>
+      <Button
+        variant="destructive"
+        onclick={() => {
+          handleMessageDelete(deleteMessageDialog.message);
+        }}
+      >
+        Supprimer
+      </Button>
+    </AlertDialog.Footer>
+  </AlertDialog.Content>
+</AlertDialog.Root>
 
 <style>
   .sentinel {

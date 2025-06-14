@@ -291,6 +291,34 @@ class Ws {
     );
   }
 
+  public editGroupMessage = (
+    groupId: string,
+    messageId: string,
+    newContent: string,
+  ) => {
+    this.send(
+      JSON.stringify({
+        action: "group-message-content-edit",
+        groupId,
+        messageId,
+        newContent,
+      }),
+    );
+  }
+
+  public deleteGroupMessage = (
+    groupId: string,
+    messageId: string,
+  ) => {
+    this.send(
+      JSON.stringify({
+        action: "group-message-delete",
+        groupId,
+        messageId,
+      }),
+    );
+  }
+
   public subscribe = (
     action: string,
     callback: (msg) => void,

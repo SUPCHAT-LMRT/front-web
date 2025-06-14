@@ -1,5 +1,6 @@
 <script lang="ts">
   import { page } from "$app/state";
+  import { smartFly } from "$lib/animation/visibleFly";
   import {
     getDirectMessages,
     type DirectMessage,
@@ -488,8 +489,19 @@
     {#if currentRoom.id !== null}
       <div bind:this={topSentinel} class="sentinel mt-4"></div>
 
-      {#each currentRoom.messages as message (message.id)}
-        <div data-message-id={message.id}>
+      {#each currentRoom.messages as message, i (message.id)}
+        <div
+          data-message-id={message.id}
+          in:smartFly|global={{
+            y: -10,
+            duration: 300,
+            delay: 100,
+            isNewMessage: i >= Math.max(0, currentRoom.messages.length - 10),
+            messageIndex: i,
+            totalMessages: currentRoom.messages.length,
+            staggerDelay: 50, // 50ms delay between each message
+          }}
+        >
           <ContextMenu.Root>
             <ContextMenu.Trigger>
               <div
@@ -674,21 +686,23 @@
                   {/each}
                 </ContextMenu.SubContent>
               </ContextMenu.Sub>
-              <ContextMenu.Separator />
-              <ContextMenu.Item class="flex justify-between">
-                <span>Modifier</span>
-                <div>
-                  <Pen size="18" />
-                </div>
-              </ContextMenu.Item>
-              <ContextMenu.Item
-                class="text-red-500 hover:!bg-red-500 hover:!text-white flex justify-between"
-              >
-                <span>Supprimer</span>
-                <div>
-                  <Trash2 size="18" />
-                </div>
-              </ContextMenu.Item>
+              {#if message.author.userId === authenticatedUser.id}
+                <ContextMenu.Separator />
+                <ContextMenu.Item class="flex justify-between">
+                  <span>Modifier</span>
+                  <div>
+                    <Pen size="18" />
+                  </div>
+                </ContextMenu.Item>
+                <ContextMenu.Item
+                  class="text-red-500 hover:!bg-red-500 hover:!text-white flex justify-between"
+                >
+                  <span>Supprimer</span>
+                  <div>
+                    <Trash2 size="18" />
+                  </div>
+                </ContextMenu.Item>
+              {/if}
             </ContextMenu.Content>
           </ContextMenu.Root>
         </div>

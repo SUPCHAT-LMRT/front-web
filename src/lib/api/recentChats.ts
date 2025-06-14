@@ -10,6 +10,13 @@ export type RecentChat = {
   kind: RecentChatKind;
   avatarUrl: string;
   name: string;
+  lastMessage: {
+    id: string;
+    content: string;
+    createdAt: Date;
+    authorId: string;
+    authorName: string;
+  }
 };
 
 export const getRecentChats = async (): Promise<RecentChat[]> => {

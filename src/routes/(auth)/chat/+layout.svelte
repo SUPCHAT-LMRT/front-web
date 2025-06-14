@@ -42,6 +42,13 @@
     id: string;
     name: string;
     avatarUrl: string;
+    lastMessage?: {
+      id: string;
+      content: string;
+      createdAt: Date;
+      authorId: string;
+      authorName: string;
+    };
   };
 
   type RecentChat =
@@ -129,6 +136,15 @@
         avatarUrl: chat.avatarUrl,
         kind: chat.kind,
         userStatus: userProfile.status,
+        lastMessage: chat.lastMessage
+          ? {
+              id: chat.lastMessage.id,
+              content: chat.lastMessage.content,
+              createdAt: new Date(chat.lastMessage.createdAt),
+              authorId: chat.lastMessage.authorId,
+              authorName: chat.lastMessage.authorName,
+            }
+          : undefined,
       };
     }
 
@@ -137,6 +153,15 @@
       name: chat.name,
       avatarUrl: chat.avatarUrl,
       kind: chat.kind,
+      lastMessage: chat.lastMessage
+        ? {
+            id: chat.lastMessage.id,
+            content: chat.lastMessage.content,
+            createdAt: new Date(chat.lastMessage.createdAt),
+            authorId: chat.lastMessage.authorId,
+            authorName: chat.lastMessage.authorName,
+          }
+        : undefined,
     };
   };
 
@@ -279,9 +304,27 @@
                           </span>
                         {/if}
                       </div>
-                      <span class="ml-4 text-sm text-gray-700 dark:text-inherit"
-                        >{chat.name}</span
-                      >
+                      <div class="ml-4">
+                        <div class="text-sm text-gray-700 dark:text-inherit">
+                          {chat.name}
+                        </div>
+                        {#if chat.lastMessage}
+                          {#if chat.lastMessage.authorId !== chat.id}
+                            <span class="text-muted-foreground text-sm">
+                              {chat.lastMessage.authorName}:
+                            </span>
+                          {:else}
+                            <span class="text-muted-foreground text-sm"
+                              >Vous:</span
+                            >
+                          {/if}
+                          {chat.lastMessage.content}
+                        {:else}
+                          <span class="text-muted-foreground">
+                            Aucun message
+                          </span>
+                        {/if}
+                      </div>
                     </a>
                   </div>
                 </div>
