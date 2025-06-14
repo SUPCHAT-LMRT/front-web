@@ -15,7 +15,7 @@
   import { cn } from "$lib/utils";
   import { fallbackAvatarLetters } from "$lib/utils/fallbackAvatarLetters.js";
   import { goto } from "$lib/utils/goto";
-  import { BellIcon, CogIcon, UserIcon } from "@lucide-svelte";
+  import { BellIcon } from "@lucide/svelte";
   import { onMount, type Snippet } from "svelte";
 
   const currentChatId = $derived(page.url.pathname.split("/").pop());
