@@ -1,4 +1,3 @@
-import type { WorkspaceRole } from "$lib/api/workspaces/roles";
 import { baseClient } from "../client";
 
 export enum WorkspaceType {
@@ -11,13 +10,6 @@ export type Workspace = {
     name: string;
     topic: string;
     type: WorkspaceType;
-};
-
-export type WorkspaceMember = {
-    id: string;
-    userId: string;
-    pseudo: string;
-    roles: WorkspaceRole[];
 };
 
 export type WorkspaceDetails = {
@@ -139,25 +131,6 @@ export const updateWorkspaceBanner = async (
                 headers: {
                     "Content-Type": "multipart/form-data",
                 },
-            },
-        );
-        return data;
-    } catch (e) {
-        console.error(e);
-        throw e;
-    }
-};
-
-export const getWorkspaceMembers = async (
-    workspaceId: string,
-    page: number,
-    limit: number,
-): Promise<{ members: WorkspaceMember[]; total: number }> => {
-    try {
-        const { data } = await baseClient.get(
-            `/api/workspaces/${workspaceId}/members`,
-            {
-                params: { page, limit },
             },
         );
         return data;

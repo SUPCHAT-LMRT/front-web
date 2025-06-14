@@ -1,29 +1,33 @@
 <script lang="ts">
-  import { cn } from "$lib/utils";
+  import { baseClient } from "$lib/api/client";
   import { getS3ObjectUrl, S3Bucket } from "$lib/api/s3";
-  import { fallbackAvatarLetters } from "$lib/utils/fallbackAvatarLetters";
+  import * as Avatar from "$lib/components/ui/avatar";
+  import * as Dialog from "$lib/components/ui/dialog";
   import { Input } from "$lib/components/ui/input";
   import { Skeleton } from "$lib/components/ui/skeleton";
-  import { baseClient } from "$lib/api/client";
-  import * as Dialog from "$lib/components/ui/dialog";
-  import * as Avatar from "$lib/components/ui/avatar";
-  import {Hash, Volume1} from "lucide-svelte";
+  import { cn } from "$lib/utils";
+  import { fallbackAvatarLetters } from "$lib/utils/fallbackAvatarLetters";
+  import { Hash, Volume1 } from "lucide-svelte";
 
   // Define TypeScript types matching your API
-  type SearchResultKind = "channel" | "message" | "user";
+  type SearchResultKind = "channel" | "message" | "user" | "group";
 
   type SearchResult = {
     kind: SearchResultKind;
-    data: SearchResultChannel | SearchResultMessage | SearchResultUser;
-  }
+    data:
+      | SearchResultChannel
+      | SearchResultMessage
+      | SearchResultUser
+      | SearchResultGroup;
+  };
 
   type SearchResultChannel = {
     id: string;
     name: string;
     topic: string;
-    kind: 'text' | 'voice';
+    kind: "text" | "voice";
     href: string;
-  }
+  };
 
   type SearchResultMessage = {
     id: string;
@@ -31,7 +35,7 @@
     authorId: string;
     authorName: string;
     href: string;
-  }
+  };
 
   type SearchResultUser = {
     id: string;
@@ -42,12 +46,21 @@
     lastName: string;
     email: string;
     href: string;
-  }
+  };
+
+  type SearchResultGroup = {
+    id: string;
+    highlightedName: string;
+    name: string;
+    href: string;
+  };
 
   const listSearchResults = async (term: string): Promise<SearchResult[]> => {
     if (term === "") return [];
     try {
-      const response = await baseClient.get(`/api/search?q=${term}&kind=${kindFilter ?? ""}`);
+      const response = await baseClient.get(
+        `/api/search?q=${term}&kind=${kindFilter ?? ""}`,
+      );
       return response.data;
     } catch (error) {
       console.error(error);
@@ -72,7 +85,9 @@
   >
     <span class="text-gray-700 text-sm dark:text-gray-300">Rechercher</span>
   </Dialog.Trigger>
-  <Dialog.Content class="flex flex-col justify-center items-center max-w-[30rem] dark:bg-gray-800">
+  <Dialog.Content
+    class="flex flex-col justify-center items-center max-w-[30rem] dark:bg-gray-800"
+  >
     <Dialog.Header>
       <Dialog.Title class="relative">
         <Input
@@ -83,25 +98,52 @@
         />
       </Dialog.Title>
       <Dialog.Description class="flex items-center pt-2">
-        <p class="text-[#1C9B4B] font-extrabold text-[11px] uppercase">Conseil de pro :</p>
+        <p class="text-[#1C9B4B] font-extrabold text-[11px] uppercase">
+          Conseil de pro :
+        </p>
         <p class="text-[11px]">
           Utilise
           <button
-            class={cn("p-1 bg-gray-200 dark:bg-gray-700 font-bold rounded", kindFilter === "message" && "!bg-green-500 text-white")}
-            onclick={() => kindFilter = (kindFilter === "message" ? null : "message")}>
+            class={cn(
+              "p-1 bg-gray-200 dark:bg-gray-700 font-bold rounded",
+              kindFilter === "message" && "!bg-green-500 text-white",
+            )}
+            onclick={() =>
+              (kindFilter = kindFilter === "message" ? null : "message")}
+          >
             Message
           </button>
           ,
           <button
-            class={cn("p-1 bg-gray-200 dark:bg-gray-700 font-bold rounded", kindFilter === "channel" && "!bg-green-500 text-white")}
-            onclick={() => kindFilter = (kindFilter === "channel" ? null : "channel")}>
+            class={cn(
+              "p-1 bg-gray-200 dark:bg-gray-700 font-bold rounded",
+              kindFilter === "channel" && "!bg-green-500 text-white",
+            )}
+            onclick={() =>
+              (kindFilter = kindFilter === "channel" ? null : "channel")}
+          >
             Canal
+          </button>
+          ,
+          <button
+            class={cn(
+              "p-1 bg-gray-200 dark:bg-gray-700 font-bold rounded",
+              kindFilter === "user" && "!bg-green-500 text-white",
+            )}
+            onclick={() => (kindFilter = kindFilter === "user" ? null : "user")}
+          >
+            Utilisateur
           </button>
           et
           <button
-            class={cn("p-1 bg-gray-200 dark:bg-gray-700 font-bold rounded", kindFilter === "user" && "!bg-green-500 text-white")}
-            onclick={() => kindFilter = (kindFilter === "user" ? null : "user")}>
-            Utilisateur
+            class={cn(
+              "p-1 bg-gray-200 dark:bg-gray-700 font-bold rounded",
+              kindFilter === "group" && "!bg-green-500 text-white",
+            )}
+            onclick={() =>
+              (kindFilter = kindFilter === "group" ? null : "group")}
+          >
+            Groupe
           </button>
           pour affiner les résultats.
         </p>
@@ -119,24 +161,39 @@
       {#if results.length > 0}
         <div class="w-full max-h-60 overflow-y-auto mt-4">
           {#each results as result}
-            <a href={result.data.href}
-               class="block p-2 border-b rounded-sm hover:!bg-gray-600 border-gray-200 dark:border-gray-700"
-               onclick={closeDialogSearch}>
+            <a
+              href={result.data.href}
+              class="block p-2 border-b rounded-sm hover:!bg-gray-600 border-gray-200 dark:border-gray-700"
+              onclick={closeDialogSearch}
+            >
               {#if result.kind === "channel"}
-                <span class="text-xs font-semibold text-gray-500 dark:text-gray-400">
+                <span
+                  class="text-xs font-semibold text-gray-500 dark:text-gray-400"
+                >
                   Canal
                 </span>
                 {@render renderChannel(result.data)}
               {:else if result.kind === "message"}
-                <span class="text-xs font-semibold text-gray-500 dark:text-gray-400">
+                <span
+                  class="text-xs font-semibold text-gray-500 dark:text-gray-400"
+                >
                   Message
                 </span>
                 {@render renderMessage(result.data)}
               {:else if result.kind === "user"}
-                <span class="text-xs font-semibold text-gray-500 dark:text-gray-400">
+                <span
+                  class="text-xs font-semibold text-gray-500 dark:text-gray-400"
+                >
                   Utilisateur
                 </span>
                 {@render renderUser(result.data)}
+              {:else if result.kind === "group"}
+                <span
+                  class="text-xs font-semibold text-gray-500 dark:text-gray-400"
+                >
+                  Groupe
+                </span>
+                {@render renderGroup(result.data)}
               {/if}
             </a>
           {/each}
@@ -147,15 +204,14 @@
         </div>
       {/if}
     {/await}
-
   </Dialog.Content>
 </Dialog.Root>
 
 {#snippet renderChannel(data: SearchResultChannel)}
   {@const Icon = data.kind === "text" ? Hash : Volume1}
-   <span class="text-sm flex items-center">
-     <Icon size={14}/>
-     <span>{@html data.name} {@html data.topic ? `(${data.topic})` : ''}</span>
+  <span class="text-sm flex items-center">
+    <Icon size={14} />
+    <span>{@html data.name} {@html data.topic ? `(${data.topic})` : ""}</span>
   </span>
 {/snippet}
 
@@ -164,8 +220,11 @@
     <div class="flex items-center gap-x-2">
       <Avatar.Root class="flex-shrink-0">
         <Avatar.Image
-          src={getS3ObjectUrl(S3Bucket.USERS_AVATARS, data.authorId)} />
-        <Avatar.Fallback>{fallbackAvatarLetters(data.authorName)}</Avatar.Fallback>
+          src={getS3ObjectUrl(S3Bucket.USERS_AVATARS, data.authorId)}
+        />
+        <Avatar.Fallback
+          >{fallbackAvatarLetters(data.authorName)}</Avatar.Fallback
+        >
       </Avatar.Root>
       <span>{data.authorName}</span>
     </div>
@@ -178,13 +237,23 @@
   <div>
     <div class="flex items-center gap-x-2">
       <Avatar.Root class="flex-shrink-0">
-        <Avatar.Image
-          src={getS3ObjectUrl(S3Bucket.USERS_AVATARS, data.id)} />
-        <Avatar.Fallback class="bg-primary">{fallbackAvatarLetters(data.firstName)}</Avatar.Fallback>
+        <Avatar.Image src={getS3ObjectUrl(S3Bucket.USERS_AVATARS, data.id)} />
+        <Avatar.Fallback class="bg-primary"
+          >{fallbackAvatarLetters(data.firstName)}</Avatar.Fallback
+        >
       </Avatar.Root>
-      <span>{@html data.highlightedFirstName} {@html data.highlightedLastName}</span>
+      <span
+        >{@html data.highlightedFirstName}
+        {@html data.highlightedLastName}</span
+      >
     </div>
 
     <span class="mt-4 text-sm">{@html data.highlightedEmail}</span>
   </div>
+{/snippet}
+
+{#snippet renderGroup(data: SearchResultGroup)}
+  <span class="text-sm">
+    {@html data.highlightedName}
+  </span>
 {/snippet}

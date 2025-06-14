@@ -190,7 +190,15 @@ export const changeUserStatus = async (
     }
 }
 
-export const listAllUsers = async (): Promise<User[]> => {
+export type ListAllUsersResponse = {
+    id: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+    status: PublicStatus;
+}
+
+export const listAllUsers = async (): Promise<ListAllUsersResponse[]> => {
     try {
         const { data } = await baseClient.get("/api/account/users");
         return data;
