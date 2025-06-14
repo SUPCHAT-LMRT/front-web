@@ -1,35 +1,12 @@
 <script lang="ts">
     import { Switch } from "$lib/components/ui/switch";
     import { Label } from "$lib/components/ui/label";
-    import { success, error } from "$lib/toast/toast";
     import { Mail, Smartphone } from "lucide-svelte";
 
     let emailNotifications = $state(true);
     let pushNotifications = $state(false);
 
-    const saveNotificationPreferences = async () => {
-        try {
-            // Ici vous pouvez ajouter l'appel API pour sauvegarder les préférences
-            // await updateNotificationPreferences({ email: emailNotifications, push: pushNotifications });
 
-            success(
-                "Préférences sauvegardées",
-                "Vos préférences de notifications ont été mises à jour."
-            );
-        } catch (e) {
-            console.error(e);
-            error(
-                "Erreur",
-                "Une erreur est survenue lors de la sauvegarde de vos préférences."
-            );
-        }
-    };
-
-    $effect(() => {
-        if (emailNotifications !== undefined || pushNotifications !== undefined) {
-            saveNotificationPreferences();
-        }
-    });
 </script>
 
 <section class="px-4 py-2 ml-2 pt-8 w-[500px]">
