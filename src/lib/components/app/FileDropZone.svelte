@@ -184,7 +184,9 @@
 
       <div class="space-y-2">
         <h3 class="text-lg font-semibold">
-          {dragOver && !disabled ? "Drop files here" : "Upload files"}
+          {dragOver && !disabled
+            ? "Glissez vos fichiers"
+            : "Téléversez vos fichiers"}
         </h3>
         <p class="text-sm text-muted-foreground">
           Déposez vos fichiers ici ou choisissez-les depuis votre appareil.
