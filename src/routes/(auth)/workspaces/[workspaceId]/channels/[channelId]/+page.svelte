@@ -511,12 +511,6 @@
   async function uploadFiles() {
     if (selectedFiles.length === 0) return;
 
-    // Example upload logic
-    const formData = new FormData();
-    selectedFiles.forEach((file, index) => {
-      formData.append(`file${index}`, file);
-    });
-
     try {
       // Replace with your upload endpoint
       await uploadChannelFile(
@@ -526,10 +520,10 @@
       );
 
       sendFileDialogOpen = false;
-      success("Fichiers envoyés", "Files uploaded successfully!");
+      success("Fichiers envoyés", "Fichiers envoyés avec succès!");
       selectedFiles = [];
     } catch (error) {
-      error("Erreur", "Failed to upload files");
+      error("Erreur", "Echec de l'envoi des fichiers.");
     }
   }
 </script>
@@ -693,11 +687,32 @@
                     </div>
                     <div class="flex flex-col gap-y-2">
                       <div class="flex items-center gap-2">
-                        <span
-                          class="p-2 rounded-xl break-all bg-primary text-white shadow-lg"
-                        >
-                          {message.content}
-                        </span>
+                        {#each message.attachments as attachment}
+                          <div class="mt-2 flex flex-col items-start">
+                            <Button
+                              variant="ghost"
+                              href={getS3ObjectUrl(
+                                S3Bucket.CHANNELS_ATTACHMENTS,
+                                attachment.id,
+                              )}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              class="w-[50px] h-[50px]"
+                            >
+                              <FileIcon />
+                            </Button>
+                            <span class="text-sm text-gray-500">
+                              {attachment.name}
+                            </span>
+                          </div>
+                        {/each}
+                        {#if message.content.trim() !== ""}
+                          <span
+                            class="p-2 rounded-xl break-all bg-primary text-white shadow-lg"
+                          >
+                            {message.content}
+                          </span>
+                        {/if}
                       </div>
                       {@render messageReaction()}
                     </div>
@@ -755,13 +770,14 @@
                                   {attachment.name}
                                 </span>
                               </div>
-                            {:else}
+                            {/each}
+                            {#if message.content.trim() !== ""}
                               <span
                                 class="p-2 rounded-xl break-all bg-primary text-white shadow-lg w-full"
                               >
                                 {message.content}
                               </span>
-                            {/each}
+                            {/if}
                           {/if}
                         </div>
 

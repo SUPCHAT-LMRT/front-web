@@ -6,6 +6,7 @@ export enum S3Bucket {
   WORKSPACES_ICONS = "workspaces-icons",
   WORKSPACES_BANNERS = "workspaces-banners",
   CHANNELS_ATTACHMENTS = "channels-attachments",
+  DIRECT_MESSAGES_ATTACHMENTS = "chat-direct-attachments",
 }
 
 export const getS3ObjectUrl = (bucket: S3Bucket, key: string): string => {
