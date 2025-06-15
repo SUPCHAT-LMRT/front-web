@@ -104,7 +104,7 @@
                         <h4 class="font-semibold text-gray-900 dark:text-white">Méthodes de connexion acceptées :</h4>
                         <ul class="list-disc list-inside space-y-1 text-gray-700 dark:text-gray-300 ml-4">
                             <li>Création d'un compte SUPCHAT-LMRT avec email et mot de passe</li>
-                            <li>Connexion via OAuth2 (Google, Facebook)</li>
+                            <li>Connexion via OAuth2 (Google, Github)</li>
                         </ul>
                     </div>
                     <p class="text-gray-700 dark:text-gray-300">
