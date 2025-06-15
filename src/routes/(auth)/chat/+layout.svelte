@@ -15,18 +15,9 @@
   import { cn } from "$lib/utils";
   import { fallbackAvatarLetters } from "$lib/utils/fallbackAvatarLetters.js";
   import { goto } from "$lib/utils/goto";
-  import { BellIcon } from "@lucide/svelte";
   import { onMount, type Snippet } from "svelte";
 
   const currentChatId = $derived(page.url.pathname.split("/").pop());
-
-  const mainItems = [
-    {
-      name: "Notifications",
-      url: "#",
-      icon: BellIcon,
-    },
-  ];
 
   type BaseRecentChat = {
     id: string;
@@ -217,22 +208,6 @@
     >
       <Sidebar.Content class="p-4 containerTest z-0 dark:bg-gray-800">
         <Sidebar.Menu class="flex flex-col">
-          {#each mainItems as item (item.name)}
-            <Sidebar.MenuItem class="mb-2 rounded w-full">
-              <Sidebar.MenuButton
-                class="flex items-center p-2 rounded transition-all duration-300 hover:bg-gray-100 dark:hover:bg-gray-700"
-              >
-                <a href={item.url} class="flex items-center w-full">
-                  <item.icon class="h-6 w-6 text-gray-600 dark:text-gray-300" />
-                  <span class="ml-4 text-gray-700 dark:text-gray-300"
-                    >{item.name}</span
-                  >
-                </a>
-              </Sidebar.MenuButton>
-            </Sidebar.MenuItem>
-          {/each}
-
-          <div class="my-4 border-t border-gray-200 dark:border-gray-700" />
           <p
             class="text-xs font-bold p-2 uppercase text-gray-600 dark:text-gray-300"
           >
