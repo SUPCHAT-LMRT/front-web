@@ -87,9 +87,7 @@
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent>
                                     <DropdownMenuItem>
-                                        <a href={PUBLIC_API_OAUTH_GOOGLE_URL_LINK} class="flex items-center">
-                                            <UserPen class="mr-2 h-4 w-4" /> Se connecter
-                                        </a>
+                                        <UserPen class="mr-2 h-4 w-4" /> Se connecter
                                     </DropdownMenuItem>
                                     <DropdownMenuItem
                                             class="text-red-500"

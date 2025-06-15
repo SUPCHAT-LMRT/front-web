@@ -44,17 +44,10 @@
       <p class="text-muted-foreground px-8 text-center text-sm">
         En cliquant sur continuer, vous acceptez nos
         <a
-          href="/terms"
+          href="/cgus"
           class="hover:text-primary underline underline-offset-4"
         >
           Conditions d'utilisation
-        </a>
-        et
-        <a
-          href="/privacy"
-          class="hover:text-primary underline underline-offset-4"
-        >
-          Politique de confidentialité
         </a>
         .
       </p>
