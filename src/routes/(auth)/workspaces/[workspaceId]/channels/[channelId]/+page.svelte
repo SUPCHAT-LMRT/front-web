@@ -226,10 +226,7 @@
             },
             createdAt: new Date(msg.createdAt),
             reactions: [],
-            attachments: msg.attachments.map((attachment) => ({
-              id: attachment.id,
-              name: attachment.name,
-            })),
+            attachments: [],
           });
 
           await tick();
