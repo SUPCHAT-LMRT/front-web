@@ -201,3 +201,13 @@ export const getGroup = async (groupId: string) => {
     const { data } = await baseClient.get(`/api/group/${groupId}`);
     return data;
 };
+
+export const fetchMentionUsers = async (workspaceId: string, channelId: string): Promise<MentionUser[]> => {
+    const { data } = await baseClient(`/api/workspaces/${workspaceId}/channels/${channelId}/mentionnable-users`);
+    return data;
+}
+
+export type MentionUser = {
+    id: string;
+    username: string;
+}

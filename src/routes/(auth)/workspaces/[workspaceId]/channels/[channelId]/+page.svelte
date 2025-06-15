@@ -3,12 +3,15 @@
   import { smartFly } from "$lib/animation/visibleFly";
   import { RoomKind } from "$lib/api/room";
   import { getS3ObjectUrl, S3Bucket } from "$lib/api/s3";
+  import { getUserProfile } from "$lib/api/user";
   import {
     type Channel,
     type ChannelMessage,
+    fetchMentionUsers,
     getPrivateChannelMembers,
     getWorkspaceChannel,
     getWorkspaceChannelMessages,
+    type MentionUser,
     uploadChannelFile,
   } from "$lib/api/workspaces/channels";
   import { getWorkspaceMembers } from "$lib/api/workspaces/member";
@@ -460,37 +463,27 @@
 
   // -------- MENTIONS ---------
   let mentionDropdownVisible = $state(false);
-  let mentionUsers = $state([]);
-  let mentionQuery = $state("");
+  let mentionUsers: MentionUser[] = $state([]);
   let mentionIndex = $state(0);
-  let mentionPosition = $state({top: 0, left: 0});
+  let mentionPosition = $state({ top: 0, left: 0 });
   let mentionLoading = $state(false);
-
-  async function fetchMentionUsers() {
-    if (!currentWorkspaceId || !currentChannelId) return [];
-    mentionLoading = true;
-    const url = `/api/workspaces/${currentWorkspaceId}/channels/${currentChannelId}/mentionnable-users`;
-    try {
-      const res = await fetch(url, { credentials: "include" });
-      const data = await res.json();
-      mentionLoading = false;
-      return data;
-    } catch (e) {
-      mentionLoading = false;
-      console.error("Erreur lors de la récupération des utilisateurs mentionnables: ", e);
-      return [];
-    }
-  }
 
   function getCaretCoordinates(editableDiv: HTMLDivElement) {
     let sel = window.getSelection();
-    if (!sel || sel.rangeCount === 0) return {top: 0, left: 0};
+    if (!sel || sel.rangeCount === 0) return { top: 0, left: 0 };
     let range = sel.getRangeAt(0).cloneRange();
     range.collapse(true);
     let rect = range.getClientRects()[0];
-    if (rect) return {top: rect.top + window.scrollY + 24, left: rect.left + window.scrollX};
+    if (rect)
+      return {
+        top: rect.top + window.scrollY + 24,
+        left: rect.left + window.scrollX,
+      };
     let box = editableDiv.getBoundingClientRect();
-    return { top: box.top + window.scrollY + 24, left: box.left + window.scrollX };
+    return {
+      top: box.top + window.scrollY + 24,
+      left: box.left + window.scrollX,
+    };
   }
 
   function setCaretPosition(el, pos) {
@@ -513,7 +506,7 @@
     }
   }
 
-  function selectMentionUser(user) {
+  function selectMentionUser(user: MentionUser) {
     // Remplace le "@..." courant par "@pseudo "
     const sel = window.getSelection();
     if (!sel || !inputElement.contains(sel.anchorNode)) return;
@@ -528,7 +521,7 @@
     if (!match) return;
     const start = before.lastIndexOf("@" + match[1]);
     const prefix = before.slice(0, start);
-    const newBefore = prefix + "@" + (user.pseudo ?? user.name) + " ";
+    const newBefore = prefix + "<@" + user.id + "> ";
     inputElement.innerText = newBefore + after;
 
     // Replace caret à la bonne position
@@ -548,7 +541,8 @@
       }
       if (e.key === "ArrowUp") {
         e.preventDefault();
-        mentionIndex = (mentionIndex - 1 + mentionUsers.length) % mentionUsers.length;
+        mentionIndex =
+          (mentionIndex - 1 + mentionUsers.length) % mentionUsers.length;
         return;
       }
       if (e.key === "Enter") {
@@ -573,10 +567,12 @@
       const before = text.slice(0, pos);
       const match = before.match(/(?:^|\s)@([^\s@]*)$/);
       if (match) {
-        mentionQuery = match[1] || "";
         mentionDropdownVisible = true;
         mentionIndex = 0;
-        mentionUsers = await fetchMentionUsers(mentionQuery);
+        mentionUsers = await fetchMentionUsers(
+          currentWorkspaceId,
+          currentChannelId,
+        );
         mentionPosition = getCaretCoordinates(inputElement);
       } else {
         mentionDropdownVisible = false;
@@ -648,6 +644,15 @@
       error("Erreur", "Echec de l'envoi des fichiers.");
     }
   }
+
+  const processMessageContent = async (content: string) => {
+    // Remplace les mentions <@userId> par @username
+    const userId = content.match(/<@(\w+)>/);
+    if (!userId) return content;
+
+    const userProfile = await getUserProfile(userId[1]);
+    return `@${userProfile.firstName} ${userProfile.lastName}`;
+  };
 </script>
 
 <div class="w-full h-full flex flex-col gap-y-4">
@@ -666,24 +671,6 @@
           <span class="text-gray-500 text-lg translate-y-[1px]"
             >{currentChannel.topic}</span
           >
-          {#if mentionDropdownVisible && mentionUsers.length > 0}
-            <div
-                    class="absolute z-50 bg-white border shadow-lg rounded max-h-60 overflow-auto min-w-[220px] max-w-[320px] mt-1"
-                    style="top: {mentionPosition.top}px; left: {mentionPosition.left}px;"
-            >
-              {#each mentionUsers as user, i}
-                <div
-                        class="px-4 py-2 cursor-pointer hover:bg-primary/10 {i === mentionIndex ? 'bg-primary/20' : ''}"
-                        onmousedown={(e) => { e.preventDefault(); selectMentionUser(user); }}
-                >
-                  @{user.pseudo ?? user.name} <span class="text-gray-400">({user.name})</span>
-                </div>
-              {/each}
-              {#if mentionLoading}
-                <div class="px-4 py-2 text-gray-400">Chargement...</div>
-              {/if}
-            </div>
-          {/if}
         </div>
       </div>
       <div class="flex items-center gap-2 mt-2">
@@ -850,7 +837,11 @@
                           <span
                             class="p-2 rounded-xl break-all bg-primary text-white shadow-lg"
                           >
-                            {message.content}
+                            {#await processMessageContent(message.content)}
+                              {message.content}
+                            {:then content}
+                              {content}
+                            {/await}
                           </span>
                         {/if}
                       </div>
@@ -915,7 +906,11 @@
                               <span
                                 class="p-2 rounded-xl break-all bg-primary text-white shadow-lg w-full"
                               >
-                                {message.content}
+                                {#await processMessageContent(message.content)}
+                                  {message.content}
+                                {:then content}
+                                  {content}
+                                {/await}
                               </span>
                             {/if}
                           {/if}
@@ -1019,7 +1014,7 @@
 
   {#if currentChannel}
     <div
-      class="flex items-center gap-x-2 px-4 py-3 bg-gray-100 dark:bg-gray-800 border-t-[2px] border-t-primary"
+      class="relative flex items-center gap-x-2 px-4 py-3 bg-gray-100 dark:bg-gray-800 border-t-[2px] border-t-primary"
     >
       <div
         class="flex-1 p-2 rounded-lg bg-white dark:bg-gray-700 min-h-[40px] max-h-32 overflow-y-auto break-all cursor-text"
@@ -1030,6 +1025,30 @@
         onkeydown={handleInputKeyDown}
         autofocus
       ></div>
+
+      {#if mentionDropdownVisible && mentionUsers.length > 0}
+        <div
+          class="absolute z-50 bg-white border shadow-lg rounded overflow-auto min-w-[220px] max-w-[320px] max-h-[100px] overflow-y-auto mt-1 -top-[100px] left-0"
+        >
+          {#each mentionUsers as user, i}
+            <div
+              class="px-4 py-2 cursor-pointer hover:bg-primary/10 {i ===
+              mentionIndex
+                ? 'bg-primary/20'
+                : ''}"
+              onmousedown={(e) => {
+                e.preventDefault();
+                selectMentionUser(user);
+              }}
+            >
+              @{user.username}
+            </div>
+          {/each}
+          {#if mentionLoading}
+            <div class="px-4 py-2 text-gray-400">Chargement...</div>
+          {/if}
+        </div>
+      {/if}
 
       <!--      button langage -->
       <a
