@@ -9,6 +9,7 @@
     getPrivateChannelMembers,
     getWorkspaceChannel,
     getWorkspaceChannelMessages,
+    uploadChannelFile,
   } from "$lib/api/workspaces/channels";
   import { getWorkspaceMembers } from "$lib/api/workspaces/member";
   import ws from "$lib/api/ws";
@@ -18,6 +19,7 @@
   import * as Avatar from "$lib/components/ui/avatar";
   import { Button } from "$lib/components/ui/button";
   import * as ContextMenu from "$lib/components/ui/context-menu";
+  import * as Dialog from "$lib/components/ui/dialog";
   import {
     DropdownMenu,
     DropdownMenuContent,
@@ -29,10 +31,12 @@
     TooltipContent,
     TooltipTrigger,
   } from "$lib/components/ui/tooltip";
+  import { error, success } from "$lib/toast/toast";
   import { cn } from "$lib/utils";
   import { fallbackAvatarLetters } from "$lib/utils/fallbackAvatarLetters.js";
   import { formatDate } from "$lib/utils/formatDate";
   import { scrollToBottom } from "$lib/utils/scrollToBottom";
+  import { FileIcon } from "@lucide/svelte";
   import NumberFlow from "@number-flow/svelte";
   import { format } from "date-fns";
   import { fr } from "date-fns/locale";
@@ -46,6 +50,7 @@
   } from "lucide-svelte";
   import type { AuthenticatedUserState } from "src/routes/(auth)/authenticatedUser.svelte";
   import { onDestroy, tick } from "svelte";
+  import FileDropZone from "../../../../../../lib/components/app/FileDropZone.svelte";
 
   type CustomChannelMessage = ChannelMessage & {
     editMode?: boolean;
@@ -80,11 +85,15 @@
     message: null,
   });
 
+  let selectedFiles: File[] = $state([]);
+  let sendFileDialogOpen = $state(false);
+
   let unsubscribeSendMessage = null;
   let unsubscribeMessageReactionAdded = null;
   let unsubscribeMessageReactionRemoved = null;
-  let unsubscribeGroupMessageContentEdited = null;
-  let unsubscribeGroupMessageDeleted = null;
+  let unsubscribeChannelMessageContentEdited = null;
+  let unsubscribeChannelMessageDeleted = null;
+  let unsubscribeChannelMessageAttachmentCreated = null;
   let inputElement: HTMLDivElement = $state(null);
   let elementsList: HTMLDivElement = $state(null);
   let isAutoScrolling = $state(false);
@@ -110,8 +119,9 @@
       unsubscribeSendMessage?.();
       unsubscribeMessageReactionAdded?.();
       unsubscribeMessageReactionRemoved?.();
-      unsubscribeGroupMessageContentEdited?.();
-      unsubscribeGroupMessageDeleted?.();
+      unsubscribeChannelMessageContentEdited?.();
+      unsubscribeChannelMessageDeleted?.();
+      unsubscribeChannelMessageAttachmentCreated?.();
       ws.leaveRoom(currentRoom.id);
       currentRoom.id = null;
       currentRoom.messages = [];
@@ -213,10 +223,13 @@
               userId: msg.sender.userId,
               pseudo: msg.sender.pseudo,
               workspaceMemberId: msg.sender.workspaceMemberId,
-              workspacePseudo: msg.sender.workspacePseudo,
             },
             createdAt: new Date(msg.createdAt),
             reactions: [],
+            attachments: msg.attachments.map((attachment) => ({
+              id: attachment.id,
+              name: attachment.name,
+            })),
           });
 
           await tick();
@@ -280,7 +293,7 @@
         },
       );
 
-      unsubscribeGroupMessageContentEdited = ws.subscribe(
+      unsubscribeChannelMessageContentEdited = ws.subscribe(
         "channel-message-content-edited",
         (msg) => {
           const message = currentRoom.messages.find(
@@ -292,7 +305,7 @@
         },
       );
 
-      unsubscribeGroupMessageDeleted = ws.subscribe(
+      unsubscribeChannelMessageDeleted = ws.subscribe(
         "channel-message-deleted",
         (msg) => {
           currentRoom.messages = currentRoom.messages.filter(
@@ -305,6 +318,32 @@
             deleteMessageDialog.open = false;
             deleteMessageDialog.message = null;
           }
+        },
+      );
+
+      unsubscribeChannelMessageAttachmentCreated = ws.subscribe(
+        "channel-message-attachment-created",
+        async ({ message }) => {
+          currentRoom.messages.push({
+            id: message.id,
+            content: "",
+            author: {
+              userId: message.senderUserId,
+              pseudo: message.senderPseudo,
+              workspaceMemberId: message.senderWorkspaceMemberId,
+            },
+            createdAt: new Date(message.createdAt),
+            reactions: [],
+            attachments: [
+              {
+                id: message.attachmentFileId,
+                name: message.attachmentFileName,
+              },
+            ],
+          });
+
+          await tick();
+          await scrollToBottomSafe(elementsList);
         },
       );
     } catch (e) {
@@ -460,6 +499,39 @@
       );
     }
   };
+
+  function handleFilesSelected(event: File[]) {
+    selectedFiles = event;
+  }
+
+  function handleError(event: string) {
+    error("Erreur", event);
+  }
+
+  async function uploadFiles() {
+    if (selectedFiles.length === 0) return;
+
+    // Example upload logic
+    const formData = new FormData();
+    selectedFiles.forEach((file, index) => {
+      formData.append(`file${index}`, file);
+    });
+
+    try {
+      // Replace with your upload endpoint
+      await uploadChannelFile(
+        currentWorkspaceId,
+        currentChannelId,
+        selectedFiles[0], // Assuming single file upload for simplicity
+      );
+
+      sendFileDialogOpen = false;
+      success("Fichiers envoyés", "Files uploaded successfully!");
+      selectedFiles = [];
+    } catch (error) {
+      error("Erreur", "Failed to upload files");
+    }
+  }
 </script>
 
 <div class="w-full h-full flex flex-col gap-y-4">
@@ -589,7 +661,7 @@
                       />
                       <Avatar.Fallback
                         >{fallbackAvatarLetters(
-                          message.author.workspacePseudo,
+                          message.author.pseudo,
                         )}</Avatar.Fallback
                       >
                     </Avatar.Root>
@@ -601,7 +673,7 @@
                         self={false}
                       >
                         <span class="font-semibold"
-                          >{message.author.workspacePseudo}</span
+                          >{message.author.pseudo}</span
                         >
                       </HoveredUserProfile>
                       <Tooltip>
@@ -665,11 +737,31 @@
                               }}
                             />
                           {:else}
-                            <span
-                              class="p-2 rounded-xl break-all bg-primary text-white shadow-lg w-full"
-                            >
-                              {message.content}
-                            </span>
+                            {#each message.attachments as attachment}
+                              <div class="mt-2 flex flex-col items-end">
+                                <Button
+                                  variant="ghost"
+                                  href={getS3ObjectUrl(
+                                    S3Bucket.CHANNELS_ATTACHMENTS,
+                                    attachment.id,
+                                  )}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  class="w-[50px] h-[50px]"
+                                >
+                                  <FileIcon />
+                                </Button>
+                                <span class="text-sm text-gray-500">
+                                  {attachment.name}
+                                </span>
+                              </div>
+                            {:else}
+                              <span
+                                class="p-2 rounded-xl break-all bg-primary text-white shadow-lg w-full"
+                              >
+                                {message.content}
+                              </span>
+                            {/each}
                           {/if}
                         </div>
 
@@ -688,7 +780,7 @@
                             />
                             <Avatar.Fallback
                               >{fallbackAvatarLetters(
-                                message.author.workspacePseudo,
+                                message.author.pseudo,
                               )}</Avatar.Fallback
                             >
                           </Avatar.Root>
@@ -790,6 +882,46 @@
       >
         <Languages size={20} class="text-primary" />
       </a>
+
+      <!-- Send file button -->
+      <Dialog.Root bind:open={sendFileDialogOpen}>
+        <Dialog.Trigger
+          class="p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+          aria-label="Envoyer un fichier"
+        >
+          <FileIcon size={20} class="text-primary" />
+        </Dialog.Trigger>
+        <Dialog.Content>
+          <Dialog.Header>
+            <Dialog.Title>Envoyer un fichier</Dialog.Title>
+            <Dialog.Description>
+              Sélectionnez un fichier à envoyer dans le canal #{currentChannel.name}
+            </Dialog.Description>
+          </Dialog.Header>
+
+          <div class="container mx-auto p-6 max-w-2xl">
+            <FileDropZone
+              accept="image/*,.pdf,.doc,.docx"
+              multiple={false}
+              maxSize={5 * 1024 * 1024}
+              filesSelected={handleFilesSelected}
+              error={handleError}
+              class="mb-6"
+            />
+
+            {#if selectedFiles.length > 0}
+              <div class="flex gap-2">
+                <button
+                  class="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90"
+                  onclick={uploadFiles}
+                >
+                  Envoyer {selectedFiles.length} fichier(s)
+                </button>
+              </div>
+            {/if}
+          </div>
+        </Dialog.Content>
+      </Dialog.Root>
 
       <button
         class="p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
