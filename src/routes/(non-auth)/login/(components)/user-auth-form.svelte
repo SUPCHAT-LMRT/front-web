@@ -1,8 +1,5 @@
 <script lang="ts">
-  import {
-    PUBLIC_API_OAUTH_GITHUB_URL,
-    PUBLIC_API_OAUTH_GOOGLE_URL,
-  } from "$env/static/public";
+  import { env } from "$env/dynamic/public";
   import { loginUser } from "$lib/api/user";
   import { Button } from "$lib/components/ui/button/index.js";
   import { Checkbox } from "$lib/components/ui/checkbox/index.js";
@@ -126,7 +123,7 @@
       variant="outline"
       type="button"
       disabled={isSubmitting}
-      href={PUBLIC_API_OAUTH_GOOGLE_URL}
+      href={env.PUBLIC_API_OAUTH_GOOGLE_URL}
     >
       {#if isSubmitting}
         <Loader class="mr-2 h-4 w-4 animate-spin" />
@@ -156,24 +153,24 @@
       Google
     </Button>
     <Button
-            class="w-full"
-            variant="outline"
-            type="button"
-            disabled={isSubmitting}
-            href={PUBLIC_API_OAUTH_GITHUB_URL}
+      class="w-full"
+      variant="outline"
+      type="button"
+      disabled={isSubmitting}
+      href={env.PUBLIC_API_OAUTH_GITHUB_URL}
     >
       {#if isSubmitting}
         <Loader class="mr-2 h-4 w-4 animate-spin" />
       {/if}
       <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="31"
-              height="31"
-              viewBox="0 0 24 24"
-              fill="currentColor"
+        xmlns="http://www.w3.org/2000/svg"
+        width="31"
+        height="31"
+        viewBox="0 0 24 24"
+        fill="currentColor"
       >
         <path
-                d="M12 0C5.37 0 0 5.373 0 12a12 12 0 008.205 11.385c.6.113.82-.258.82-.577v-2.232c-3.338.726-4.033-1.416-4.033-1.416-.546-1.388-1.333-1.757-1.333-1.757-1.089-.745.083-.73.083-.73 1.204.085 1.837 1.237 1.837 1.237 1.07 1.833 2.807 1.303 3.492.996.108-.775.419-1.303.762-1.602-2.665-.303-5.466-1.334-5.466-5.933 0-1.312.468-2.384 1.235-3.222-.123-.303-.535-1.522.117-3.176 0 0 1.008-.322 3.3 1.23a11.42 11.42 0 013.003-.404c1.02.005 2.047.138 3.003.404 2.289-1.552 3.295-1.23 3.295-1.23.655 1.654.243 2.873.12 3.176.77.838 1.234 1.91 1.234 3.222 0 4.61-2.806 5.626-5.478 5.922.43.372.823 1.102.823 2.222v3.293c0 .322.216.694.825.576A12.005 12.005 0 0024 12c0-6.627-5.373-12-12-12z"
+          d="M12 0C5.37 0 0 5.373 0 12a12 12 0 008.205 11.385c.6.113.82-.258.82-.577v-2.232c-3.338.726-4.033-1.416-4.033-1.416-.546-1.388-1.333-1.757-1.333-1.757-1.089-.745.083-.73.083-.73 1.204.085 1.837 1.237 1.837 1.237 1.07 1.833 2.807 1.303 3.492.996.108-.775.419-1.303.762-1.602-2.665-.303-5.466-1.334-5.466-5.933 0-1.312.468-2.384 1.235-3.222-.123-.303-.535-1.522.117-3.176 0 0 1.008-.322 3.3 1.23a11.42 11.42 0 013.003-.404c1.02.005 2.047.138 3.003.404 2.289-1.552 3.295-1.23 3.295-1.23.655 1.654.243 2.873.12 3.176.77.838 1.234 1.91 1.234 3.222 0 4.61-2.806 5.626-5.478 5.922.43.372.823 1.102.823 2.222v3.293c0 .322.216.694.825.576A12.005 12.005 0 0024 12c0-6.627-5.373-12-12-12z"
         />
       </svg>
       GitHub

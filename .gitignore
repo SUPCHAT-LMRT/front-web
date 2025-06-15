@@ -7,3 +7,4 @@ pnpm-lock.json
 !.env.example
 /pnpm-lock.yaml
 /*.iml
+build/
