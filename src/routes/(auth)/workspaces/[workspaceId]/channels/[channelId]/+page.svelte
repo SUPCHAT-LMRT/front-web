@@ -465,7 +465,6 @@
   let mentionDropdownVisible = $state(false);
   let mentionUsers: MentionUser[] = $state([]);
   let mentionIndex = $state(0);
-  let mentionPosition = $state({ top: 0, left: 0 });
   let mentionLoading = $state(false);
 
   function getCaretCoordinates(editableDiv: HTMLDivElement) {
@@ -573,7 +572,6 @@
           currentWorkspaceId,
           currentChannelId,
         );
-        mentionPosition = getCaretCoordinates(inputElement);
       } else {
         mentionDropdownVisible = false;
       }
