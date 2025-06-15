@@ -54,7 +54,6 @@ export const uploadDirectMessageFile = async (
   try {
     const formData = new FormData();
     formData.append("file", file);
-    formData.append("other_user_id", otherUserId);
     const { data } = await baseClient.post(
       `/api/chats/direct/${otherUserId}/files`,
       formData,
