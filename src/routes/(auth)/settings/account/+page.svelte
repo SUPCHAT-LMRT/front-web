@@ -51,7 +51,7 @@
         Supprimer vos données signifie que vous ne pourrez plus les récupérer.
     </p>
     <div class="flex flex-col w-[50%] mt-3">
-        <Button variant="outline" size="sm" class="mb-2" onclick={handleExportData}>
+        <Button variant="outline" size="sm" class="mb-2 w-[60%]" onclick={handleExportData}>
             <Download />
             Exporter mes données
         </Button>
