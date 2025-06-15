@@ -16,6 +16,7 @@
         DropdownMenuTrigger,
     } from "$lib/components/ui/dropdown-menu";
     import {MoreHorizontal, UserMinus, UserPen} from "lucide-svelte";
+    import {PUBLIC_API_OAUTH_GOOGLE_URL_LINK} from "$env/static/public";
 
     const connexions = [
         {
@@ -86,7 +87,9 @@
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent>
                                     <DropdownMenuItem>
-                                        <UserPen class="mr-2 h-4 w-4" /> Se connecter
+                                        <a href={PUBLIC_API_OAUTH_GOOGLE_URL_LINK} class="flex items-center">
+                                            <UserPen class="mr-2 h-4 w-4" /> Se connecter
+                                        </a>
                                     </DropdownMenuItem>
                                     <DropdownMenuItem
                                             class="text-red-500"
