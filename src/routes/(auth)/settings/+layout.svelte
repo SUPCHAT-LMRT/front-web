@@ -88,6 +88,14 @@
     <div class="flex">
       <div class="min-w-1/2">
         {@render children?.()}
+        <div class="fixed bottom-2 right-2 z-50">
+          <a
+                  href="/cgu"
+                  class="text-xs text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors duration-200"
+          >
+            CGU
+          </a>
+        </div>
       </div>
     </div>
   </div>

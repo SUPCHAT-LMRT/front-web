@@ -1,2 +1,5 @@
 [tools]
 node = "23.7.0"
+
+[tasks.build-push]
+run = "docker image build --push -t ghcr.io/supchat-lmrt/front-web:dev ."

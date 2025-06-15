@@ -240,15 +240,6 @@
                               Créer un espace de travail
                             </Button>
                           </div>
-                        {:else}
-                          <div class="w-full">
-                            <p class="text-sm text-gray-500 mb-2">
-                              Tu as déjà une invitation ?
-                            </p>
-                            <Button class="w-full justify-center h-10">
-                              Rejoindre un espace de travail
-                            </Button>
-                          </div>
                         {/if}
                       </div>
                     </div>

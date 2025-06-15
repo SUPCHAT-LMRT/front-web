@@ -49,7 +49,7 @@
   let { children } = $props();
 </script>
 
-<section class="border-gray-200 dark:border-gray-800 dark:bg-gray-800 w-full h-full">
+<section class="border-gray-200 dark:border-gray-800 dark:bg-gray-800 w-full min-h-screen">
   {#if !canViewUsers}
     <div class="space-y-6 m-12">
       <a

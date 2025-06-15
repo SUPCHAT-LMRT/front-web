@@ -3,12 +3,16 @@
   import { smartFly } from "$lib/animation/visibleFly";
   import { RoomKind } from "$lib/api/room";
   import { getS3ObjectUrl, S3Bucket } from "$lib/api/s3";
+  import { getUserProfile } from "$lib/api/user";
   import {
     type Channel,
     type ChannelMessage,
+    fetchMentionUsers,
     getPrivateChannelMembers,
     getWorkspaceChannel,
     getWorkspaceChannelMessages,
+    type MentionUser,
+    uploadChannelFile,
   } from "$lib/api/workspaces/channels";
   import { getWorkspaceMembers } from "$lib/api/workspaces/member";
   import ws from "$lib/api/ws";
@@ -18,6 +22,7 @@
   import * as Avatar from "$lib/components/ui/avatar";
   import { Button } from "$lib/components/ui/button";
   import * as ContextMenu from "$lib/components/ui/context-menu";
+  import * as Dialog from "$lib/components/ui/dialog";
   import {
     DropdownMenu,
     DropdownMenuContent,
@@ -29,10 +34,12 @@
     TooltipContent,
     TooltipTrigger,
   } from "$lib/components/ui/tooltip";
+  import { error, success } from "$lib/toast/toast";
   import { cn } from "$lib/utils";
   import { fallbackAvatarLetters } from "$lib/utils/fallbackAvatarLetters.js";
   import { formatDate } from "$lib/utils/formatDate";
   import { scrollToBottom } from "$lib/utils/scrollToBottom";
+  import { FileIcon } from "@lucide/svelte";
   import NumberFlow from "@number-flow/svelte";
   import { format } from "date-fns";
   import { fr } from "date-fns/locale";
@@ -46,6 +53,7 @@
   } from "lucide-svelte";
   import type { AuthenticatedUserState } from "src/routes/(auth)/authenticatedUser.svelte";
   import { onDestroy, tick } from "svelte";
+  import FileDropZone from "../../../../../../lib/components/app/FileDropZone.svelte";
 
   type CustomChannelMessage = ChannelMessage & {
     editMode?: boolean;
@@ -80,11 +88,15 @@
     message: null,
   });
 
+  let selectedFiles: File[] = $state([]);
+  let sendFileDialogOpen = $state(false);
+
   let unsubscribeSendMessage = null;
   let unsubscribeMessageReactionAdded = null;
   let unsubscribeMessageReactionRemoved = null;
-  let unsubscribeGroupMessageContentEdited = null;
-  let unsubscribeGroupMessageDeleted = null;
+  let unsubscribeChannelMessageContentEdited = null;
+  let unsubscribeChannelMessageDeleted = null;
+  let unsubscribeChannelMessageAttachmentCreated = null;
   let inputElement: HTMLDivElement = $state(null);
   let elementsList: HTMLDivElement = $state(null);
   let isAutoScrolling = $state(false);
@@ -110,8 +122,9 @@
       unsubscribeSendMessage?.();
       unsubscribeMessageReactionAdded?.();
       unsubscribeMessageReactionRemoved?.();
-      unsubscribeGroupMessageContentEdited?.();
-      unsubscribeGroupMessageDeleted?.();
+      unsubscribeChannelMessageContentEdited?.();
+      unsubscribeChannelMessageDeleted?.();
+      unsubscribeChannelMessageAttachmentCreated?.();
       ws.leaveRoom(currentRoom.id);
       currentRoom.id = null;
       currentRoom.messages = [];
@@ -213,10 +226,10 @@
               userId: msg.sender.userId,
               pseudo: msg.sender.pseudo,
               workspaceMemberId: msg.sender.workspaceMemberId,
-              workspacePseudo: msg.sender.workspacePseudo,
             },
             createdAt: new Date(msg.createdAt),
             reactions: [],
+            attachments: [],
           });
 
           await tick();
@@ -280,7 +293,7 @@
         },
       );
 
-      unsubscribeGroupMessageContentEdited = ws.subscribe(
+      unsubscribeChannelMessageContentEdited = ws.subscribe(
         "channel-message-content-edited",
         (msg) => {
           const message = currentRoom.messages.find(
@@ -292,7 +305,7 @@
         },
       );
 
-      unsubscribeGroupMessageDeleted = ws.subscribe(
+      unsubscribeChannelMessageDeleted = ws.subscribe(
         "channel-message-deleted",
         (msg) => {
           currentRoom.messages = currentRoom.messages.filter(
@@ -305,6 +318,32 @@
             deleteMessageDialog.open = false;
             deleteMessageDialog.message = null;
           }
+        },
+      );
+
+      unsubscribeChannelMessageAttachmentCreated = ws.subscribe(
+        "channel-message-attachment-created",
+        async ({ message }) => {
+          currentRoom.messages.push({
+            id: message.id,
+            content: "",
+            author: {
+              userId: message.senderUserId,
+              pseudo: message.senderPseudo,
+              workspaceMemberId: message.senderWorkspaceMemberId,
+            },
+            createdAt: new Date(message.createdAt),
+            reactions: [],
+            attachments: [
+              {
+                id: message.attachmentFileId,
+                name: message.attachmentFileName,
+              },
+            ],
+          });
+
+          await tick();
+          await scrollToBottomSafe(elementsList);
         },
       );
     } catch (e) {
@@ -422,8 +461,126 @@
       inputElement.innerText = "";
   });
 
-  const handleInputKeyDown = (e) => {
-    if (e.key === "Enter" && !e.shiftKey) {
+  // -------- MENTIONS ---------
+  let mentionDropdownVisible = $state(false);
+  let mentionUsers: MentionUser[] = $state([]);
+  let mentionIndex = $state(0);
+  let mentionPosition = $state({ top: 0, left: 0 });
+  let mentionLoading = $state(false);
+
+  function getCaretCoordinates(editableDiv: HTMLDivElement) {
+    let sel = window.getSelection();
+    if (!sel || sel.rangeCount === 0) return { top: 0, left: 0 };
+    let range = sel.getRangeAt(0).cloneRange();
+    range.collapse(true);
+    let rect = range.getClientRects()[0];
+    if (rect)
+      return {
+        top: rect.top + window.scrollY + 24,
+        left: rect.left + window.scrollX,
+      };
+    let box = editableDiv.getBoundingClientRect();
+    return {
+      top: box.top + window.scrollY + 24,
+      left: box.left + window.scrollX,
+    };
+  }
+
+  function setCaretPosition(el, pos) {
+    let range = document.createRange();
+    let sel = window.getSelection();
+    if (!el.firstChild) return;
+    // Gestion multi-noeuds (basique)
+    let node = el.firstChild;
+    let offset = pos;
+    while (node && node.textContent && offset > node.textContent.length) {
+      offset -= node.textContent.length;
+      node = node.nextSibling;
+    }
+    if (node) {
+      range.setStart(node, offset);
+      range.collapse(true);
+      sel.removeAllRanges();
+      sel.addRange(range);
+      el.focus();
+    }
+  }
+
+  function selectMentionUser(user: MentionUser) {
+    // Remplace le "@..." courant par "@pseudo "
+    const sel = window.getSelection();
+    if (!sel || !inputElement.contains(sel.anchorNode)) return;
+    const range = sel.getRangeAt(0);
+    const text = inputElement.innerText;
+    const pos = sel.anchorOffset;
+    const before = text.slice(0, pos);
+    const after = text.slice(pos);
+
+    // Trouve le début du mot "@..."
+    const match = before.match(/(?:^|\s)@([^\s@]*)$/);
+    if (!match) return;
+    const start = before.lastIndexOf("@" + match[1]);
+    const prefix = before.slice(0, start);
+    const newBefore = prefix + "<@" + user.id + "> ";
+    inputElement.innerText = newBefore + after;
+
+    // Replace caret à la bonne position
+    setCaretPosition(inputElement, newBefore.length);
+    currentMessage = inputElement.innerText;
+
+    mentionDropdownVisible = false;
+  }
+
+  const handleInputKeyDown = async (e) => {
+    // Gestion navigation dropdown mention
+    if (mentionDropdownVisible) {
+      if (e.key === "ArrowDown") {
+        e.preventDefault();
+        mentionIndex = (mentionIndex + 1) % mentionUsers.length;
+        return;
+      }
+      if (e.key === "ArrowUp") {
+        e.preventDefault();
+        mentionIndex =
+          (mentionIndex - 1 + mentionUsers.length) % mentionUsers.length;
+        return;
+      }
+      if (e.key === "Enter") {
+        e.preventDefault();
+        selectMentionUser(mentionUsers[mentionIndex]);
+        return;
+      }
+      if (e.key === "Escape") {
+        mentionDropdownVisible = false;
+        return;
+      }
+    }
+    // Détection du '@'
+    setTimeout(async () => {
+      const sel = window.getSelection();
+      if (!sel || !inputElement.contains(sel.anchorNode)) {
+        mentionDropdownVisible = false;
+        return;
+      }
+      const text = inputElement.innerText;
+      const pos = sel.anchorOffset;
+      const before = text.slice(0, pos);
+      const match = before.match(/(?:^|\s)@([^\s@]*)$/);
+      if (match) {
+        mentionDropdownVisible = true;
+        mentionIndex = 0;
+        mentionUsers = await fetchMentionUsers(
+          currentWorkspaceId,
+          currentChannelId,
+        );
+        mentionPosition = getCaretCoordinates(inputElement);
+      } else {
+        mentionDropdownVisible = false;
+      }
+    }, 0);
+
+    // Envoi du message classique (hors mention dropdown)
+    if (e.key === "Enter" && !e.shiftKey && !mentionDropdownVisible) {
       e.preventDefault();
       sendMessageToWs();
     }
@@ -459,6 +616,42 @@
         "Impossible de supprimer le message, veuillez réessayer plus tard.",
       );
     }
+  };
+
+  function handleFilesSelected(event: File[]) {
+    selectedFiles = event;
+  }
+
+  function handleError(event: string) {
+    error("Erreur", event);
+  }
+
+  async function uploadFiles() {
+    if (selectedFiles.length === 0) return;
+
+    try {
+      // Replace with your upload endpoint
+      await uploadChannelFile(
+        currentWorkspaceId,
+        currentChannelId,
+        selectedFiles[0], // Assuming single file upload for simplicity
+      );
+
+      sendFileDialogOpen = false;
+      success("Fichiers envoyés", "Fichiers envoyés avec succès!");
+      selectedFiles = [];
+    } catch (error) {
+      error("Erreur", "Echec de l'envoi des fichiers.");
+    }
+  }
+
+  const processMessageContent = async (content: string) => {
+    // Remplace les mentions <@userId> par @username
+    const userId = content.match(/<@(\w+)>/);
+    if (!userId) return content;
+
+    const userProfile = await getUserProfile(userId[1]);
+    return `@${userProfile.firstName} ${userProfile.lastName}`;
   };
 </script>
 
@@ -589,7 +782,7 @@
                       />
                       <Avatar.Fallback
                         >{fallbackAvatarLetters(
-                          message.author.workspacePseudo,
+                          message.author.pseudo,
                         )}</Avatar.Fallback
                       >
                     </Avatar.Root>
@@ -601,7 +794,7 @@
                         self={false}
                       >
                         <span class="font-semibold"
-                          >{message.author.workspacePseudo}</span
+                          >{message.author.pseudo}</span
                         >
                       </HoveredUserProfile>
                       <Tooltip>
@@ -621,11 +814,36 @@
                     </div>
                     <div class="flex flex-col gap-y-2">
                       <div class="flex items-center gap-2">
-                        <span
-                          class="p-2 rounded-xl break-all bg-primary text-white shadow-lg"
-                        >
-                          {message.content}
-                        </span>
+                        {#each message.attachments as attachment}
+                          <div class="mt-2 flex flex-col items-start">
+                            <Button
+                              variant="ghost"
+                              href={getS3ObjectUrl(
+                                S3Bucket.CHANNELS_ATTACHMENTS,
+                                attachment.id,
+                              )}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              class="w-[50px] h-[50px]"
+                            >
+                              <FileIcon />
+                            </Button>
+                            <span class="text-sm text-gray-500">
+                              {attachment.name}
+                            </span>
+                          </div>
+                        {/each}
+                        {#if message.content.trim() !== ""}
+                          <span
+                            class="p-2 rounded-xl break-all bg-primary text-white shadow-lg"
+                          >
+                            {#await processMessageContent(message.content)}
+                              {message.content}
+                            {:then content}
+                              {content}
+                            {/await}
+                          </span>
+                        {/if}
                       </div>
                       {@render messageReaction()}
                     </div>
@@ -665,11 +883,36 @@
                               }}
                             />
                           {:else}
-                            <span
-                              class="p-2 rounded-xl break-all bg-primary text-white shadow-lg w-full"
-                            >
-                              {message.content}
-                            </span>
+                            {#each message.attachments as attachment}
+                              <div class="mt-2 flex flex-col items-end">
+                                <Button
+                                  variant="ghost"
+                                  href={getS3ObjectUrl(
+                                    S3Bucket.CHANNELS_ATTACHMENTS,
+                                    attachment.id,
+                                  )}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  class="w-[50px] h-[50px]"
+                                >
+                                  <FileIcon />
+                                </Button>
+                                <span class="text-sm text-gray-500">
+                                  {attachment.name}
+                                </span>
+                              </div>
+                            {/each}
+                            {#if message.content.trim() !== ""}
+                              <span
+                                class="p-2 rounded-xl break-all bg-primary text-white shadow-lg w-full"
+                              >
+                                {#await processMessageContent(message.content)}
+                                  {message.content}
+                                {:then content}
+                                  {content}
+                                {/await}
+                              </span>
+                            {/if}
                           {/if}
                         </div>
 
@@ -688,7 +931,7 @@
                             />
                             <Avatar.Fallback
                               >{fallbackAvatarLetters(
-                                message.author.workspacePseudo,
+                                message.author.pseudo,
                               )}</Avatar.Fallback
                             >
                           </Avatar.Root>
@@ -771,7 +1014,7 @@
 
   {#if currentChannel}
     <div
-      class="flex items-center gap-x-2 px-4 py-3 bg-gray-100 dark:bg-gray-800 border-t-[2px] border-t-primary"
+      class="relative flex items-center gap-x-2 px-4 py-3 bg-gray-100 dark:bg-gray-800 border-t-[2px] border-t-primary"
     >
       <div
         class="flex-1 p-2 rounded-lg bg-white dark:bg-gray-700 min-h-[40px] max-h-32 overflow-y-auto break-all cursor-text"
@@ -783,6 +1026,30 @@
         autofocus
       ></div>
 
+      {#if mentionDropdownVisible && mentionUsers.length > 0}
+        <div
+          class="absolute z-50 bg-white border shadow-lg rounded overflow-auto min-w-[220px] max-w-[320px] max-h-[100px] overflow-y-auto mt-1 -top-[100px] left-0"
+        >
+          {#each mentionUsers as user, i}
+            <div
+              class="px-4 py-2 cursor-pointer hover:bg-primary/10 {i ===
+              mentionIndex
+                ? 'bg-primary/20'
+                : ''}"
+              onmousedown={(e) => {
+                e.preventDefault();
+                selectMentionUser(user);
+              }}
+            >
+              @{user.username}
+            </div>
+          {/each}
+          {#if mentionLoading}
+            <div class="px-4 py-2 text-gray-400">Chargement...</div>
+          {/if}
+        </div>
+      {/if}
+
       <!--      button langage -->
       <a
         href="/workspaces/{currentWorkspaceId}/channels/{currentChannelId}/translate"
@@ -790,6 +1057,46 @@
       >
         <Languages size={20} class="text-primary" />
       </a>
+
+      <!-- Send file button -->
+      <Dialog.Root bind:open={sendFileDialogOpen}>
+        <Dialog.Trigger
+          class="p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+          aria-label="Envoyer un fichier"
+        >
+          <FileIcon size={20} class="text-primary" />
+        </Dialog.Trigger>
+        <Dialog.Content>
+          <Dialog.Header>
+            <Dialog.Title>Envoyer un fichier</Dialog.Title>
+            <Dialog.Description>
+              Sélectionnez un fichier à envoyer dans le canal #{currentChannel.name}
+            </Dialog.Description>
+          </Dialog.Header>
+
+          <div class="container mx-auto p-6 max-w-2xl">
+            <FileDropZone
+              accept="image/*,.pdf,.doc,.docx"
+              multiple={false}
+              maxSize={5 * 1024 * 1024}
+              filesSelected={handleFilesSelected}
+              error={handleError}
+              class="mb-6"
+            />
+
+            {#if selectedFiles.length > 0}
+              <div class="flex gap-2">
+                <button
+                  class="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90"
+                  onclick={uploadFiles}
+                >
+                  Envoyer {selectedFiles.length} fichier(s)
+                </button>
+              </div>
+            {/if}
+          </div>
+        </Dialog.Content>
+      </Dialog.Root>
 
       <button
         class="p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"

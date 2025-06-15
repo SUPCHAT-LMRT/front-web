@@ -16,6 +16,7 @@
         DropdownMenuTrigger,
     } from "$lib/components/ui/dropdown-menu";
     import {MoreHorizontal, UserMinus, UserPen} from "lucide-svelte";
+    import {PUBLIC_API_OAUTH_GOOGLE_URL_LINK} from "$env/static/public";
 
     const connexions = [
         {
