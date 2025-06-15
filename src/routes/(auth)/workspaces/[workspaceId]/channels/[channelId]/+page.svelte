@@ -458,8 +458,133 @@
       inputElement.innerText = "";
   });
 
-  const handleInputKeyDown = (e) => {
-    if (e.key === "Enter" && !e.shiftKey) {
+  // -------- MENTIONS ---------
+  let mentionDropdownVisible = $state(false);
+  let mentionUsers = $state([]);
+  let mentionQuery = $state("");
+  let mentionIndex = $state(0);
+  let mentionPosition = $state({top: 0, left: 0});
+  let mentionLoading = $state(false);
+
+  async function fetchMentionUsers() {
+    if (!currentWorkspaceId || !currentChannelId) return [];
+    mentionLoading = true;
+    const url = `/api/workspaces/${currentWorkspaceId}/channels/${currentChannelId}/mentionnable-users`;
+    try {
+      const res = await fetch(url, { credentials: "include" });
+      const data = await res.json();
+      mentionLoading = false;
+      return data;
+    } catch (e) {
+      mentionLoading = false;
+      console.error("Erreur lors de la récupération des utilisateurs mentionnables: ", e);
+      return [];
+    }
+  }
+
+  function getCaretCoordinates(editableDiv: HTMLDivElement) {
+    let sel = window.getSelection();
+    if (!sel || sel.rangeCount === 0) return {top: 0, left: 0};
+    let range = sel.getRangeAt(0).cloneRange();
+    range.collapse(true);
+    let rect = range.getClientRects()[0];
+    if (rect) return {top: rect.top + window.scrollY + 24, left: rect.left + window.scrollX};
+    let box = editableDiv.getBoundingClientRect();
+    return { top: box.top + window.scrollY + 24, left: box.left + window.scrollX };
+  }
+
+  function setCaretPosition(el, pos) {
+    let range = document.createRange();
+    let sel = window.getSelection();
+    if (!el.firstChild) return;
+    // Gestion multi-noeuds (basique)
+    let node = el.firstChild;
+    let offset = pos;
+    while (node && node.textContent && offset > node.textContent.length) {
+      offset -= node.textContent.length;
+      node = node.nextSibling;
+    }
+    if (node) {
+      range.setStart(node, offset);
+      range.collapse(true);
+      sel.removeAllRanges();
+      sel.addRange(range);
+      el.focus();
+    }
+  }
+
+  function selectMentionUser(user) {
+    // Remplace le "@..." courant par "@pseudo "
+    const sel = window.getSelection();
+    if (!sel || !inputElement.contains(sel.anchorNode)) return;
+    const range = sel.getRangeAt(0);
+    const text = inputElement.innerText;
+    const pos = sel.anchorOffset;
+    const before = text.slice(0, pos);
+    const after = text.slice(pos);
+
+    // Trouve le début du mot "@..."
+    const match = before.match(/(?:^|\s)@([^\s@]*)$/);
+    if (!match) return;
+    const start = before.lastIndexOf("@" + match[1]);
+    const prefix = before.slice(0, start);
+    const newBefore = prefix + "@" + (user.pseudo ?? user.name) + " ";
+    inputElement.innerText = newBefore + after;
+
+    // Replace caret à la bonne position
+    setCaretPosition(inputElement, newBefore.length);
+    currentMessage = inputElement.innerText;
+
+    mentionDropdownVisible = false;
+  }
+
+  const handleInputKeyDown = async (e) => {
+    // Gestion navigation dropdown mention
+    if (mentionDropdownVisible) {
+      if (e.key === "ArrowDown") {
+        e.preventDefault();
+        mentionIndex = (mentionIndex + 1) % mentionUsers.length;
+        return;
+      }
+      if (e.key === "ArrowUp") {
+        e.preventDefault();
+        mentionIndex = (mentionIndex - 1 + mentionUsers.length) % mentionUsers.length;
+        return;
+      }
+      if (e.key === "Enter") {
+        e.preventDefault();
+        selectMentionUser(mentionUsers[mentionIndex]);
+        return;
+      }
+      if (e.key === "Escape") {
+        mentionDropdownVisible = false;
+        return;
+      }
+    }
+    // Détection du '@'
+    setTimeout(async () => {
+      const sel = window.getSelection();
+      if (!sel || !inputElement.contains(sel.anchorNode)) {
+        mentionDropdownVisible = false;
+        return;
+      }
+      const text = inputElement.innerText;
+      const pos = sel.anchorOffset;
+      const before = text.slice(0, pos);
+      const match = before.match(/(?:^|\s)@([^\s@]*)$/);
+      if (match) {
+        mentionQuery = match[1] || "";
+        mentionDropdownVisible = true;
+        mentionIndex = 0;
+        mentionUsers = await fetchMentionUsers(mentionQuery);
+        mentionPosition = getCaretCoordinates(inputElement);
+      } else {
+        mentionDropdownVisible = false;
+      }
+    }, 0);
+
+    // Envoi du message classique (hors mention dropdown)
+    if (e.key === "Enter" && !e.shiftKey && !mentionDropdownVisible) {
       e.preventDefault();
       sendMessageToWs();
     }
@@ -541,6 +666,24 @@
           <span class="text-gray-500 text-lg translate-y-[1px]"
             >{currentChannel.topic}</span
           >
+          {#if mentionDropdownVisible && mentionUsers.length > 0}
+            <div
+                    class="absolute z-50 bg-white border shadow-lg rounded max-h-60 overflow-auto min-w-[220px] max-w-[320px] mt-1"
+                    style="top: {mentionPosition.top}px; left: {mentionPosition.left}px;"
+            >
+              {#each mentionUsers as user, i}
+                <div
+                        class="px-4 py-2 cursor-pointer hover:bg-primary/10 {i === mentionIndex ? 'bg-primary/20' : ''}"
+                        onmousedown={(e) => { e.preventDefault(); selectMentionUser(user); }}
+                >
+                  @{user.pseudo ?? user.name} <span class="text-gray-400">({user.name})</span>
+                </div>
+              {/each}
+              {#if mentionLoading}
+                <div class="px-4 py-2 text-gray-400">Chargement...</div>
+              {/if}
+            </div>
+          {/if}
         </div>
       </div>
       <div class="flex items-center gap-2 mt-2">

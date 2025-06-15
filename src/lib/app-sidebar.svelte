@@ -16,7 +16,6 @@
 
   import { checkUserPermission, JobPermission } from "$lib/api/admin";
   import * as Avatar from "$lib/components/ui/avatar";
-  import { Button } from "$lib/components/ui/button";
   import * as DropdownMenu from "$lib/components/ui/dropdown-menu";
   import { useSidebar } from "$lib/components/ui/sidebar";
   import { toggleMode } from "mode-watcher";

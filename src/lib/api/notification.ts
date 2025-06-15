@@ -56,27 +56,3 @@ export const markNotificationAsRead = async (notificationId: string): Promise<vo
   }
 };
 
-export const deleteNotification = async (notificationId: string): Promise<void> => {
-  try {
-    await baseClient.delete(`/api/notifications/${notificationId}`);
-  } catch (error) {
-    console.error("Error deleting notification:", error);
-    throw error;
-  }
-};
-
-export const createNotification = async (
-  title: string,
-  message: string
-): Promise<Notification> => {
-  try {
-    const { data } = await baseClient.post<Notification>("/api/notifications", {
-      title,
-      message,
-    });
-    return data;
-  } catch (error) {
-    console.error("Error creating notification:", error);
-    throw error;
-  }
-};
