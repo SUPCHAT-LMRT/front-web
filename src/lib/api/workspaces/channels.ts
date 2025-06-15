@@ -167,3 +167,8 @@ export const getPrivateChannelMembers = async (
         throw e;
     }
 };
+
+export const getGroup = async (groupId: string) => {
+    const { data } = await baseClient.get(`/api/group/${groupId}`);
+    return data;
+};
