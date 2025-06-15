@@ -37,17 +37,16 @@
   async function onSubmit() {
     isSubmitting = true;
 
-    // TODO disabled, (code works but not needed for now)
-    // if (!passwordRegex.test(password)) {
-    //   notifyByLevel({
-    //     title: "Mot de passe invalide",
-    //     level: "error",
-    //     message:
-    //       "Le mot de passe doit contenir au moins 8 caractères, une majuscule, une minuscule et un chiffre.",
-    //   });
-    //   isSubmitting = false;
-    //   return;
-    // }
+    if (!passwordRegex.test(password)) {
+      notifyByLevel({
+        title: "Mot de passe invalide",
+        level: "error",
+        message:
+          "Le mot de passe doit contenir au moins 8 caractères, une majuscule, une minuscule et un chiffre.",
+      });
+      isSubmitting = false;
+      return;
+    }
 
     try {
       const response = await registerUser(
